@@ -1,0 +1,23 @@
+.vermeg{
+    font-family: 'Visby Bold', sans-serif !important;
+    font-size: 25px !important;
+    width: 100%;
+    //border: solid red 2px;
+    text-align: center;
+    padding-top: 2%;
+}
+
+.visbyFont{
+    font-family: 'Visby Medium', sans-serif !important;
+}
+.slash{
+    /*text color is primary color*/
+    color: var(--primary-color);
+}
+
+.bordering{
+    //border: solid red 2px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
