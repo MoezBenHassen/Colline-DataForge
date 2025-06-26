@@ -5,7 +5,7 @@ import { provideRouter, withEnabledBlockingInitialNavigation, withInMemoryScroll
 import Aura from '@primeng/themes/aura';
 import { providePrimeNG } from 'primeng/config';
 import { appRoutes } from './app.routes';
-import { JwtInterceptor } from './app/interceptors/JwtInterceptor';
+import { JwtInterceptor } from './app/helpers/JwtInterceptor';
 
 export let appConfig: ApplicationConfig;
 appConfig = {

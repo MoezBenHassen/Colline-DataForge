@@ -1,22 +1,26 @@
 import { Component } from '@angular/core';
 import { MenuItem } from 'primeng/api';
-import { RouterModule } from '@angular/router';
+import { Router, RouterModule } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { StyleClassModule } from 'primeng/styleclass';
 import { AppConfigurator } from './app.configurator';
 import { LayoutService } from '../service/layout.service';
+import { AuthService } from '../../services/auth/auth.service';
+import { Tooltip } from 'primeng/tooltip';
+import { Ripple } from 'primeng/ripple';
+import { OverlayBadgeModule } from 'primeng/overlaybadge';
 
 @Component({
     selector: 'app-topbar',
     standalone: true,
-    imports: [RouterModule, CommonModule, StyleClassModule, AppConfigurator],
+    imports: [RouterModule, CommonModule, StyleClassModule, AppConfigurator, Tooltip, Ripple, OverlayBadgeModule],
     template: ` <div class="layout-topbar">
         <div class="layout-topbar-logo-container">
             <button class="layout-menu-button layout-topbar-action" (click)="layoutService.onMenuToggle()">
                 <i class="pi pi-bars"></i>
             </button>
             <a class="layout-topbar-logo" routerLink="/">
-        <!--        <svg viewBox="0 0 54 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <!--        <svg viewBox="0 0 54 40" fill="none" xmlns="http://www.w3.org/2000/svg">
                     <path
                         fill-rule="evenodd"
                         clip-rule="evenodd"
@@ -35,12 +39,20 @@ import { LayoutService } from '../service/layout.service';
                 </svg>-->
                 <svg id="Layer_1" data-name="Layer 1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 346 342">
                     <defs>
-                        <style>.cls-1{fill:var(--primary-color);}</style>
+                        <style>
+                            .cls-1 {
+                                fill: var(--primary-color);
+                            }
+                        </style>
                     </defs>
-                    <path class="cls-1"
-                          d="M183.64,136.9c-2.23,0-7.86-4.87-10.9-7.78-3.78-3.62-7.56-7.22-11.33-10.84-3-2.91-3.07-4.81-.13-7.85,1.48-1.53,3.1-2.93,4.57-4.47s1.5-2.73-.07-4.28q-5.13-5.07-10.39-10c-1.76-1.66-3.06-1.58-5,.32-3.86,3.82-7.65,7.72-11.49,11.56L99.48,142.87c-2.37,2.35-2.39,3.35,0,5.6q4.6,4.44,9.26,8.82c2,1.91,3.27,1.92,5.31,0,2.24-2.14,4.41-4.34,6.6-6.53s3.74-2.23,5.78,0c3.21,3.48,6.69,6.8,9.42,10.63a24.18,24.18,0,0,1-2,30.64c-6.57,7.29-13.81,14-20.67,21-2.55,2.61-4.84,5.45-7.29,8.24-4.76-4.28-8.79-7.91-12.84-11.53-16.66-14.89-34.91-27.34-55.58-36.06A139.11,139.11,0,0,0,.94,164a8,8,0,0,1-.81-.19v-4.71C5.65,158.06,11,157.2,16.27,156c20.59-4.73,39.43-13.54,57-25.14,23.89-15.8,45.29-34.43,63.13-56.94,10.32-13,19.45-26.79,25.41-42.44A94.74,94.74,0,0,0,168.19.38h5.11c.55,4.57.9,9.09,1.67,13.53,2.32,13.5,7.72,25.84,14.6,37.59,7.75,13.25,17.47,25,27.92,36.15,2.63,2.8,5.28,5.6,8.1,8.59-1.73,1.69-3.5,3.38-5.23,5.1Q208,113.66,195.71,126c-.58.58-1.19,1.14-1.79,1.7" />
-                    <path class="cls-1"
-                          d="M209.07,157.59c0,2.24,5,7.76,8,10.75l11.07,11.1c3,3,4.87,3,7.85,0,1.5-1.51,2.87-3.16,4.38-4.66s2.69-1.55,4.27,0q5.18,5,10.24,10.19c1.69,1.72,1.64,3-.23,5-3.74,3.94-7.55,7.81-11.31,11.73q-19.28,20.1-38.53,40.22c-2.3,2.41-3.3,2.45-5.6.16q-4.53-4.52-9-9.08c-1.95-2-2-3.23-.07-5.31,2.09-2.28,4.25-4.49,6.39-6.72s2.16-3.79-.09-5.78c-3.54-3.15-6.93-6.56-10.83-9.21A24.18,24.18,0,0,0,155,208.51c-7.16,6.72-13.7,14.1-20.6,21.1-2.56,2.59-5.36,4.95-8.09,7.45,4.37,4.68,8.09,8.63,11.78,12.6,15.23,16.36,28,34.35,37.18,54.84a138.69,138.69,0,0,1,10.38,36.31,8.23,8.23,0,0,0,.21.81l2.38-.05,2.32-.05c.95-5.55,1.7-10.91,2.8-16.2,4.31-20.69,12.74-39.7,24-57.47,15.31-24.21,33.5-46,55.65-64.28,12.8-10.58,26.39-20,41.92-26.26a94.75,94.75,0,0,1,30.94-7l-.1-5.11c-4.58-.46-9.1-.72-13.56-1.39-13.54-2.05-26-7.2-37.88-13.84-13.4-7.48-25.33-17-36.7-27.18-2.86-2.57-5.71-5.16-8.76-7.92-1.65,1.76-3.3,3.56-5,5.32q-12.07,12.58-24.14,25.16c-.58.59-1.12,1.21-1.67,1.82" />
+                    <path
+                        class="cls-1"
+                        d="M183.64,136.9c-2.23,0-7.86-4.87-10.9-7.78-3.78-3.62-7.56-7.22-11.33-10.84-3-2.91-3.07-4.81-.13-7.85,1.48-1.53,3.1-2.93,4.57-4.47s1.5-2.73-.07-4.28q-5.13-5.07-10.39-10c-1.76-1.66-3.06-1.58-5,.32-3.86,3.82-7.65,7.72-11.49,11.56L99.48,142.87c-2.37,2.35-2.39,3.35,0,5.6q4.6,4.44,9.26,8.82c2,1.91,3.27,1.92,5.31,0,2.24-2.14,4.41-4.34,6.6-6.53s3.74-2.23,5.78,0c3.21,3.48,6.69,6.8,9.42,10.63a24.18,24.18,0,0,1-2,30.64c-6.57,7.29-13.81,14-20.67,21-2.55,2.61-4.84,5.45-7.29,8.24-4.76-4.28-8.79-7.91-12.84-11.53-16.66-14.89-34.91-27.34-55.58-36.06A139.11,139.11,0,0,0,.94,164a8,8,0,0,1-.81-.19v-4.71C5.65,158.06,11,157.2,16.27,156c20.59-4.73,39.43-13.54,57-25.14,23.89-15.8,45.29-34.43,63.13-56.94,10.32-13,19.45-26.79,25.41-42.44A94.74,94.74,0,0,0,168.19.38h5.11c.55,4.57.9,9.09,1.67,13.53,2.32,13.5,7.72,25.84,14.6,37.59,7.75,13.25,17.47,25,27.92,36.15,2.63,2.8,5.28,5.6,8.1,8.59-1.73,1.69-3.5,3.38-5.23,5.1Q208,113.66,195.71,126c-.58.58-1.19,1.14-1.79,1.7"
+                    />
+                    <path
+                        class="cls-1"
+                        d="M209.07,157.59c0,2.24,5,7.76,8,10.75l11.07,11.1c3,3,4.87,3,7.85,0,1.5-1.51,2.87-3.16,4.38-4.66s2.69-1.55,4.27,0q5.18,5,10.24,10.19c1.69,1.72,1.64,3-.23,5-3.74,3.94-7.55,7.81-11.31,11.73q-19.28,20.1-38.53,40.22c-2.3,2.41-3.3,2.45-5.6.16q-4.53-4.52-9-9.08c-1.95-2-2-3.23-.07-5.31,2.09-2.28,4.25-4.49,6.39-6.72s2.16-3.79-.09-5.78c-3.54-3.15-6.93-6.56-10.83-9.21A24.18,24.18,0,0,0,155,208.51c-7.16,6.72-13.7,14.1-20.6,21.1-2.56,2.59-5.36,4.95-8.09,7.45,4.37,4.68,8.09,8.63,11.78,12.6,15.23,16.36,28,34.35,37.18,54.84a138.69,138.69,0,0,1,10.38,36.31,8.23,8.23,0,0,0,.21.81l2.38-.05,2.32-.05c.95-5.55,1.7-10.91,2.8-16.2,4.31-20.69,12.74-39.7,24-57.47,15.31-24.21,33.5-46,55.65-64.28,12.8-10.58,26.39-20,41.92-26.26a94.75,94.75,0,0,1,30.94-7l-.1-5.11c-4.58-.46-9.1-.72-13.56-1.39-13.54-2.05-26-7.2-37.88-13.84-13.4-7.48-25.33-17-36.7-27.18-2.86-2.57-5.71-5.16-8.76-7.92-1.65,1.76-3.3,3.56-5,5.32q-12.07,12.58-24.14,25.16c-.58.59-1.12,1.21-1.67,1.82"
+                    />
                 </svg>
                 <!--<svg id="Layer_1" data-name="Layer 1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 328 327.25"><defs><style>.cls-1{fill:#e7393b;}.cls-2{fill:#fff;}</style></defs><circle class="cls-1" cx="166.98" cy="166.12" r="160.83"/><path class="cls-2" d="M326.4,187.2c2.77-4.61,1.11-34.85,1.11-34.85l-6.81-.06c-34.63,0-69.26.21-103.89-.18-6-.07-12-2.33-17.79-4.25-1.56-.53-2.63-3.43-3.06-5.4-1-4.54-1.43-9.18-2.19-14.41,8.87.54,9.34-4.1,8.79-9.72a53.08,53.08,0,0,1,0-11.48c.75-6.08-2.54-9-8.59-9.1q-31.11-.34-62.24,0c-6,0-9.05,2.85-8.45,9,.65,6.52.15,13.13.15,20l6.17,1.27c.34.49.82.86.79,1.18-.48,5-.56,10.17-1.79,15.06-.43,1.7-3.73,3.89-5.76,3.93-4.42.08-6.95,1.69-7,5.38-.2,11.2-.24,22.41.33,33.59.09,1.76,3.82,4.9,5.64,4.77,6.75-.49,7.91,3.37,8.48,7.71.44,3.34.09,6.76.09,10.57l-6.89,1.6c0,8.08-.32,16.13.25,24.14.12,1.69,3.23,4.29,5.32,4.61a226.14,226.14,0,0,0,67.68.08c4-.59,6-2.78,5.8-6.7a146.7,146.7,0,0,1,0-14.68c.28-5.15.25-9.76-8.89-8.21,1-5.87,1.79-10.82,2.68-15.76.15-.81.53-2,1.14-2.26,5.84-2,11.73-5.47,17.65-5.55,36.49-.52,73-.26,109.71-.26Z"/></svg>-->
                 <span>DATAFORGE</span>
@@ -48,7 +60,7 @@ import { LayoutService } from '../service/layout.service';
         </div>
 
         <div class="layout-topbar-actions">
-            <div class="layout-config-menu">
+            <!--      <div class="layout-config-menu">
                 <button type="button" class="layout-topbar-action" (click)="toggleDarkMode()">
                     <i [ngClass]="{ 'pi ': true, 'pi-moon': layoutService.isDarkTheme(), 'pi-sun': !layoutService.isDarkTheme() }"></i>
                 </button>
@@ -66,7 +78,7 @@ import { LayoutService } from '../service/layout.service';
                     </button>
                     <app-configurator />
                 </div>
-            </div>
+            </div>-->
 
             <button class="layout-topbar-menu-button layout-topbar-action" pStyleClass="@next" enterFromClass="hidden" enterActiveClass="animate-scalein" leaveToClass="hidden" leaveActiveClass="animate-fadeout" [hideOnOutsideClick]="true">
                 <i class="pi pi-ellipsis-v"></i>
@@ -74,7 +86,32 @@ import { LayoutService } from '../service/layout.service';
 
             <div class="layout-topbar-menu hidden lg:block">
                 <div class="layout-topbar-menu-content">
-                    <button type="button" class="layout-topbar-action">
+                    <button type="button" pRipple class="layout-topbar-action" (click)="toggleDarkMode()" [pTooltip]="layoutService.isDarkTheme() ? 'Enable Light Mode' : 'Enable Dark Mode'" tooltipPosition="bottom">
+                        <i [ngClass]="{ 'pi ': true, 'pi-sun': layoutService.isDarkTheme(), 'pi-moon': !layoutService.isDarkTheme() }"></i>
+                        <span>
+                            <ng-container *ngIf="layoutService.isDarkTheme()"> Enable Light Mode </ng-container>
+                            <ng-container *ngIf="!layoutService.isDarkTheme()"> Enable Dark Mode </ng-container>
+                        </span>
+                    </button>
+                    <div class="relative">
+                        <button
+                            class="layout-topbar-action layout-topbar-action-highlight"
+                            pStyleClass="@next"
+                            enterFromClass="hidden"
+                            enterActiveClass="animate-scalein"
+                            leaveToClass="hidden"
+                            leaveActiveClass="animate-fadeout"
+                            [hideOnOutsideClick]="true"
+                            pTooltip="Change Theme"
+                            tooltipPosition="bottom"
+                        >
+                            <i class="pi pi-palette"></i>
+                            <span>Theme</span>
+                        </button>
+                        <app-configurator />
+                    </div>
+
+                    <button type="button" class="layout-topbar-action" pRipple style="--p-ripple-background: var(--primary-color)">
                         <i class="pi pi-calendar"></i>
                         <span>Calendar</span>
                     </button>
@@ -82,10 +119,12 @@ import { LayoutService } from '../service/layout.service';
                         <i class="pi pi-inbox"></i>
                         <span>Messages</span>
                     </button>
-                    <button type="button" class="layout-topbar-action">
-                        <i class="pi pi-user"></i>
-                        <span>Profile</span>
+
+                    <button type="button" class="layout-topbar-action" pTooltip="Sign Out" tooltipPosition="bottom" (click)="logout()">
+                        <i class="pi pi-sign-out"></i>
+                        <span>Sign Out</span>
                     </button>
+
                 </div>
             </div>
         </div>
@@ -94,7 +133,15 @@ import { LayoutService } from '../service/layout.service';
 export class AppTopbar {
     items!: MenuItem[];
 
-    constructor(public layoutService: LayoutService) {}
+    constructor(
+        private auth: AuthService,
+        public layoutService: LayoutService
+    ) {}
+
+    logout(): void {
+        console.log('Logging out...');
+        this.auth.logout();
+    }
 
     toggleDarkMode() {
         this.layoutService.layoutConfig.update((state) => ({ ...state, darkTheme: !state.darkTheme }));

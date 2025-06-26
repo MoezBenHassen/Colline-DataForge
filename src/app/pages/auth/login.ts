@@ -22,12 +22,13 @@ export class Login {
     password = '';
     checked = false;
     error: string | null = null;
+    rememberMe = false;
 
     constructor(private authService: AuthService, private router: Router) {}
 
     onSubmit() {
         console.log('Login submitted', this.email, this.password);
-        this.authService.login(this.email, this.password).subscribe({
+        this.authService.login(this.email, this.password,this.rememberMe).subscribe({
             next: () => this.router.navigate(['/']),
             error: (err) => {
                 this.error = "Invalid credentials"; // optionally get from err.error.message
