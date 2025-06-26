@@ -25,6 +25,13 @@ export class AppMenu {
                 items: [{ label: 'Dashboard', icon: 'pi pi-fw pi-home', routerLink: ['/'] }]
             },
             {
+                label: 'Excel Forge',
+                items: [
+                    { label: 'Interest Rate', icon: 'pi pi-fw pi-dollar', routerLink: ['/excel/interest-rate'] },
+                    { label: 'Interest Rate', icon: 'pi pi-fw pi-file-excel', routerLink: ['/excel/interest-rate'] },
+                ]
+            },
+            {
                 label: 'UI Components',
                 items: [
                     { label: 'Form Layout', icon: 'pi pi-fw pi-id-card', routerLink: ['/uikit/formlayout'] },
