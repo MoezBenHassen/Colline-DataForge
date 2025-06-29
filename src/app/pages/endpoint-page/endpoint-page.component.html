@@ -1,0 +1,38 @@
+<div class="endpoint-page">
+    <!-- Header -->
+    <h1>{{ metadata.title }}</h1>
+    <div class="endpoint-path">
+        <code>{{ metadata.path }}</code>
+        <button (click)="navigator.clipboard.writeText(metadata.path)">Copy</button>
+    </div>
+    <div class="short-desc">{{ metadata.shortDescription }}</div>
+
+    <!-- Form -->
+    <form (ngSubmit)="onSubmit()">
+        <div *ngFor="let param of metadata.params">
+            <ng-container [ngSwitch]="param.type">
+                <select *ngSwitchCase="'select'" [(ngModel)]="form[param.name]" [name]="param.name" [required]="!!param.required">
+                    <option [value]="null">Select {{ param.label }}</option>
+                    <option *ngFor="let opt of param.options" [value]="opt">{{ opt }}</option>
+                </select>
+                <input *ngSwitchCase="'number'" type="number" [(ngModel)]="form[param.name]" [name]="param.name"
+                       [placeholder]="param.placeholder || param.label" [required]="!!param.required" />
+                <input *ngSwitchCase="'text'" type="text" [(ngModel)]="form[param.name]" [name]="param.name"
+                       [placeholder]="param.placeholder || param.label" [required]="!!param.required" />
+                <input *ngSwitchCase="'file'" type="file" [name]="param.name" />
+            </ng-container>
+        </div>
+        <button type="submit" [disabled]="loading">Run</button>
+        <button type="button" (click)="onReset()">Reset</button>
+    </form>
+
+    <!-- Result Panel -->
+  <!--  <app-result-panel *ngIf="result" [result]="result"></app-result-panel>
+    <div *ngIf="loading">Loading...</div>
+    <div *ngIf="error" class="error">{{ error }}</div>-->
+
+    <!-- Docs Section -->
+    <app-doc-section [metadata]="metadata"></app-doc-section>
+    <!-- FAQ Section -->
+    <app-faq-section *ngIf="metadata.faq" [faq]="metadata.faq"></app-faq-section>
+</div>

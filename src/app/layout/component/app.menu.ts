@@ -27,7 +27,7 @@ export class AppMenu {
             {
                 label: 'Excel Forge',
                 items: [
-                    { label: 'Interest Rate', icon: 'pi pi-fw pi-dollar', routerLink: ['/excel/interest-rate'] },
+                    { label: 'Interest Rate', icon: 'pi pi-fw pi-dollar', routerLink: ['/interest-rate'] },
                     { label: 'Interest Rate', icon: 'pi pi-fw pi-file-excel', routerLink: ['/excel/interest-rate'] },
                 ]
             },

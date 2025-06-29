@@ -3,7 +3,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { Observable, tap } from 'rxjs';
-import {API} from '../../constants/api-endpoints';
+import {API} from '../../core/constants/api-endpoints';
 import { environment } from '../../../environments/environment';
 import { TokenService } from '../token.service';
 
