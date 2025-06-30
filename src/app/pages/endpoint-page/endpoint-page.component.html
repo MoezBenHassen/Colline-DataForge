@@ -1,103 +1,107 @@
-<div class="endpoint-page">
-    <!-- Header -->
-    <h1>{{ metadata.title }}</h1>
-    <div class="endpoint-path">
-        <code>{{ metadata.path }}</code>
-        <button (click)="navigator.clipboard.writeText(metadata.path)">Copy</button>
+<div class="endpoint-page p-4">
+
+    <div class="mb-6">
+        <h1 class="text-4xl font-bold text-color">{{ metadata.title }}</h1>
+        <p class="text-lg text-color-secondary mt-2">{{ metadata.shortDescription }}</p>
     </div>
-    <div class="short-desc">{{ metadata.shortDescription }}</div>
 
-    <div class="card">
-        <form (ngSubmit)="onSubmit()" #dynamicForm="ngForm">
 
-            <div class="formgrid grid">
-                <div *ngFor="let param of metadata.params" class="field col-12 md:col-6">
-                    <label [for]="param.name" class="block font-bold mb-2">{{ param.label }} <span *ngIf="param.required" class="text-red-500">*</span></label>
+    <div class="grid grid-cols-12 gap-4">
 
-                    <ng-container [ngSwitch]="param.type">
+        <div class="col-span-12 lg:col-span-7">
 
-                        <p-dropdown
-                            *ngSwitchCase="'select'"
-                            [options]="param.options!"
-                            [(ngModel)]="form[param.name]"
-                            [name]="param.name"
-                            [id]="param.name"
-                            [placeholder]="'Select ' + param.label"
-                            [required]="!!param.required"
-                            [showClear]="true"
-                            styleClass="w-full">
-                        </p-dropdown>
+            <div class="card">
+                <div class="font-semibold text-xl mb-4">Execution</div>
+                <form (ngSubmit)="onSubmit()" #dynamicForm="ngForm">
+                    <div class="formgrid grid">
+                        <div *ngFor="let param of metadata.params" class="field col-12 md:col-6">
+                            <label [for]="param.name" class="block font-bold mb-2">
+                                {{ param.label }}
+                                <span *ngIf="param.required" class="text-red-500">*</span>
+                            </label>
 
-                        <input
-                            *ngSwitchCase="'number'"
-                            pInputText
-                            type="number"
-                            class="w-full"
-                            [(ngModel)]="form[param.name]"
-                            [name]="param.name"
-                            [id]="param.name"
-                            [placeholder]="param.placeholder || param.label"
-                            [required]="!!param.required" />
+                            <ng-container [ngSwitch]="param.type">
 
-                        <input
-                            *ngSwitchCase="'checkbox'"
-                            type="checkbox"
-                            class="w-full"
-                            [(ngModel)]="form[param.name]"
-                            [name]="param.name"
-                            [id]="param.name" />
+                                <p-dropdown *ngSwitchCase="'select'"
+                                            [options]="param.options!"
+                                            [(ngModel)]="form[param.name]"
+                                            [name]="param.name"
+                                            [id]="param.name"
+                                            [placeholder]="'Select ' + param.label"
+                                            [required]="!!param.required"
+                                            [showClear]="true"
+                                            styleClass="w-full">
+                                </p-dropdown>
 
-                        <ng-container [ngSwitch]="param.type">
+                                <input *ngSwitchCase="'number'"
+                                       pInputText
+                                       type="number"
+                                       class="w-full"
+                                       [(ngModel)]="form[param.name]"
+                                       [name]="param.name"
+                                       [id]="param.name"
+                                       [placeholder]="param.placeholder || param.label"
+                                       [required]="!!param.required" />
 
-                            <div *ngSwitchCase="'file'" class="flex align-items-center gap-2">
-                                <p-fileupload
-                                    mode="basic"
-                                    [name]="param.name"
-                                    (onSelect)="onFileSelect($event, param.name)"
-                                    [customUpload]="true"
-                                    [auto]="true"
-                                    [multiple]="false"
-                                    chooseLabel="Choose File"
-                                    accept="image/*,.pdf,.csv,.xls,.xlsx"
-                                    maxFileSize="2000000">
-                                </p-fileupload>
+                                <p-checkbox *ngSwitchCase="'checkbox'"
+                                            [binary]="true"
+                                            [(ngModel)]="form[param.name]"
+                                            [name]="param.name"
+                                            [id]="param.name">
+                                </p-checkbox>
 
-                                <span *ngIf="form[param.name]" class="text-sm text-color-secondary">
-                                    {{ form[param.name].name }}
-                                </span>
-                            </div>
+                                <div *ngSwitchCase="'file'" class="flex align-items-center gap-2">
+                                    <p-fileupload *ngIf="!form[param.name]"
+                                                  mode="basic"
+                                                  [name]="param.name"
+                                                  (onSelect)="onFileSelect($event, param.name)"
+                                                  [customUpload]="true" [auto]="true" [multiple]="false"
+                                                  chooseLabel="Choose File" accept="image/*,.pdf,.csv,.xls,.xlsx"
+                                                  maxFileSize="2000000">
+                                    </p-fileupload>
+                                    <p-chip *ngIf="form[param.name]"
+                                            [label]="form[param.name].name"
+                                            [removable]="true" (onRemove)="onFileClear(param.name)"
+                                            styleClass="text-sm">
+                                    </p-chip>
+                                </div>
+                            </ng-container>
+                        </div>
+                    </div>
 
-                        </ng-container>
+                    <div class="flex justify-content-end gap-2 mt-4">
+                        <p-button label="Reset" icon="pi pi-refresh" styleClass="p-button-outlined"
+                                  (click)="onReset()">
+                        </p-button>
+                        <p-button label="Run" icon="pi pi-play" type="submit" [loading]="loading"
+                                  [disabled]="dynamicForm.invalid || loading">
+                        </p-button>
+                    </div>
+                </form>
+            </div>
 
-                    </ng-container>
+        </div>
+
+        <div class="col-span-12 lg:col-span-5">
+
+            <div class="card mb-4">
+                <div class="flex justify-content-between align-items-center">
+                    <code class="font-mono text-lg surface-ground p-2 border-round">{{ metadata.path }}</code>
+                    <p-button icon="pi pi-copy" styleClass="p-button-text"
+                              pTooltip="Copy Path" tooltipPosition="top"
+                              (click)="navigator.clipboard.writeText(metadata.path)">
+                    </p-button>
                 </div>
             </div>
 
-            <div class="flex justify-content-end gap-2 mt-4">
-                <p-button
-                    label="Reset"
-                    icon="pi pi-refresh"
-                    styleClass="p-button-outlined"
-                    (click)="onReset()">
-                </p-button>
-                <p-button
-                    label="Run"
-                    icon="pi pi-play"
-                    type="submit"
-                    [loading]="loading"
-                    [disabled]="dynamicForm.invalid || loading">
-                </p-button>
+            <div class="card mb-4">
+                <app-doc-section [metadata]="metadata"></app-doc-section>
             </div>
-        </form>
+
+            <div *ngIf="metadata.faq" class="card">
+                <app-faq-section [faq]="metadata.faq"></app-faq-section>
+            </div>
+
+        </div>
     </div>
-
-    <!-- Result Panel -->
-  <!--  <app-result-panel *ngIf="result" [result]="result"></app-result-panel>
-    <div *ngIf="loading">Loading...</div>
-    <div *ngIf="error" class="error">{{ error }}</div>-->
-
-    <!-- Docs Section -->
-    <app-doc-section [metadata]="metadata"></app-doc-section>
-    <!-- FAQ Section -->
-    <app-faq-section *ngIf="metadata.faq" [faq]="metadata.faq"></app-faq-section>
 </div>

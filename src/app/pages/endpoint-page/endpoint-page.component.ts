@@ -12,12 +12,14 @@ import { ExcelService } from '../../services/excel.sevice';
 import { saveAs } from 'file-saver';
 import { FileSelectEvent, FileUpload } from 'primeng/fileupload';
 import { MessageService } from 'primeng/api';
+import { Chip } from 'primeng/chip';
+import { Checkbox } from 'primeng/checkbox';
 
 @Component({
     selector: 'app-endpoint-page',
     standalone: true,
     templateUrl: './endpoint-page.component.html',
-    imports: [FormsModule, CommonModule, DocSectionComponent, FaqSectionComponent, Button, InputText, DropdownModule, FileUpload],
+    imports: [FormsModule, CommonModule, DocSectionComponent, FaqSectionComponent, Button, InputText, DropdownModule, FileUpload, Chip, Checkbox],
     styleUrls: ['./endpoint-page.component.scss'],
     providers: [MessageService]
 })
@@ -99,7 +101,6 @@ export class EndpointPageComponent implements OnInit {
         this.messageService.add({ severity: 'info', summary: 'Success', detail: 'File Uploaded' });
     }
 
-
     /**
      * Handles file selection from the p-fileUpload component (works for both basic and advanced modes).
      * This method is triggered by the (onSelect) event.
@@ -117,7 +118,6 @@ export class EndpointPageComponent implements OnInit {
 
     onFileClear(name: string) {
         this.form[name] = null; // Clear the file input
-        this.uploadedFiles = this.uploadedFiles.filter(file => file.name !== name); // Remove from uploaded files
-
+        this.uploadedFiles = this.uploadedFiles.filter((file) => file.name !== name); // Remove from uploaded files
     }
 }

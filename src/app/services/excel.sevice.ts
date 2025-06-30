@@ -2,11 +2,13 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { environment } from '../../environments/environment';
 
 @Injectable({ providedIn: 'root' })
 export class ExcelService {
-    private readonly BASE_URL = '/api/excel';
+    private readonly BASE_URL = environment.apiUrl+'/api/excel';
 
+    private readonly interestRateEndpoint = `${this.BASE_URL}/interest-rate`;
     constructor(private http: HttpClient) {}
 
     interestRate(
@@ -26,7 +28,7 @@ export class ExcelService {
             params = params.set('clearWarnings', String(clearWarnings));
         }
 
-        return this.http.post(`${this.BASE_URL}/interest-rate`, formData, {
+        return this.http.post(this.interestRateEndpoint, formData, {
             params,
             responseType: 'blob' // Get the Excel file as a Blob
         });
