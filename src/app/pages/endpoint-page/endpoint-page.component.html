@@ -49,26 +49,23 @@
 
                         <ng-container [ngSwitch]="param.type">
 
-                            <p-fileupload
-                                *ngSwitchCase="'file'"
-                                mode="advanced"
-                                [name]="param.name"
-                                [id]="param.name"
-                                (onSelect)="onFileSelect($event, param.name)"
-                                (onClear)="onFileClear(param.name)"
-                                [customUpload]="true"
-                                [multiple]="false"
-                                [showUploadButton]="false"
-                                [showCancelButton]="false"
-                                accept="image/*,.pdf,.csv,.xls,.xlsx"
-                                maxFileSize="2000000">
-                                <ng-template pTemplate="empty">
-                                    <div class="flex align-items-center flex-column">
-                                        <i class="pi pi-cloud-upload border-2 border-circle p-5 text-8xl text-400 border-400"></i>
-                                        <p class="mt-4 mb-0">Drag and drop files to here to upload.</p>
-                                    </div>
-                                </ng-template>
-                            </p-fileupload>
+                            <div *ngSwitchCase="'file'" class="flex align-items-center gap-2">
+                                <p-fileupload
+                                    mode="basic"
+                                    [name]="param.name"
+                                    (onSelect)="onFileSelect($event, param.name)"
+                                    [customUpload]="true"
+                                    [auto]="true"
+                                    [multiple]="false"
+                                    chooseLabel="Choose File"
+                                    accept="image/*,.pdf,.csv,.xls,.xlsx"
+                                    maxFileSize="2000000">
+                                </p-fileupload>
+
+                                <span *ngIf="form[param.name]" class="text-sm text-color-secondary">
+                                    {{ form[param.name].name }}
+                                </span>
+                            </div>
 
                         </ng-container>
 

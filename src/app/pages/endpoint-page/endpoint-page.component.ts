@@ -10,7 +10,7 @@ import { InputText } from 'primeng/inputtext';
 import { DropdownModule } from 'primeng/dropdown';
 import { ExcelService } from '../../services/excel.sevice';
 import { saveAs } from 'file-saver';
-import { FileUpload } from 'primeng/fileupload';
+import { FileSelectEvent, FileUpload } from 'primeng/fileupload';
 import { MessageService } from 'primeng/api';
 
 @Component({
@@ -100,11 +100,17 @@ export class EndpointPageComponent implements OnInit {
     }
 
 
-    onFileSelect(event: any, paramName: string) {
-        const element = event.currentTarget as HTMLInputElement;
-        let fileList: FileList | null = element.files;
-        if (fileList) {
-            this.form[paramName] = fileList[0]; // Store the file object in the form model
+    /**
+     * Handles file selection from the p-fileUpload component (works for both basic and advanced modes).
+     * This method is triggered by the (onSelect) event.
+     * @param event The file select event containing the selected file(s).
+     * @param paramName The name of the form parameter to update.
+     */
+    onFileSelect(event: FileSelectEvent, paramName: string): void {
+        if (event.files.length > 0) {
+            // Store the selected file in your form model
+            this.form[paramName] = event.files[0];
+            console.log(`File selected for ${paramName}:`, this.form[paramName].name);
         }
     }
     protected readonly navigator = navigator;
