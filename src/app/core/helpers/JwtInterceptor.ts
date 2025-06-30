@@ -1,22 +1,30 @@
 // src/app/core/interceptors/jwt.interceptor.ts
-import { Injectable } from '@angular/core';
-import { HttpInterceptor, HttpRequest, HttpHandler, HttpEvent } from '@angular/common/http';
-import { Observable } from 'rxjs';
-import { AuthService } from '../../services/auth/auth.service';
+import { HttpInterceptorFn } from '@angular/common/http';
+import { inject } from '@angular/core';
+import { AuthService } from '../../services/auth/auth.service'; // Make sure this path is correct
 
-@Injectable({ providedIn: 'root' })
-export class JwtInterceptor implements HttpInterceptor {
-    constructor(private authService: AuthService) {}
+/**
+ * A modern, functional HTTP interceptor that attaches the JWT to outgoing requests.
+ */
+export const jwtInterceptor: HttpInterceptorFn = (req, next) => {
+    // This console log WILL now appear in your browser's developer console
+    console.log('JWT Interceptor running for request:', req.url);
 
-    intercept(req: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
-        const token = this.authService.getToken();
-        if (token) {
-            req = req.clone({
-                setHeaders: {
-                    Authorization: `Bearer ${token}`,
-                }
-            });
-        }
-        return next.handle(req);
+    // Inject services using the modern `inject` function
+    const authService = inject(AuthService);
+    const token = authService.getToken();
+
+    // If a token exists, clone the request and add the Authorization header
+    if (token) {
+        const authReq = req.clone({
+            setHeaders: {
+                Authorization: `Bearer ${token}`
+            }
+        });
+        // Pass the cloned request with the header to the next handler
+        return next(authReq);
     }
-}
+
+    // If there's no token, pass the original request along
+    return next(req);
+};

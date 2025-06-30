@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Data } from '@angular/router';
-import { EndpointMetadata, ENDPOINTS_METADATA } from '../../core/constants/endpoints-metadata';
+import {EndpointMetadata, EndpointParam, ENDPOINTS_METADATA} from '../../core/constants/endpoints-metadata';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { DocSectionComponent } from './doc-section.component'// <--- fix import!
@@ -14,12 +14,15 @@ import { FileSelectEvent, FileUpload } from 'primeng/fileupload';
 import { MessageService } from 'primeng/api';
 import { Chip } from 'primeng/chip';
 import { Checkbox } from 'primeng/checkbox';
+import {Select} from "primeng/select";
+import {InputNumber} from "primeng/inputnumber";
+import {FloatLabel} from "primeng/floatlabel";
 
 @Component({
     selector: 'app-endpoint-page',
     standalone: true,
     templateUrl: './endpoint-page.component.html',
-    imports: [FormsModule, CommonModule, DocSectionComponent, FaqSectionComponent, Button, InputText, DropdownModule, FileUpload, Chip, Checkbox],
+    imports: [FormsModule, CommonModule, DocSectionComponent, FaqSectionComponent, Button, DropdownModule, FileUpload, Chip, Checkbox, Select, InputNumber, FloatLabel],
     styleUrls: ['./endpoint-page.component.scss'],
     providers: [MessageService]
 })
@@ -91,6 +94,16 @@ export class EndpointPageComponent implements OnInit {
                 this.form[param.name] = false;
             }
         }
+    }
+
+    /**
+     * Helper function to find a specific parameter's metadata by its name.
+     * This allows us to build a custom layout in the template.
+     * @param name The 'name' of the parameter to find (e.g., 'databaseType').
+     * @returns The EndpointParam object or undefined if not found.
+     */
+    public getParam(name: string): EndpointParam | undefined {
+        return this.metadata?.params.find((p) => p.name === name);
     }
 
     onUpload(event: any) {
