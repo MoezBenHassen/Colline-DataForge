@@ -7,24 +7,92 @@
     </div>
     <div class="short-desc">{{ metadata.shortDescription }}</div>
 
-    <!-- Form -->
-    <form (ngSubmit)="onSubmit()">
-        <div *ngFor="let param of metadata.params">
-            <ng-container [ngSwitch]="param.type">
-                <select *ngSwitchCase="'select'" [(ngModel)]="form[param.name]" [name]="param.name" [required]="!!param.required">
-                    <option [value]="null">Select {{ param.label }}</option>
-                    <option *ngFor="let opt of param.options" [value]="opt">{{ opt }}</option>
-                </select>
-                <input *ngSwitchCase="'number'" type="number" [(ngModel)]="form[param.name]" [name]="param.name"
-                       [placeholder]="param.placeholder || param.label" [required]="!!param.required" />
-                <input *ngSwitchCase="'text'" type="text" [(ngModel)]="form[param.name]" [name]="param.name"
-                       [placeholder]="param.placeholder || param.label" [required]="!!param.required" />
-                <input *ngSwitchCase="'file'" type="file" [name]="param.name" />
-            </ng-container>
-        </div>
-        <button type="submit" [disabled]="loading">Run</button>
-        <button type="button" (click)="onReset()">Reset</button>
-    </form>
+    <div class="card">
+        <form (ngSubmit)="onSubmit()" #dynamicForm="ngForm">
+
+            <div class="formgrid grid">
+                <div *ngFor="let param of metadata.params" class="field col-12 md:col-6">
+                    <label [for]="param.name" class="block font-bold mb-2">{{ param.label }} <span *ngIf="param.required" class="text-red-500">*</span></label>
+
+                    <ng-container [ngSwitch]="param.type">
+
+                        <p-dropdown
+                            *ngSwitchCase="'select'"
+                            [options]="param.options!"
+                            [(ngModel)]="form[param.name]"
+                            [name]="param.name"
+                            [id]="param.name"
+                            [placeholder]="'Select ' + param.label"
+                            [required]="!!param.required"
+                            [showClear]="true"
+                            styleClass="w-full">
+                        </p-dropdown>
+
+                        <input
+                            *ngSwitchCase="'number'"
+                            pInputText
+                            type="number"
+                            class="w-full"
+                            [(ngModel)]="form[param.name]"
+                            [name]="param.name"
+                            [id]="param.name"
+                            [placeholder]="param.placeholder || param.label"
+                            [required]="!!param.required" />
+
+                        <input
+                            *ngSwitchCase="'checkbox'"
+                            type="checkbox"
+                            class="w-full"
+                            [(ngModel)]="form[param.name]"
+                            [name]="param.name"
+                            [id]="param.name" />
+
+                        <ng-container [ngSwitch]="param.type">
+
+                            <p-fileupload
+                                *ngSwitchCase="'file'"
+                                mode="advanced"
+                                [name]="param.name"
+                                [id]="param.name"
+                                (onSelect)="onFileSelect($event, param.name)"
+                                (onClear)="onFileClear(param.name)"
+                                [customUpload]="true"
+                                [multiple]="false"
+                                [showUploadButton]="false"
+                                [showCancelButton]="false"
+                                accept="image/*,.pdf,.csv,.xls,.xlsx"
+                                maxFileSize="2000000">
+                                <ng-template pTemplate="empty">
+                                    <div class="flex align-items-center flex-column">
+                                        <i class="pi pi-cloud-upload border-2 border-circle p-5 text-8xl text-400 border-400"></i>
+                                        <p class="mt-4 mb-0">Drag and drop files to here to upload.</p>
+                                    </div>
+                                </ng-template>
+                            </p-fileupload>
+
+                        </ng-container>
+
+                    </ng-container>
+                </div>
+            </div>
+
+            <div class="flex justify-content-end gap-2 mt-4">
+                <p-button
+                    label="Reset"
+                    icon="pi pi-refresh"
+                    styleClass="p-button-outlined"
+                    (click)="onReset()">
+                </p-button>
+                <p-button
+                    label="Run"
+                    icon="pi pi-play"
+                    type="submit"
+                    [loading]="loading"
+                    [disabled]="dynamicForm.invalid || loading">
+                </p-button>
+            </div>
+        </form>
+    </div>
 
     <!-- Result Panel -->
   <!--  <app-result-panel *ngIf="result" [result]="result"></app-result-panel>

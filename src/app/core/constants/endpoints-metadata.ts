@@ -1,7 +1,7 @@
 export interface EndpointParam {
     name: string;
     label: string;
-    type: 'text' | 'number' | 'select' | 'file';
+    type: 'text' | 'number' | 'select' | 'file' | 'checkbox';
     required?: boolean;
     options?: string[]; // for select fields
     placeholder?: string;
@@ -48,7 +48,20 @@ _This endpoint will generate an Excel file with random or real interest rates ba
                 type: 'number',
                 required: true,
                 placeholder: 'Enter number of rows'
+            },
+            {
+                name: 'clearWarnings',
+                type: 'checkbox', // <-- CHANGE from 'select' to 'checkbox'
+                label: 'Clear warnings',
+                required: false
+            },
+            {
+                name: 'file',
+                label: 'Excel Template',
+                type: 'file',
+                required: true
             }
+
         ],
         sampleFiles: ['/assets/screenshots/interest-rate-example.png'],
         sqlQuery: `SELECT ... FROM ... WHERE ... FETCH FIRST ? ROWS ONLY`, // <-- put actual query if you want

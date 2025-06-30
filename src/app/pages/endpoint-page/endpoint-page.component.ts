@@ -5,13 +5,21 @@ import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { DocSectionComponent } from './doc-section.component'// <--- fix import!
 import { FaqSectionComponent } from './faq-section.component';
+import { Button } from 'primeng/button';
+import { InputText } from 'primeng/inputtext';
+import { DropdownModule } from 'primeng/dropdown';
+import { ExcelService } from '../../services/excel.sevice';
+import { saveAs } from 'file-saver';
+import { FileUpload } from 'primeng/fileupload';
+import { MessageService } from 'primeng/api';
 
 @Component({
     selector: 'app-endpoint-page',
     standalone: true,
     templateUrl: './endpoint-page.component.html',
-    imports: [FormsModule, CommonModule, DocSectionComponent, FaqSectionComponent],
-    styleUrls: ['./endpoint-page.component.scss']
+    imports: [FormsModule, CommonModule, DocSectionComponent, FaqSectionComponent, Button, InputText, DropdownModule, FileUpload],
+    styleUrls: ['./endpoint-page.component.scss'],
+    providers: [MessageService]
 })
 export class EndpointPageComponent implements OnInit {
     metadata!: EndpointMetadata;
@@ -19,19 +27,29 @@ export class EndpointPageComponent implements OnInit {
     result: any = null;
     error: string | null = null;
     loading = false;
+    uploadedFiles: any[] = [];
 
-    constructor(private route: ActivatedRoute) {}
+    constructor(
+        private route: ActivatedRoute,
+        private excelService: ExcelService,
+        private messageService: MessageService
+    ) {}
 
     ngOnInit() {
         // Support both static (data) and dynamic (param) routes
-        const endpointKey =
-            this.route.snapshot.data['endpointKey'] ||
-            this.route.snapshot.paramMap.get('id');
+        const endpointKey = this.route.snapshot.data['endpointKey'] || this.route.snapshot.paramMap.get('id');
         if (!endpointKey || !ENDPOINTS_METADATA[endpointKey]) {
             this.error = 'Unknown endpoint';
             return;
         }
         this.metadata = ENDPOINTS_METADATA[endpointKey];
+
+        // Set default values for checkboxes
+        for (let param of this.metadata.params) {
+            if (param.type === 'checkbox') {
+                this.form[param.name] = false;
+            }
+        }
     }
 
     onSubmit() {
@@ -39,22 +57,61 @@ export class EndpointPageComponent implements OnInit {
         this.error = null;
         this.result = null;
 
-        // Replace with actual API call using a service
-        setTimeout(() => {
-            this.result = {
-                fileUrl: '/assets/sample-output.xlsx',
-                warnings: [],
-                output: 'Success!'
-            };
+        // Validate required fields
+        const { numRows, databaseType, file, clearWarnings } = this.form;
+        if (!file || !numRows || !databaseType) {
+            this.error = 'Please provide all required fields and upload a file.';
             this.loading = false;
-        }, 1200);
+            return;
+        }
+
+        this.excelService.interestRate(file, numRows, databaseType, clearWarnings).subscribe({
+            next: (blob: Blob) => {
+                // Save/download the file using file-saver
+                saveAs(blob, 'filled_interest_rates.xlsx');
+                this.result = 'File downloaded!';
+                this.loading = false;
+            },
+            error: (err) => {
+                this.error = 'Failed to generate file: ' + (err.error?.message || err.statusText || 'Unknown error');
+                this.loading = false;
+            }
+        });
     }
 
     onReset() {
         this.form = {};
         this.result = null;
         this.error = null;
+        // Reset checkboxes to false after reset
+        for (let param of this.metadata.params) {
+            if (param.type === 'checkbox') {
+                this.form[param.name] = false;
+            }
+        }
     }
 
+    onUpload(event: any) {
+        for (const file of event.files) {
+            this.uploadedFiles.push(file);
+        }
+
+        this.messageService.add({ severity: 'info', summary: 'Success', detail: 'File Uploaded' });
+    }
+
+
+    onFileSelect(event: any, paramName: string) {
+        const element = event.currentTarget as HTMLInputElement;
+        let fileList: FileList | null = element.files;
+        if (fileList) {
+            this.form[paramName] = fileList[0]; // Store the file object in the form model
+        }
+    }
     protected readonly navigator = navigator;
+
+    onFileClear(name: string) {
+        this.form[name] = null; // Clear the file input
+        this.uploadedFiles = this.uploadedFiles.filter(file => file.name !== name); // Remove from uploaded files
+
+    }
 }
