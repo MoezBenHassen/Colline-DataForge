@@ -12,10 +12,10 @@
                 <form (ngSubmit)="onSubmit()" #dynamicForm="ngForm" class="space-y-6">
 
                     <div class="formgrid grid gap-4">
-                        <div *ngFor="let param of metadata.params" class="col-span-12 md:col-span-6">
+                        <!-- Loop for standard params -->
+                        <div *ngFor="let param of inputParams" class="col-span-12 md:col-span-6">
                             <ng-container [ngSwitch]="param.type">
-
-                                <!-- Select with float label -->
+                                <!-- Select -->
                                 <div *ngSwitchCase="'select'" class="p-float-label w-full mb-4">
                                     <label [for]="param.name">{{ param.label }} <span *ngIf="param.required" class="text-red-500">*</span></label>
                                     <p-dropdown
@@ -28,10 +28,8 @@
                                         [showClear]="true"
                                         styleClass="w-full">
                                     </p-dropdown>
-
                                 </div>
-
-                                <!-- Number input with float label -->
+                                <!-- Number input -->
                                 <div *ngSwitchCase="'number'" class="p-float-label w-full mb-4">
                                     <label [for]="param.name">{{ param.label }} <span *ngIf="param.required" class="text-red-500">*</span></label>
                                     <p-inputNumber
@@ -41,7 +39,9 @@
                                         [id]="param.name"
                                         [placeholder]="param.placeholder || param.label"
                                         [required]="!!param.required"
-                                        class="w-full">
+                                        class="w-full"
+                                        buttonLayout="horizontal"
+                                    >
                                         <ng-template #incrementbuttonicon>
                                             <span class="pi pi-plus"></span>
                                         </ng-template>
@@ -49,10 +49,8 @@
                                             <span class="pi pi-minus"></span>
                                         </ng-template>
                                     </p-inputNumber>
-
                                 </div>
-
-                                <!-- Text input with float label -->
+                                <!-- Text input -->
                                 <div *ngSwitchCase="'text'" class="p-float-label w-full mb-4">
                                     <input
                                         pInputText
@@ -65,48 +63,52 @@
                                         [required]="!!param.required"/>
                                     <label [for]="param.name">{{ param.label }} <span *ngIf="param.required" class="text-red-500">*</span></label>
                                 </div>
-
-                                <!-- Checkbox (label right) -->
-                                <div *ngSwitchCase="'checkbox'" class="flex items-center gap-2 mb-4">
-                                    <p-checkbox
-                                        inputId="{{param.name}}"
-                                        binary="true"
-                                        [indeterminate]="true"
-                                        [(ngModel)]="form[param.name]"
-                                        [name]="param.name"
-                                        [id]="param.name">
-                                    </p-checkbox>
-                                    <label [for]="param.name" class="font-medium">{{ param.label }}</label>
-                                </div>
-
-                                <!-- File upload -->
-                                <div *ngSwitchCase="'file'" class="flex items-center gap-2 mb-4">
-                                    <!--<label class="block font-bold" [for]="param.name">{{ param.label }} <span *ngIf="param.required" class="text-red-500">*</span></label>-->
-                                    <div class="flex items-center gap-2">
-                                        <p-fileUpload
-                                            *ngIf="!form[param.name]"
-                                            mode="basic"
-                                            [name]="param.name"
-                                            (onSelect)="onFileSelect($event, param.name)"
-                                            [customUpload]="true" [auto]="true" [multiple]="false"
-                                            chooseLabel="Excel template file"
-                                            accept=".xls,.xlsx"
-                                            maxFileSize="5000000"
-                                            styleClass="p-button-danger">
-                                        </p-fileUpload>
-                                        <p-chip
-                                            *ngIf="form[param.name]"
-                                            [label]="form[param.name].name"
-                                            removable="true"
-                                            (onRemove)="onFileClear(param.name)"
-                                            styleClass="text-sm">
-                                        </p-chip>
-                                    </div>
-                                </div>
-
                             </ng-container>
                         </div>
+
+                        <!-- OUTSIDE THE LOOP: Checkbox + File Upload, single row, space-between -->
+                        <div class="col-span-12 flex items-center justify-between mb-4">
+                            <!-- File Upload -->
+                            <div class="flex items-center gap-2">
+                                <ng-container *ngIf="getParam('file') as fileParam">
+                                    <p-fileupload
+                                        *ngIf="!form[fileParam.name]"
+                                        mode="basic"
+                                        [name]="fileParam.name"
+                                        (onSelect)="onFileSelect($event, fileParam.name)"
+                                        [customUpload]="true" [auto]="true" [multiple]="false"
+                                        chooseLabel="Excel template file"
+                                        accept=".xls,.xlsx"
+                                        maxFileSize="5000000"
+                                    >
+                                    </p-fileupload>
+                                    <p-chip
+                                        *ngIf="form[fileParam.name]"
+                                        [label]="form[fileParam.name].name"
+                                        removable="true"
+                                        icon="pi pi-file-excel"
+                                        (onRemove)="onFileClear(fileParam.name)"
+                                        styleClass="text-sm">
+                                    </p-chip>
+                                </ng-container>
+                            </div>
+                            <!-- Checkbox -->
+                            <div class="flex items-center gap-2">
+                                <ng-container *ngIf="getParam('clearWarnings') as checkboxParam">
+                                    <p-checkbox
+                                        inputId="{{checkboxParam.name}}"
+                                        binary="true"
+                                        [(ngModel)]="form[checkboxParam.name]"
+                                        [name]="checkboxParam.name"
+                                        [id]="checkboxParam.name">
+                                    </p-checkbox>
+                                    <label [for]="checkboxParam.name" class="font-medium">{{ checkboxParam.label }}</label>
+                                </ng-container>
+                            </div>
+
+                        </div>
                     </div>
+
 
                     <div class="flex justify-end gap-3 mt-6">
                         <p-button
@@ -132,9 +134,12 @@
         <div class="col-span-12 lg:col-span-5 flex flex-col gap-4">
             <div class="card mb-2">
                 <div class="flex justify-between items-center">
-                    <code class="font-mono text-lg surface-ground p-2 border-round">{{ metadata.path }}</code>
+                    <code *ngIf="layoutService.isDarkTheme()" id="darkCode" class="font-mono text-lg surface-ground p-2 border-round">{{ metadata.path }}</code>
+                    <code *ngIf="!layoutService.isDarkTheme()" id="lightCode" class="font-mono text-lg surface-ground p-2 border-round">{{ metadata.path }}</code>
+
                     <p-button icon="pi pi-copy" styleClass="p-button-text"
-                              pTooltip="Copy Path" tooltipPosition="top"
+                              pTooltip="Copy"
+                              tooltipPosition="bottom"
                               (click)="navigator.clipboard.writeText(metadata.path)">
                     </p-button>
                 </div>

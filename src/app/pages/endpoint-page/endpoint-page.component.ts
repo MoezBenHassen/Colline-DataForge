@@ -8,7 +8,7 @@ import { FaqSectionComponent } from './faq-section.component';
 import { Button } from 'primeng/button';
 import { InputText } from 'primeng/inputtext';
 import { DropdownModule } from 'primeng/dropdown';
-import { ExcelService } from '../../services/excel.sevice';
+import { ExcelService } from '../../services/excel.service';
 import { saveAs } from 'file-saver';
 import { FileSelectEvent, FileUpload } from 'primeng/fileupload';
 import { MessageService } from 'primeng/api';
@@ -17,12 +17,13 @@ import { Checkbox } from 'primeng/checkbox';
 import {Select} from "primeng/select";
 import {InputNumber} from "primeng/inputnumber";
 import {FloatLabel} from "primeng/floatlabel";
-
+import { LayoutService } from '../../../app/layout/service/layout.service';
+import {Tooltip} from "primeng/tooltip";
 @Component({
     selector: 'app-endpoint-page',
     standalone: true,
     templateUrl: './endpoint-page.component.html',
-    imports: [FormsModule, CommonModule, DocSectionComponent, FaqSectionComponent, Button, DropdownModule, FileUpload, Chip, Checkbox, Select, InputNumber, FloatLabel],
+    imports: [FormsModule, CommonModule, DocSectionComponent, FaqSectionComponent, Button, DropdownModule, FileUpload, Chip, Checkbox, Select, InputNumber, FloatLabel, Tooltip],
     styleUrls: ['./endpoint-page.component.scss'],
     providers: [MessageService]
 })
@@ -33,11 +34,13 @@ export class EndpointPageComponent implements OnInit {
     error: string | null = null;
     loading = false;
     uploadedFiles: any[] = [];
+    validationErrors: Record<string, string> = {};
 
     constructor(
         private route: ActivatedRoute,
         private excelService: ExcelService,
-        private messageService: MessageService
+        private messageService: MessageService,
+        protected layoutService: LayoutService
     ) {}
 
     ngOnInit() {
@@ -58,21 +61,19 @@ export class EndpointPageComponent implements OnInit {
     }
 
     onSubmit() {
-        this.loading = true;
         this.error = null;
         this.result = null;
+        this.loading = true;
 
-        // Validate required fields
-        const { numRows, databaseType, file, clearWarnings } = this.form;
-        if (!file || !numRows || !databaseType) {
-            this.error = 'Please provide all required fields and upload a file.';
+        if (!this.validateForm()) {
             this.loading = false;
+            // Optionally: scroll to first error field
             return;
         }
 
+        const { numRows, databaseType, file, clearWarnings } = this.form;
         this.excelService.interestRate(file, numRows, databaseType, clearWarnings).subscribe({
             next: (blob: Blob) => {
-                // Save/download the file using file-saver
                 saveAs(blob, 'filled_interest_rates.xlsx');
                 this.result = 'File downloaded!';
                 this.loading = false;
@@ -133,4 +134,38 @@ export class EndpointPageComponent implements OnInit {
         this.form[name] = null; // Clear the file input
         this.uploadedFiles = this.uploadedFiles.filter((file) => file.name !== name); // Remove from uploaded files
     }
+    get inputParams() {
+        return this.metadata?.params.filter((param) => param.type !== 'checkbox' && param.type !== 'file');
+    }
+
+    validateForm(): boolean {
+        this.validationErrors = {};
+
+        // Database type
+        if (!this.form.databaseType) {
+            this.validationErrors.databaseType = "Database type is required.";
+        }
+
+        // Number of rows
+        if (this.form.numRows == null || this.form.numRows === "") {
+            this.validationErrors.numRows = "Number of rows is required.";
+        } else if (isNaN(this.form.numRows) || Number(this.form.numRows) <= 0) {
+            this.validationErrors.numRows = "Number of rows must be greater than zero.";
+        }
+
+        // File
+        const file = this.form.file;
+        if (!file) {
+            this.validationErrors.file = "Excel file is required.";
+        } else {
+            const validExt = /\.(xlsx|xls)$/i;
+            if (!validExt.test(file.name)) {
+                this.validationErrors.file = "Only .xls or .xlsx files are allowed.";
+            }
+        }
+
+        // No error keys = valid
+        return Object.keys(this.validationErrors).length === 0;
+    }
+s
 }
