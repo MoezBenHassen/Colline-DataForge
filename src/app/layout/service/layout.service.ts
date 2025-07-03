@@ -1,5 +1,6 @@
-import { Injectable, effect, signal, computed } from '@angular/core';
+import {Injectable, effect, signal, computed, inject} from '@angular/core';
 import { Subject } from 'rxjs';
+import {HighlightLoader} from "ngx-highlightjs";
 
 export interface layoutConfig {
     preset?: string;
@@ -77,8 +78,28 @@ export class LayoutService {
     transitionComplete = signal<boolean>(false);
 
     private initialized = false;
+    private highlightLoader = inject(HighlightLoader);
+
+    private lastTheme: string | null = null; // track last theme
 
     constructor() {
+
+        effect(() => {
+            const config = this.layoutConfig();
+            if (!config) return;
+
+            this.onConfigUpdate();
+
+            // Only switch if darkTheme really changes
+            const themeFile = config.darkTheme
+                ? 'assets/styles/atom-one-dark.css'
+                : 'assets/styles/github.css';
+
+            if (themeFile !== this.lastTheme) {
+                this.highlightLoader.setTheme(themeFile);
+                this.lastTheme = themeFile;
+            }
+        });
         effect(() => {
             const config = this.layoutConfig();
             if (config) {

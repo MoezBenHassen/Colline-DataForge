@@ -12,7 +12,7 @@ import Aura from '@primeng/themes/aura';
 import { providePrimeNG } from 'primeng/config';
 import { appRoutes } from './app.routes';
 import {jwtInterceptor} from './app/core/helpers/JwtInterceptor';
-import { HighlightModule, HIGHLIGHT_OPTIONS } from 'ngx-highlightjs';
+import {HighlightModule, HIGHLIGHT_OPTIONS, provideHighlightOptions} from 'ngx-highlightjs';
 
 
 export let appConfig: ApplicationConfig;
@@ -26,6 +26,13 @@ appConfig = {
             }),
             withEnabledBlockingInitialNavigation()
         ),
+        provideHighlightOptions({
+            coreLibraryLoader: () => import('highlight.js/lib/core'),
+            languages: {
+                sql: () => import('highlight.js/lib/languages/sql')
+            },
+            themePath: 'assets/styles/github.css'
+        }),
         provideHttpClient(
             withFetch(),
             withInterceptors([
