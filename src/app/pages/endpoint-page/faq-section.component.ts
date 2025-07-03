@@ -1,10 +1,10 @@
 import { Component, Input } from '@angular/core';
 import { NgForOf } from '@angular/common';
-import {Panel} from "primeng/panel";
+import {PanelModule} from "primeng/panel";
 
 @Component({
     selector: 'app-faq-section',
-    imports: [NgForOf, Panel],
+    imports: [NgForOf, PanelModule],
     template: `
         <div class="flex flex-col gap-2">
             <p-panel *ngFor="let item of faq" [toggleable]="true" [collapsed]="true">

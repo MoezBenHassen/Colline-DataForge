@@ -9,7 +9,7 @@
     </div>
 
     <!-- Collapsible Documentation Section -->
-    <p-panel [toggleable]="true" collapsed="true" [style]="{marginBottom: '1rem'}">
+    <p-panel [toggleable]="true" collapsed="false" [style]="{marginBottom: '1rem'}">
         <ng-template pTemplate="header">
             <h4 class="mt-3 mb-1 font-semibold">Documentation</h4>
         </ng-template>
@@ -19,7 +19,7 @@
     </p-panel>
 
     <!-- SQL Query Display Section -->
-    <p-panel [toggleable]="true" collapsed="true" [style]="{marginBottom: '1rem'}">
+    <p-panel [toggleable]="true" collapsed="false" [style]="{marginBottom: '1rem'}">
         <ng-template pTemplate="header">
             <h4 class="mt-3 mb-1 font-semibold">SQL Query</h4>
         </ng-template>
@@ -34,6 +34,7 @@
         </div>
     </p-panel>
 
+    <!-- Frequently Asked Questions Section -->
     <div class="flex flex-col" *ngIf="metadata">
         <div *ngIf="metadata.faq" class="card">
             <h4 class="font-semibold mb-3">Frequently Asked Questions</h4>
