@@ -10,8 +10,8 @@ import { NgIf } from '@angular/common';
             <h2>Documentation</h2>
             <p>{{ metadata.docSection }}</p>
             <!--<img *ngFor="let img of metadata.sampleScreenshots" [src]="img" class="doc-screenshot" />-->
-            <h3>SQL Query</h3>
-            <pre>{{ metadata.sqlQuery }}</pre>
+            <!-- Example inside your docs card or a dedicated place -->
+
         </section>
     `
 })
