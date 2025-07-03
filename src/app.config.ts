@@ -12,6 +12,7 @@ import Aura from '@primeng/themes/aura';
 import { providePrimeNG } from 'primeng/config';
 import { appRoutes } from './app.routes';
 import {jwtInterceptor} from './app/core/helpers/JwtInterceptor';
+import { HighlightModule, HIGHLIGHT_OPTIONS } from 'ngx-highlightjs';
 
 export let appConfig: ApplicationConfig;
 appConfig = {
