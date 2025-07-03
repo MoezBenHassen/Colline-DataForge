@@ -12,7 +12,8 @@ export class DbManagementService {
 
     getQueryByKey(dbType: string, key: string): Observable<string | string[]> {
         return this.http.get<string | string[]>(`${this.BASE_URL}/queries/${dbType}/${key}`, {
-            params: new HttpParams().set('dbType', dbType).set('key', key)
+            params: new HttpParams().set('dbType', dbType).set('key', key),
+            responseType: 'text' as 'json' // Ensure the response is treated as text
         });
     }
     getDatabases(dbType: String): Observable<string[]> {

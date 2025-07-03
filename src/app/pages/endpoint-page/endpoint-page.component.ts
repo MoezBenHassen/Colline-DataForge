@@ -86,8 +86,10 @@ export class EndpointPageComponent implements OnInit {
                 next: (query) => {
                     this.sqlQuery = query;
                     this.sqlQueryLoading = false;
+                    console.log('SQL Query loaded:', this.sqlQuery);
                 },
                 error: (err) => {
+                    console.log('SQL Q', this.sqlQuery, 'error:', err);
                     this.sqlQuery = '[Could not load SQL query]';
                     this.sqlQueryLoading = false;
                 }
