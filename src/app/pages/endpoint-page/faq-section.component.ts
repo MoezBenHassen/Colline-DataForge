@@ -1,16 +1,18 @@
 import { Component, Input } from '@angular/core';
 import { NgForOf } from '@angular/common';
+import {Panel} from "primeng/panel";
 
 @Component({
     selector: 'app-faq-section',
-    imports: [NgForOf],
+    imports: [NgForOf, Panel],
     template: `
-        <div class="faq-section">
-            <h2>FAQ</h2>
-            <div *ngFor="let item of faq">
-                <strong>Q: {{ item.q }}</strong>
-                <div>A: {{ item.a }}</div>
-            </div>
+        <div class="flex flex-col gap-2">
+            <p-panel *ngFor="let item of faq" [toggleable]="true" [collapsed]="true">
+                <ng-template pTemplate="header">
+                    <span class="font-semibold">{{ item.q }}</span>
+                </ng-template>
+                <p class="m-0 leading-normal">{{ item.a }}</p>
+            </p-panel>
         </div>
     `
 })

@@ -3,7 +3,7 @@ import { ActivatedRoute } from '@angular/router';
 import { EndpointMetadata, EndpointParam, ENDPOINTS_METADATA } from '../../core/constants/endpoints-metadata';
 import { ReactiveFormsModule, FormGroup, FormControl, Validators } from '@angular/forms'; // <-- Import Reactive Forms
 import { CommonModule } from '@angular/common';
-import { DocSectionComponent } from './doc-section.component';
+import { DocSectionComponent } from './doc-section/doc-section.component';
 import { FaqSectionComponent } from './faq-section.component';
 import { Button } from 'primeng/button';
 import { DropdownModule } from 'primeng/dropdown';
