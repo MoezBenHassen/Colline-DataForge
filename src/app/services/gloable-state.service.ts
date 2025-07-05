@@ -1,13 +1,24 @@
 import { Injectable, signal } from '@angular/core';
 
-export type DatabaseType = 'ORACLE' | 'MSSQL' | 'POSTGRESQL' | null;
+//export type DatabaseType = 'ORACLE' | 'MSSQL' | 'POSTGRESQL' | null;
+export const DATABASE_OPTIONS = [
+    { label: 'Oracle', value: 'ORACLE' },
+    { label: 'PostgreSQL', value: 'POSTGRESQL' },
+    { label: 'MS SQL', value: 'MSSQL' }
+] as const;
+
+// 2. Derive the type from the array's values.
+//    This creates the type: 'ORACLE' | 'MSSQL' | 'POSTGRESQL' | null
+export type DatabaseType = typeof DATABASE_OPTIONS[number]['value'] | null;
 
 @Injectable({
     providedIn: 'root'
 })
 export class GlobalStateService {
     private readonly STORAGE_KEY = 'defaultDatabaseType';
-
+    // --- ADD THIS OPTIONS ARRAY ---
+    public readonly databaseOptions = DATABASE_OPTIONS;
+    // -
     // Create a writable signal for internal state
     private readonly _defaultDatabase = signal<DatabaseType>(this.getInitialState());
 

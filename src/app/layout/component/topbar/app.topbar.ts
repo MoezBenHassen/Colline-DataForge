@@ -9,7 +9,7 @@ import { AuthService } from '../../../services/auth/auth.service';
 import { Tooltip } from 'primeng/tooltip';
 import { Ripple } from 'primeng/ripple';
 import { OverlayBadgeModule } from 'primeng/overlaybadge';
-import { DatabaseType, GlobalStateService } from '../../../services/gloable-state.service';
+import { DatabaseType, GlobalStateService, DATABASE_OPTIONS } from '../../../services/gloable-state.service';
 import { Select } from 'primeng/select';
 import { FormsModule } from '@angular/forms';
 
@@ -22,12 +22,20 @@ import { FormsModule } from '@angular/forms';
 export class AppTopbar implements OnInit {
     items!: MenuItem[];
     selectedDefaultDb: DatabaseType = null;
+    // --- THIS IS THE SIMPLIFIED TYPE DEFINITION ---
+    // The type is now inferred directly from the constant.
+    // public readonly defaultDbOptions: typeof DATABASE_OPTIONS;
+    // 1. We'll use a slightly less strict (but still type-safe) mutable type here.
+    public readonly defaultDbOptions: { label: string; value: DatabaseType }[];
 
     constructor(
         private auth: AuthService,
         public layoutService: LayoutService,
         private globalStateService: GlobalStateService
     ) {
+        // 2. THIS IS THE FIX: Create a new, MUTABLE copy of the readonly options.
+        // The spread syntax `[...]` creates a new array that the p-select component can accept.
+        this.defaultDbOptions = [...this.globalStateService.databaseOptions];
     }
 
     ngOnInit(): void {

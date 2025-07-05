@@ -24,7 +24,7 @@ export interface EndpointMetadata {
 
 export const ENDPOINTS_METADATA: Record<string, EndpointMetadata> = {
     'interest-rate': {
-        key: 'interest-rate',
+        key: 'interest_rate',
         title: 'Interest Rate Generator',
         path: '/api/excel/interest-rate',
         shortDescription: 'Generate an Excel file with sample interest rates using live data.',
