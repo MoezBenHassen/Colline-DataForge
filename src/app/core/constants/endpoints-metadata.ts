@@ -14,6 +14,8 @@ export interface EndpointMetadata {
     shortDescription: string;
     docs: string;
     params: EndpointParam[];
+    swaggerTag: string;      // The 'name' from the @Tag annotation in Spring Boot
+    operationId: string;     // The controller method name, used by Swagger as an ID
     sampleFiles?: string[];  // URLs to sample files/screenshots
     sqlQuery?: string;
     faq?: { q: string; a: string }[];
@@ -26,6 +28,8 @@ export const ENDPOINTS_METADATA: Record<string, EndpointMetadata> = {
         title: 'Interest Rate Generator',
         path: '/api/excel/interest-rate',
         shortDescription: 'Generate an Excel file with sample interest rates using live data.',
+        swaggerTag: 'Excel Generation',
+        operationId: 'generateExcel',
         docs: `
 **How it works:**
 - Select the database.

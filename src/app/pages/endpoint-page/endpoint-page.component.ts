@@ -19,6 +19,8 @@ import { FloatLabel } from "primeng/floatlabel";
 import { LayoutService } from '../../../app/layout/service/layout.service';
 import { Tooltip } from "primeng/tooltip";
 import {DbManagementService} from "../../services/db-management.service";
+import { DatabaseType, GlobalStateService } from '../../services/gloable-state.service';
+import { Subscription } from 'rxjs';
 
 @Component({
     selector: 'app-endpoint-page',
@@ -53,12 +55,14 @@ export class EndpointPageComponent implements OnInit {
     sqlQuery?: string | string[];
     // validationErrors is no longer needed
     sqlQueryLoading = false;
+    private globalStateSub!: Subscription // <-- Injected for database type management
     constructor(
         private route: ActivatedRoute,
         private excelService: ExcelService,
         private messageService: MessageService,
         protected layoutService: LayoutService,
-        private dbService: DbManagementService
+        private dbService: DbManagementService,
+        private globalStateService: GlobalStateService // <-- Injected for database type management
     ) {}
 
     ngOnInit() {
@@ -76,26 +80,52 @@ export class EndpointPageComponent implements OnInit {
             const validators = param.required ? [Validators.required] : [];
             controls[param.name] = new FormControl(defaultValue, validators);
         }
-        // Example: fetch SQL query for 'interest-rate'
-        // --- Determine database type to use (default or from user form)
-        const defaultDbType = 'ORACLE'; // Or fetch from a selector or user input
+
+        this.form = new FormGroup(controls);
+
+        // --- Subscribe to global state changes ---
+        this.globalStateSub = this.globalStateService.defaultDatabase$.subscribe(defaultDb => {
+            // If a default DB is set and this form has a databaseType control, patch its value.
+            if (defaultDb && this.form.get('databaseType')) {
+                this.form.patchValue({ databaseType: defaultDb });
+            }
+        });
+
+        // Also subscribe to local form changes to update the SQL query display
+        this.form.get('databaseType')?.valueChanges.subscribe((dbType: DatabaseType) => {
+            this.fetchSqlQuery(dbType);
+        });
+
+    }
+
+    fetchSqlQuery(dbType: DatabaseType | null) {
+        // Use the key from metadata, and only fetch if a dbType is selected
+        const queryKey = this.metadata.key;
+        if (!dbType || !queryKey) {
+            this.sqlQuery = undefined;
+            return;
+        }
 
         this.sqlQueryLoading = true;
-        this.dbService.getQueryByKey(defaultDbType, 'interest_rate') // <-- key should match backend query key
-            .subscribe({
-                next: (query) => {
-                    this.sqlQuery = query;
-                    this.sqlQueryLoading = false;
-                    console.log('SQL Query loaded:', this.sqlQuery);
-                },
-                error: (err) => {
-                    console.log('SQL Q', this.sqlQuery, 'error:', err);
-                    this.sqlQuery = '[Could not load SQL query]';
-                    this.sqlQueryLoading = false;
-                }
-            });
-        this.form = new FormGroup(controls);
+        this.dbService.getQueryByKey(dbType, queryKey).subscribe({
+            next: (query) => {
+                this.sqlQuery = query;
+                this.sqlQueryLoading = false;
+            },
+            error: (err) => {
+                this.sqlQuery = `[Could not load SQL query for ${dbType}]`;
+                this.sqlQueryLoading = false;
+            }
+        });
     }
+
+    // Unsubscribe when the component is destroyed to prevent memory leaks
+    ngOnDestroy(): void {
+        if (this.globalStateSub) {
+           this.globalStateSub.unsubscribe();
+        }
+    }
+
 
     onSubmit() {
         this.error = null;

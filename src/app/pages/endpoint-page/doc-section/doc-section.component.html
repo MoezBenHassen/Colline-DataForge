@@ -2,8 +2,18 @@
         <!-- Endpoint Path Display -->
         <div class="card mb-1">
             <div class="flex justify-between items-center">
-                <code *ngIf="layoutService.isDarkTheme()" id="darkCode" class="font-mono text-lg surface-ground p-2 border-round">{{ metadata.path }}</code>
-                <code *ngIf="!layoutService.isDarkTheme()" id="lightCode" class="font-mono text-lg surface-ground p-2 border-round">{{ metadata.path }}</code>
+                <a [href]="swaggerUrl"
+                    target="_blank"
+                   rel="noopener noreferrer"
+                   class="flex-grow no-underline hover:underline text-color"
+                   pTooltip=" 🔗 View in Swagger UI"
+                   tooltipPosition="bottom"
+                >
+                    <code *ngIf="layoutService.isDarkTheme()" id="darkCode" class="font-mono text-lg surface-ground p-2 border-round">
+                        {{ metadata.path }}
+                    </code>
+                    <code *ngIf="!layoutService.isDarkTheme()" id="lightCode" class="font-mono text-lg surface-ground p-2 border-round">{{ metadata.path }}</code>
+                </a>
                 <p-button icon="pi pi-copy" styleClass="p-button-text" pTooltip="Copy Path" [rounded]="true" tooltipPosition="bottom" (click)="navigator.clipboard.writeText(metadata.path)"> </p-button>
             </div>
         </div>
@@ -28,7 +38,7 @@
             <ng-template pTemplate="icons">
                 <p-button
                     icon="pi pi-copy"
-                    styleClass="p-button-text p-button-sm"
+                    styleClass="p-button-text"
                     pTooltip="Copy SQL Query"
                     [rounded]="true"
                     tooltipPosition="bottom"
