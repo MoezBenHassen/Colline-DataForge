@@ -21,7 +21,6 @@ import { FormsModule } from '@angular/forms';
 })
 export class AppTopbar implements OnInit {
     items!: MenuItem[];
-    defaultDbOptions: { label: string; value: DatabaseType }[];
     selectedDefaultDb: DatabaseType = null;
 
     constructor(
@@ -29,21 +28,15 @@ export class AppTopbar implements OnInit {
         public layoutService: LayoutService,
         private globalStateService: GlobalStateService
     ) {
-        this.defaultDbOptions = [
-            { label: 'Oracle', value: 'ORACLE' },
-            { label: 'PostgreSQL', value: 'POSTGRESQL' },
-            { label: 'MS SQL', value: 'MSSQL' }
-        ];
     }
 
     ngOnInit(): void {
-        // Initialize the dropdown with the current value from the service (or localStorage).
-        this.selectedDefaultDb = this.globalStateService.getCurrentDefaultDatabase();
+        // Initialize the dropdown by reading the signal's current value
+        this.selectedDefaultDb = this.globalStateService.defaultDatabase();
     }
 
     /**
-     * Called when the user changes the default DB selection in the topbar.
-     * It updates the global state service.
+     * Called when the user changes the default DB. It still just calls the service.
      */
     onDefaultDbChange(event: { value: DatabaseType }): void {
         this.globalStateService.setDefaultDatabase(event.value);

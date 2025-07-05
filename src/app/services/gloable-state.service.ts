@@ -1,7 +1,5 @@
-import { Injectable } from '@angular/core';
-import { BehaviorSubject, Observable } from 'rxjs';
+import { Injectable, signal } from '@angular/core';
 
-// Define a type for clarity, allowing null when no default is set.
 export type DatabaseType = 'ORACLE' | 'MSSQL' | 'POSTGRESQL' | null;
 
 @Injectable({
@@ -10,40 +8,28 @@ export type DatabaseType = 'ORACLE' | 'MSSQL' | 'POSTGRESQL' | null;
 export class GlobalStateService {
     private readonly STORAGE_KEY = 'defaultDatabaseType';
 
-    // BehaviorSubject holds the current value and emits it immediately to new subscribers.
-    private readonly _defaultDatabase$ = new BehaviorSubject<DatabaseType>(this.getInitialState());
+    // Create a writable signal for internal state
+    private readonly _defaultDatabase = signal<DatabaseType>(this.getInitialState());
 
-    // Expose the state as a public, read-only observable for components to subscribe to.
-    public readonly defaultDatabase$: Observable<DatabaseType> = this._defaultDatabase$.asObservable();
+    // Expose the signal as a read-only version to prevent outside components from changing it
+    public readonly defaultDatabase = this._defaultDatabase.asReadonly();
 
     constructor() { }
 
     private getInitialState(): DatabaseType {
-        // On startup, load the saved state from localStorage.
         return localStorage.getItem(this.STORAGE_KEY) as DatabaseType | null;
     }
 
     /**
-     * Updates the default database type, saves it to localStorage,
-     * and notifies all subscribed components of the change.
-     * @param dbType The new database type, or null to clear the default.
+     * Updates the default database type.
      */
     setDefaultDatabase(dbType: DatabaseType): void {
         if (dbType) {
             localStorage.setItem(this.STORAGE_KEY, dbType);
         } else {
-            // If null is passed, clear the stored preference.
             localStorage.removeItem(this.STORAGE_KEY);
         }
-        // Emit the new value to all subscribers.
-        this._defaultDatabase$.next(dbType);
-    }
-
-    /**
-     * A helper method to get the current value synchronously.
-     * @returns The currently selected default database type.
-     */
-    getCurrentDefaultDatabase(): DatabaseType {
-        return this._defaultDatabase$.getValue();
+        // Use .set() to update the signal's value
+        this._defaultDatabase.set(dbType);
     }
 }

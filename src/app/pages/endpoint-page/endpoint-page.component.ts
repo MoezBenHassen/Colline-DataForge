@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, effect, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { EndpointMetadata, EndpointParam, ENDPOINTS_METADATA } from '../../core/constants/endpoints-metadata';
 import { ReactiveFormsModule, FormGroup, FormControl, Validators } from '@angular/forms'; // <-- Import Reactive Forms
@@ -55,7 +55,8 @@ export class EndpointPageComponent implements OnInit {
     sqlQuery?: string | string[];
     // validationErrors is no longer needed
     sqlQueryLoading = false;
-    private globalStateSub!: Subscription // <-- Injected for database type management
+    // Hold a direct reference to the read-only signal from the service
+    defaultDb;
     constructor(
         private route: ActivatedRoute,
         private excelService: ExcelService,
@@ -63,7 +64,21 @@ export class EndpointPageComponent implements OnInit {
         protected layoutService: LayoutService,
         private dbService: DbManagementService,
         private globalStateService: GlobalStateService // <-- Injected for database type management
-    ) {}
+    ) {
+        // 2. Initialize the property inside the constructor where the service is available.
+        this.defaultDb = this.globalStateService.defaultDatabase;
+        // --- Create an effect to react to changes in the signal ---
+        effect(() => {
+            const currentDefaultDb = this.defaultDb(); // Read the signal's value
+            console.log('Default DB changed to:', currentDefaultDb);
+
+            // If a default DB is set and the form exists, patch the value
+            if (currentDefaultDb && this.form && this.form.get('databaseType')) {
+                this.form.patchValue({ databaseType: currentDefaultDb });
+            }
+        });
+
+    }
 
     ngOnInit() {
         const endpointKey = this.route.snapshot.data['endpointKey'] || this.route.snapshot.paramMap.get('id');
@@ -83,18 +98,14 @@ export class EndpointPageComponent implements OnInit {
 
         this.form = new FormGroup(controls);
 
-        // --- Subscribe to global state changes ---
-        this.globalStateSub = this.globalStateService.defaultDatabase$.subscribe(defaultDb => {
-            // If a default DB is set and this form has a databaseType control, patch its value.
-            if (defaultDb && this.form.get('databaseType')) {
-                this.form.patchValue({ databaseType: defaultDb });
-            }
-        });
 
-        // Also subscribe to local form changes to update the SQL query display
+        // You might still want this to react to user changes within the form itself
         this.form.get('databaseType')?.valueChanges.subscribe((dbType: DatabaseType) => {
             this.fetchSqlQuery(dbType);
         });
+
+        // Fetch initial SQL query based on the initial default DB
+        this.fetchSqlQuery(this.defaultDb());
 
     }
 
@@ -117,13 +128,6 @@ export class EndpointPageComponent implements OnInit {
                 this.sqlQueryLoading = false;
             }
         });
-    }
-
-    // Unsubscribe when the component is destroyed to prevent memory leaks
-    ngOnDestroy(): void {
-        if (this.globalStateSub) {
-           this.globalStateSub.unsubscribe();
-        }
     }
 
 
