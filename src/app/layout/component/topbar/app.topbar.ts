@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, effect, OnInit } from '@angular/core';
 import { MenuItem } from 'primeng/api';
 import { Router, RouterModule } from '@angular/router';
 import { CommonModule } from '@angular/common';
@@ -36,6 +36,11 @@ export class AppTopbar implements OnInit {
         // 2. THIS IS THE FIX: Create a new, MUTABLE copy of the readonly options.
         // The spread syntax `[...]` creates a new array that the p-select component can accept.
         this.defaultDbOptions = [...this.globalStateService.databaseOptions];
+
+        // This effect keeps the topbar's dropdown in sync with the global state
+        effect(() => {
+            this.selectedDefaultDb = this.globalStateService.defaultDatabase();
+        });
     }
 
     ngOnInit(): void {

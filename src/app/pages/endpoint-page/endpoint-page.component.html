@@ -21,11 +21,12 @@
                                     <label [for]="param.name">{{ param.label }} <span *ngIf="param.required" class="text-red-500">*</span></label>
                                     <p-select
                                         [options]="param.options"
-                                        formControlName="{{param.name}}"
-                                    [id]="param.name"
-                                    [placeholder]="'Select ' + param.label"
-                                    [showClear]="true"
-                                    styleClass="w-full">
+                                        [formControlName]="param.name"
+                                        [id]="param.name"
+                                        [placeholder]="'Select ' + param.label"
+                                        [showClear]="true"
+                                        styleClass="w-full"
+                                    >
                                     </p-select>
                                     <!-- Reactive Forms Validation Check -->
                                     <div *ngIf="form.get(param.name)?.invalid && form.get(param.name)?.touched" class="text-red-500 text-xs mt-1">

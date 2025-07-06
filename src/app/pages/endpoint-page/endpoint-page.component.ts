@@ -20,7 +20,7 @@ import { LayoutService } from '../../../app/layout/service/layout.service';
 import { Tooltip } from "primeng/tooltip";
 import {DbManagementService} from "../../services/db-management.service";
 import { DatabaseType, GlobalStateService } from '../../services/gloable-state.service';
-import { Subscription } from 'rxjs';
+import { debounceTime, distinctUntilChanged, Subscription } from 'rxjs';
 
 @Component({
     selector: 'app-endpoint-page',
@@ -55,8 +55,10 @@ export class EndpointPageComponent implements OnInit {
     sqlQuery?: string | string[];
     // validationErrors is no longer needed
     sqlQueryLoading = false;
+    private formSub?: Subscription;
     // Hold a direct reference to the read-only signal from the service
-    defaultDb;
+//    defaultDb;
+
     constructor(
         private route: ActivatedRoute,
         private excelService: ExcelService,
@@ -65,19 +67,18 @@ export class EndpointPageComponent implements OnInit {
         private dbService: DbManagementService,
         private globalStateService: GlobalStateService // <-- Injected for database type management
     ) {
-        // 2. Initialize the property inside the constructor where the service is available.
-        this.defaultDb = this.globalStateService.defaultDatabase;
-        // --- Create an effect to react to changes in the signal ---
-        effect(() => {
-            const currentDefaultDb = this.defaultDb(); // Read the signal's value
-            console.log('Default DB changed to:', currentDefaultDb);
+        //this.defaultDb = this.globalStateService.defaultDatabase;
 
-            // If a default DB is set and the form exists, patch the value
-            if (currentDefaultDb && this.form && this.form.get('databaseType')) {
-                this.form.patchValue({ databaseType: currentDefaultDb });
+        // This effect receives updates FROM the global state
+        effect(() => {
+            const globalDb = this.globalStateService.defaultDatabase();
+
+            // Only update the form if it exists and its value is different
+            if (this.form && this.form.get('databaseType')?.value !== globalDb) {
+                console.log(`Global state changed to ${globalDb}, updating local form.`);
+                this.form.patchValue({ databaseType: globalDb }, { emitEvent: false }); // emitEvent: false prevents an infinite loop
             }
         });
-
     }
 
     ngOnInit() {
@@ -97,15 +98,25 @@ export class EndpointPageComponent implements OnInit {
         }
 
         this.form = new FormGroup(controls);
+        // --- THIS IS THE KEY LOGIC ---
+        // Set the initial value from the global state
+        const initialDbType = this.globalStateService.defaultDatabase();
+        if (initialDbType) {
+            this.form.patchValue({ databaseType: initialDbType });
+        }
 
-
-        // You might still want this to react to user changes within the form itself
-        this.form.get('databaseType')?.valueChanges.subscribe((dbType: DatabaseType) => {
-            this.fetchSqlQuery(dbType);
+        // This subscription now sends updates FROM the local form TO the global state
+        this.formSub = this.form.get('databaseType')?.valueChanges.pipe(
+            debounceTime(100), // Wait briefly to avoid rapid firing
+            distinctUntilChanged() // Only fire if the value actually changes
+        ).subscribe((localDbType: DatabaseType) => {
+            console.log(`Local form changed to ${localDbType}, updating global state.`);
+            this.globalStateService.setDefaultDatabase(localDbType);
+            this.fetchSqlQuery(localDbType);
         });
 
-        // Fetch initial SQL query based on the initial default DB
-        this.fetchSqlQuery(this.defaultDb());
+        // Fetch initial SQL query
+        this.fetchSqlQuery(this.form.get('databaseType')?.value);
 
     }
 
