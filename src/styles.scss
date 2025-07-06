@@ -3,3 +3,24 @@
 @use './assets/layout/layout.scss';
 @use 'primeicons/primeicons.css';
 @use './assets/demo/demo.scss';
+
+.status-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    display: inline-block;
+    align-self: center; // Vertically center the dot
+
+    &.active {
+        background-color: #22c55e; // green-500
+        box-shadow: 0 0 5px #22c55e;
+    }
+
+    &.inactive {
+        background-color: #ef4444; // red-500
+        box-shadow: 0 0 5px #ef4444;
+    }
+    &.unconfigured {
+        background-color: #9ca3af; // gray-400
+    }
+}

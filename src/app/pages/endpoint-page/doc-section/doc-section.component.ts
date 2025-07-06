@@ -2,7 +2,7 @@ import { Component, Input, OnInit } from '@angular/core';
 import { EndpointMetadata } from '../../../core/constants/endpoints-metadata';
 import { CommonModule } from '@angular/common';
 import { LayoutService } from '../../../layout/service/layout.service';
-import { FaqSectionComponent } from '../faq-section.component';
+import { FaqSectionComponent } from './faq-section.component';
 import { ButtonModule } from 'primeng/button';
 import { TooltipModule } from 'primeng/tooltip';
 import {Panel} from "primeng/panel";
@@ -30,7 +30,6 @@ export class DocSectionComponent implements OnInit{
     // Inject LayoutService as it's used in the template for dark mode check
     constructor(protected layoutService: LayoutService) {}
 
-    // --- ADD THE ngOnInit LIFECYCLE HOOK ---
     ngOnInit(): void {
         this.buildSwaggerUrl();
     }

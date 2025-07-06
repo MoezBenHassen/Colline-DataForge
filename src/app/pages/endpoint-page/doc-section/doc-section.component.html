@@ -42,15 +42,26 @@
                     pTooltip="Copy SQL Query"
                     [rounded]="true"
                     tooltipPosition="bottom"
-                    (click)="copySql($event)">
+                    (click)="copySql($event)"
+                    class="opacity-70 hover:opacity-100"
+                >
                 </p-button>
             </ng-template>
 
-            <div *ngIf="sqlQueryLoading">Loading SQL query…</div>
+            <div *ngIf="sqlQueryLoading" class="text-center text-color-secondary p-3">
+                <i class="pi pi-spin pi-spinner" style="font-size: 1.5rem"></i>
+                <p class="mt-2">Loading SQL query…</p>
+            </div>
+
             <div *ngIf="!sqlQueryLoading && sqlQuery">
-            <pre class="sql-pre">
-              <code [highlight]="sqlQuery.toString()" language="sql" class="m-0 p-0 sql-code"></code>
-            </pre>
+                <pre class="sql-pre">
+                    <code [highlight]="sqlQuery.toString()" language="sql" class="m-0 p-0 sql-code"></code>
+                </pre>
+            </div>
+
+            <div *ngIf="!sqlQueryLoading && !sqlQuery" class="text-center text-color-secondary p-3 opacity-50">
+                <i class="pi pi-database" style="font-size: 1.5rem"></i>
+                <p class="mt-2">Select a database to view its query.</p>
             </div>
 
         </p-panel>

@@ -1,128 +1,19 @@
 <div class="endpoint-page p-4">
-    <div class="mb-6">
+    <div class="mb-6" *ngIf="metadata">
         <h1 class="text-4xl font-bold text-color">{{ metadata.title }}</h1>
         <p class="text-lg text-color-secondary mt-2">{{ metadata.shortDescription }}</p>
     </div>
 
-    <div class="grid grid-cols-12 gap-6">
-        <!-- Main form -->
+    <div class="grid grid-cols-12 gap-6" *ngIf="metadata">
         <div class="col-span-12 lg:col-span-7">
-            <div class="card px-8 py-6 shadow-xl rounded-2xl">
-                <div class="font-semibold text-xl mb-6 tracking-wide">Execution</div>
-                <!-- Bind the form to the FormGroup -->
-                <form [formGroup]="form" (ngSubmit)="onSubmit()" class="space-y-6">
-
-                    <div class="formgrid grid gap-4">
-                        <!-- Loop for standard params -->
-                        <div *ngFor="let param of inputParams" class="col-span-12 md:col-span-6">
-                            <ng-container [ngSwitch]="param.type">
-                                <!-- Select -->
-                                <div *ngSwitchCase="'select'" class="p-float-label w-full mb-4">
-                                    <label [for]="param.name">{{ param.label }} <span *ngIf="param.required" class="text-red-500">*</span></label>
-                                    <p-select
-                                        [options]="param.options"
-                                        [formControlName]="param.name"
-                                        [id]="param.name"
-                                        [placeholder]="'Select ' + param.label"
-                                        [showClear]="true"
-                                        styleClass="w-full"
-                                    >
-                                    </p-select>
-                                    <!-- Reactive Forms Validation Check -->
-                                    <div *ngIf="form.get(param.name)?.invalid && form.get(param.name)?.touched" class="text-red-500 text-xs mt-1">
-                                        {{ param.label }} is required.
-                                    </div>
-                                </div>
-
-                                <!-- Number Input -->
-                                <div *ngSwitchCase="'number'" class="p-float-label w-full mb-4">
-                                    <label [for]="param.name">{{ param.label }} <span *ngIf="param.required" class="text-red-500">*</span></label>
-                                    <p-inputNumber
-                                        [showButtons]="true"
-                                        formControlName="{{param.name}}"
-                                    [id]="param.name"
-                                    [placeholder]="param.placeholder || param.label"
-                                    class="w-full"
-                                    buttonLayout="horizontal"
-                                    >
-                                        <ng-template #incrementbuttonicon><span class="pi pi-plus"></span></ng-template>
-                                        <ng-template #decrementbuttonicon><span class="pi pi-minus"></span></ng-template>
-                                    </p-inputNumber>
-                                    <!-- Reactive Forms Validation Check -->
-                                    <div *ngIf="form.get(param.name)?.invalid && form.get(param.name)?.touched" class="text-red-500 text-xs mt-1">
-                                        {{ param.label }} is required.
-                                    </div>
-                                </div>
-                            </ng-container>
-                        </div>
-
-                        <!-- File Upload and Checkbox Section -->
-                        <div class="col-span-12 flex items-center justify-between mb-4">
-                            <!-- File Upload -->
-                            <div class="flex items-center gap-2">
-                                <ng-container *ngIf="getParam('file') as fileParam">
-                                    <p-fileupload
-                                        *ngIf="!form.get(fileParam.name)?.value"
-                                        mode="basic"
-                                        [name]="fileParam.name"
-                                        (onSelect)="onFileSelect($event, fileParam.name)"
-                                        [customUpload]="true" [auto]="true" [multiple]="false"
-                                        chooseLabel="Excel template file"
-                                        accept=".xls,.xlsx"
-                                        maxFileSize="5000000">
-                                    </p-fileupload>
-                                    <p-chip
-                                        *ngIf="form.get(fileParam.name)?.value"
-                                        [label]="form.get(fileParam.name)?.value.name"
-                                        removable="true"
-                                        icon="pi pi-file-excel"
-                                        (onRemove)="onFileClear(fileParam.name)"
-                                        styleClass="text-sm">
-                                    </p-chip>
-                                    <!-- Reactive Forms Validation Check -->
-                                    <div *ngIf="form.get(fileParam.name)?.invalid && form.get(fileParam.name)?.touched" class="text-red-500 text-xs mt-1">
-                                        A file is required.
-                                    </div>
-                                </ng-container>
-                            </div>
-
-                            <!-- Checkbox -->
-                            <div class="flex items-center gap-2">
-                                <ng-container *ngIf="getParam('clearWarnings') as checkboxParam">
-                                    <p-checkbox
-                                        inputId="{{checkboxParam.name}}"
-                                        binary="true"
-                                        formControlName="{{checkboxParam.name}}"> <!-- Use formControlName -->
-                                    </p-checkbox>
-                                    <label [for]="checkboxParam.name" class="font-medium">{{ checkboxParam.label }}</label>
-                                </ng-container>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="flex justify-end gap-3 mt-6">
-                        <p-button
-                            label="Reset"
-                            icon="pi pi-refresh"
-                            styleClass="p-button-outlined p-button-secondary"
-                            (click)="onReset()">
-                        </p-button>
-                        <p-button
-                            label="Run"
-                            icon="pi pi-play"
-                            type="submit"
-                            [loading]="loading"
-                            styleClass="p-button-rounded p-button-danger"
-                            [disabled]="form.invalid || loading"> <!-- Disable based on FormGroup validity -->
-                        </p-button>
-                    </div>
-                </form>
-            </div>
+            <app-execution-form
+                [metadata]="metadata"
+                [loading]="loading"
+                (execute)="handleExecute($event)"
+                (formReset)="handleReset()">
+            </app-execution-form>
         </div>
 
-        <!-- Sidebar (docs/FAQ) -->
-
-        <!-- === SIMPLIFIED SIDEBAR === -->
         <div class="col-span-12 lg:col-span-5">
             <app-doc-section
                 [metadata]="metadata"

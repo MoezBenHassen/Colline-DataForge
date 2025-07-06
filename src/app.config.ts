@@ -11,7 +11,7 @@ import { provideRouter, withEnabledBlockingInitialNavigation, withInMemoryScroll
 import Aura from '@primeng/themes/aura';
 import { providePrimeNG } from 'primeng/config';
 import { appRoutes } from './app.routes';
-import {jwtInterceptor} from './app/core/helpers/JwtInterceptor';
+import {jwtInterceptor} from './app/core/interceptors/JwtInterceptor';
 import {HighlightModule, HIGHLIGHT_OPTIONS, provideHighlightOptions} from 'ngx-highlightjs';
 
 

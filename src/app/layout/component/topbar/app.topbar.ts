@@ -1,4 +1,4 @@
-import { Component, effect, OnInit } from '@angular/core';
+import { Component, effect, OnInit, Signal } from '@angular/core';
 import { MenuItem } from 'primeng/api';
 import { Router, RouterModule } from '@angular/router';
 import { CommonModule } from '@angular/common';
@@ -9,35 +9,36 @@ import { AuthService } from '../../../services/auth/auth.service';
 import { Tooltip } from 'primeng/tooltip';
 import { Ripple } from 'primeng/ripple';
 import { OverlayBadgeModule } from 'primeng/overlaybadge';
-import { DatabaseType, GlobalStateService, DATABASE_OPTIONS } from '../../../services/gloable-state.service';
+import {
+    DatabaseType,
+    GlobalStateService,
+    DatabaseOption
+} from '../../../services/gloable-state.service';
 import { Select } from 'primeng/select';
 import { FormsModule } from '@angular/forms';
+import { Button } from 'primeng/button';
 
 @Component({
     selector: 'app-topbar',
     standalone: true,
-    imports: [RouterModule, CommonModule, StyleClassModule, AppConfigurator, Tooltip, Ripple, OverlayBadgeModule, Select, FormsModule],
+    imports: [RouterModule, CommonModule, StyleClassModule, AppConfigurator, Tooltip, Ripple, OverlayBadgeModule, Select, FormsModule, Button],
     templateUrl: 'topbar-component.html'
 })
 export class AppTopbar implements OnInit {
     items!: MenuItem[];
     selectedDefaultDb: DatabaseType = null;
-    // --- THIS IS THE SIMPLIFIED TYPE DEFINITION ---
-    // The type is now inferred directly from the constant.
-    // public readonly defaultDbOptions: typeof DATABASE_OPTIONS;
-    // 1. We'll use a slightly less strict (but still type-safe) mutable type here.
-    public readonly defaultDbOptions: { label: string; value: DatabaseType }[];
+    // This property now holds a signal of the enriched options
+    public readonly dbOptions: Signal<DatabaseOption[]>;
+    public isRefreshingDbStatus = false;
 
     constructor(
         private auth: AuthService,
         public layoutService: LayoutService,
         private globalStateService: GlobalStateService
     ) {
-        // 2. THIS IS THE FIX: Create a new, MUTABLE copy of the readonly options.
-        // The spread syntax `[...]` creates a new array that the p-select component can accept.
-        this.defaultDbOptions = [...this.globalStateService.databaseOptions];
+        // Get the signal directly from the service
+        this.dbOptions = this.globalStateService.databaseOptionsWithStatus;
 
-        // This effect keeps the topbar's dropdown in sync with the global state
         effect(() => {
             this.selectedDefaultDb = this.globalStateService.defaultDatabase();
         });
@@ -45,9 +46,19 @@ export class AppTopbar implements OnInit {
 
     ngOnInit(): void {
         // Initialize the dropdown by reading the signal's current value
-        this.selectedDefaultDb = this.globalStateService.defaultDatabase();
     }
-
+    onRefreshDbStatus(): void {
+        this.isRefreshingDbStatus = true; // Show loading spinner
+        this.globalStateService.refreshDbStatus().subscribe({
+            // When the refresh is complete, hide the spinner
+            complete: () => {
+                this.isRefreshingDbStatus = false;
+            },
+            error: () => {
+                this.isRefreshingDbStatus = false; // Also hide on error
+            }
+        });
+    }
     /**
      * Called when the user changes the default DB. It still just calls the service.
      */
