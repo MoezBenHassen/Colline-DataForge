@@ -1,5 +1,5 @@
 import { Component, effect, OnInit, Signal } from '@angular/core';
-import { MenuItem } from 'primeng/api';
+import {MenuItem, MessageService} from 'primeng/api';
 import { Router, RouterModule } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { StyleClassModule } from 'primeng/styleclass';
@@ -17,6 +17,7 @@ import {
 import { Select } from 'primeng/select';
 import { FormsModule } from '@angular/forms';
 import { Button } from 'primeng/button';
+import {DbManagementService} from "../../../services/db-management.service";
 
 @Component({
     selector: 'app-topbar',
@@ -30,11 +31,14 @@ export class AppTopbar implements OnInit {
     // This property now holds a signal of the enriched options
     public readonly dbOptions: Signal<DatabaseOption[]>;
     public isRefreshingDbStatus = false;
+    public isReloadingQueries = false;
 
     constructor(
         private auth: AuthService,
         public layoutService: LayoutService,
-        private globalStateService: GlobalStateService
+        private globalStateService: GlobalStateService,
+        private dbService: DbManagementService,
+        private messageService: MessageService,
     ) {
         // Get the signal directly from the service
         this.dbOptions = this.globalStateService.databaseOptionsWithStatus;
@@ -44,6 +48,30 @@ export class AppTopbar implements OnInit {
         });
     }
 
+    onReloadQueries(): void{
+        this.isReloadingQueries = true;
+        this.dbService.reloadQueries().subscribe({
+            next: (response) => {
+                this.messageService.add({
+                    severity: 'success',
+                    summary: 'Queries Reloaded',
+                    detail: response,
+                    life: 3000
+                });
+                this.isReloadingQueries = false;
+            },
+            error: (err) => {
+                const detail = err.error || 'Failed to connect to the server';
+                this.messageService.add({
+                    severity: 'error',
+                    summary: 'Error Reloading Queries',
+                    detail: detail,
+                    life: 3000
+                });
+                this.isReloadingQueries = false;
+            }
+        });
+    }
     ngOnInit(): void {
         // Initialize the dropdown by reading the signal's current value
     }

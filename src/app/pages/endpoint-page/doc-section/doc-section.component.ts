@@ -13,7 +13,7 @@ import { environment } from '../../../../environments/environment';
 @Component({
     selector: 'app-doc-section',
     standalone: true,
-    imports: [CommonModule, FaqSectionComponent, ButtonModule, TooltipModule, Panel, Highlight, HighlightLineNumbers],
+    imports: [CommonModule, FaqSectionComponent, ButtonModule, TooltipModule, Panel, Highlight],
     templateUrl: './doc-section.component.html',
     styleUrls: ['./doc-section.component.scss']
 })

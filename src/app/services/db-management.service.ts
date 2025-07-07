@@ -10,7 +10,14 @@ export class DbManagementService {
     private readonly BASE_URL = environment.apiUrl + '/api/database-management';
 
     constructor(private http: HttpClient) {}
-
+    
+    /**
+     * Triggers the backend to reload all SQL queries from the configuration files.
+     * @returns An Observable with the success or failure message from the server.
+     */
+    reloadQueries(): Observable<string> {
+        return this.http.post(`${this.BASE_URL}/reload-queries`, {}, { responseType: 'text' });
+    }
 
     /**
      * Fetches the list of database types that are configured in the backend.
