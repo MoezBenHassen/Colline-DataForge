@@ -42,7 +42,7 @@
                     <span>Reload Queries</span>
                 </p-button>
                 <!-- Inside the <div class="layout-topbar-menu-content"> -->
-                <div class="p-fluid" pTooltip="Set a default database for all pages" tooltipPosition="bottom">
+                <div class="layout-topbar-action" pTooltip="Set a default database for all pages" tooltipPosition="bottom">
                     <p-select
                         [options]="dbOptions()"
                         [(ngModel)]="selectedDefaultDb"
@@ -53,13 +53,13 @@
 
                         <ng-template let-option pTemplate="item">
                             <div class="flex align-items-center gap-2">
-                            <span class="status-dot"
-                                  [ngClass]="{
-                                      'active': option.active,
-                                      'inactive': option.configured && !option.active,
-                                      'unconfigured': !option.configured
-                                  }">
-                            </span>
+                    <span class="status-dot"
+                          [ngClass]="{
+                              'active': option.active,
+                              'inactive': option.configured && !option.active,
+                              'unconfigured': !option.configured
+                          }">
+                    </span>
                                 <span>{{ option.label }}</span>
                             </div>
                         </ng-template>
@@ -67,7 +67,6 @@
                         <ng-template #dropdownicon>
                             <i class="pi pi-database text-color-secondary"></i>
                         </ng-template>
-
                     </p-select>
                 </div>
                 <p-button pRipple variant="outlined" [rounded]="true"  severity="secondary" class="layout-topbar-action" (click)="onRefreshDbStatus()" [loading]="isRefreshingDbStatus" pTooltip="Refresh Database Status" tooltipPosition="bottom">
