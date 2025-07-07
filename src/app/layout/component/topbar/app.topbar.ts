@@ -23,7 +23,7 @@ import {Divider} from "primeng/divider";
 @Component({
     selector: 'app-topbar',
     standalone: true,
-    imports: [RouterModule, CommonModule, StyleClassModule, AppConfigurator, Tooltip, Ripple, OverlayBadgeModule, Select, FormsModule, Button, Divider],
+    imports: [RouterModule, CommonModule, StyleClassModule, AppConfigurator, Tooltip, Ripple, OverlayBadgeModule, Select, FormsModule, Button],
     templateUrl: 'topbar-component.html'
 })
 export class AppTopbar implements OnInit {

@@ -29,7 +29,7 @@ export class AppMenu {
                 items: [
                     { label: 'Interest Rate', icon: 'pi pi-fw pi-file-excel', routerLink: ['/interest-rate'] },
                     { label: 'FX Rates', icon: 'pi pi-fw pi-file-excel', routerLink: ['/fx-rates'] },
-                    { label: 'Interest Rate', icon: 'pi pi-fw pi-file-excel', routerLink: ['/excel/interest-rate'] },
+                    { label: 'Org Ratings', icon: 'pi pi-fw pi-file-excel', routerLink: ['/org-ratings'] },
                 ]
             },
             {
