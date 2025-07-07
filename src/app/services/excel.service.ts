@@ -11,26 +11,25 @@ export class ExcelService {
     private readonly interestRateEndpoint = `${this.BASE_URL}/interest-rate`;
     constructor(private http: HttpClient) {}
 
-    interestRate(
-        file: File,
-        numRows: number,
-        databaseType: string,
-        clearWarnings?: boolean
-    ): Observable<Blob> {
-        const formData = new FormData();
-        formData.append('file', file);
+    /**
+     * A generic method to call any Excel generation endpoint.
+     * @param endpointKey The key for the endpoint (e.g., 'interest-rate', 'fx-rates').
+     * @param formData The complete form data from the component.
+     */
+    generate(endpointKey: string, formData: any): Observable<Blob> {
+        const url = `${this.BASE_URL}/${endpointKey}`;
 
-        // Query params
-        let params = new HttpParams()
-            .set('numRows', numRows)
-            .set('databaseType', databaseType);
-        if (clearWarnings !== undefined) {
-            params = params.set('clearWarnings', String(clearWarnings));
+        const data = new FormData();
+
+        // Dynamically append all properties from the form data
+        for (const key in formData) {
+            if (formData.hasOwnProperty(key) && formData[key] !== null) {
+                data.append(key, formData[key]);
+            }
         }
 
-        return this.http.post(this.interestRateEndpoint, formData, {
-            params,
-            responseType: 'blob' // Get the Excel file as a Blob
+        return this.http.post(url, data, {
+            responseType: 'blob'
         });
     }
 }

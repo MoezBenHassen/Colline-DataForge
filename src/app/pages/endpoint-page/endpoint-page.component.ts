@@ -53,7 +53,9 @@ export class EndpointPageComponent implements OnInit {
     }
 
     fetchSqlQuery(dbType: DatabaseType | null) {
-        const queryKey = this.metadata.key;
+        if (!this.metadata) return;
+
+        const queryKey = this.metadata.sqlQueryKey;
         if (!dbType || !queryKey) {
             this.sqlQuery = undefined;
             return;
@@ -61,8 +63,27 @@ export class EndpointPageComponent implements OnInit {
 
         this.sqlQueryLoading = true;
         this.dbService.getQueryByKey(dbType, queryKey).subscribe({
-            next: (query) => {
-                this.sqlQuery = query;
+            next: (responseText: string | string[]) => {
+
+                // ✅ --- THIS IS THE NEW LOGIC ---
+                // We expect a string, but handle both cases for safety.
+                const queryText = Array.isArray(responseText) ? JSON.stringify(responseText) : responseText;
+
+                // Check if the string looks like a JSON array.
+                if (queryText.trim().startsWith('[') && queryText.trim().endsWith(']')) {
+                    try {
+                        // If it looks like an array, parse it into a real JavaScript array.
+                        this.sqlQuery = JSON.parse(queryText);
+                    } catch (e) {
+                        // If parsing fails, fall back to treating it as a single string.
+                        this.sqlQuery = queryText;
+                    }
+                } else {
+                    // If it's just a plain string, assign it directly.
+                    this.sqlQuery = queryText;
+                }
+                // ---------------------------------
+
                 this.sqlQueryLoading = false;
             },
             error: (err) => {
@@ -80,11 +101,11 @@ export class EndpointPageComponent implements OnInit {
 
         const { file, numRows, databaseType, clearWarnings } = formData;
 
-        // The API call logic remains here in the parent
-        this.excelService.interestRate(file, numRows, databaseType, clearWarnings).subscribe({
+        // ✅ Make the service call and filename dynamic
+        this.excelService.generate(this.metadata.key, formData).subscribe({
             next: (blob: Blob) => {
-                saveAs(blob, 'filled_interest_rates.xlsx');
-                this.result = 'File downloaded!';
+                saveAs(blob, `${this.metadata.key}.xlsx`);
+                this.result = 'File downloaded successfully!';
                 this.loading = false;
             },
             error: (err) => {

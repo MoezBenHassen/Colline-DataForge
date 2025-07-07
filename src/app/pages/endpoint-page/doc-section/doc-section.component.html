@@ -36,36 +36,29 @@
             </ng-template>
 
             <ng-template pTemplate="icons">
-                <p-button
-                    icon="pi pi-copy"
-                    styleClass="p-button-text"
-                    pTooltip="Copy SQL Query"
-                    [rounded]="true"
-                    tooltipPosition="bottom"
-                    (click)="copySql($event)"
-                    class="opacity-70 hover:opacity-100"
-                >
-                </p-button>
             </ng-template>
 
             <div *ngIf="sqlQueryLoading" class="text-center text-color-secondary p-3">
-                <i class="pi pi-spin pi-spinner" style="font-size: 1.5rem"></i>
-                <p class="mt-2">Loading SQL query…</p>
             </div>
 
             <div *ngIf="!sqlQueryLoading && sqlQuery">
-                <pre class="sql-pre">
-                    <code [highlight]="sqlQuery.toString()" language="sql" class="m-0 p-0 sql-code"></code>
-                </pre>
+
+        <pre *ngIf="isString(sqlQuery)" class="sql-pre">
+            <code [highlight]="sqlQuery" language="sql" class="m-0 p-0 sql-code"></code>
+        </pre>
+
+        <pre *ngIf="isArray(sqlQuery)" class="sql-pre">
+            <ng-container *ngFor="let query of sqlQuery; let isLast = last">
+                <code [highlight]="query" language="sql" class="sql-code block"></code>
+                <hr *ngIf="!isLast" class="my-0 border-surface-200 dark:border-surface-700">
+            </ng-container>
+        </pre>
             </div>
 
             <div *ngIf="!sqlQueryLoading && !sqlQuery" class="text-center text-color-secondary p-3 opacity-50">
-                <i class="pi pi-database" style="font-size: 1.5rem"></i>
-                <p class="mt-2">Select a database to view its query.</p>
             </div>
 
         </p-panel>
-
         <!-- Frequently Asked Questions Section -->
         <div class="flex flex-col" *ngIf="metadata">
             <div *ngIf="metadata.faq" class="card">

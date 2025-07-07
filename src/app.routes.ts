@@ -18,7 +18,8 @@ export const appRoutes: Routes = [
             { path: `${RoutePaths.UIKIT}`, loadChildren: () => import('./app/pages/uikit/uikit.routes'), canActivate: [AuthGuard] },
             { path: `${RoutePaths.DOCUMENTATION}`, component: Documentation, canActivate: [AuthGuard] },
             { path: `${RoutePaths.PAGES}`, loadChildren: () => import('./app/pages/pages.routes'), canActivate: [AuthGuard] },
-            {path: 'interest-rate', component: EndpointPageComponent, data: { endpointKey: 'interest-rate' } },
+            { path: 'interest-rate', component: EndpointPageComponent, data: { endpointKey: 'interest-rate' } },
+            { path: 'fx-rates', component: EndpointPageComponent, data: { endpointKey: 'fx-rates' } },
         ]
     },
 

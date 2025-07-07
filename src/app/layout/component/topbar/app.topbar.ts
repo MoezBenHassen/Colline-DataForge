@@ -18,11 +18,12 @@ import { Select } from 'primeng/select';
 import { FormsModule } from '@angular/forms';
 import { Button } from 'primeng/button';
 import {DbManagementService} from "../../../services/db-management.service";
+import {Divider} from "primeng/divider";
 
 @Component({
     selector: 'app-topbar',
     standalone: true,
-    imports: [RouterModule, CommonModule, StyleClassModule, AppConfigurator, Tooltip, Ripple, OverlayBadgeModule, Select, FormsModule, Button],
+    imports: [RouterModule, CommonModule, StyleClassModule, AppConfigurator, Tooltip, Ripple, OverlayBadgeModule, Select, FormsModule, Button, Divider],
     templateUrl: 'topbar-component.html'
 })
 export class AppTopbar implements OnInit {
@@ -38,7 +39,7 @@ export class AppTopbar implements OnInit {
         public layoutService: LayoutService,
         private globalStateService: GlobalStateService,
         private dbService: DbManagementService,
-        private messageService: MessageService,
+        private messageService: MessageService
     ) {
         // Get the signal directly from the service
         this.dbOptions = this.globalStateService.databaseOptionsWithStatus;
@@ -48,7 +49,7 @@ export class AppTopbar implements OnInit {
         });
     }
 
-    onReloadQueries(): void{
+    onReloadQueries(): void {
         this.isReloadingQueries = true;
         this.dbService.reloadQueries().subscribe({
             next: (response) => {
