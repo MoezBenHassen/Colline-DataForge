@@ -9,15 +9,16 @@ import {Panel} from "primeng/panel";
 import {Highlight} from "ngx-highlightjs";
 import {HighlightLineNumbers} from "ngx-highlightjs/line-numbers";
 import { environment } from '../../../../environments/environment';
+import {MarkdownComponent} from "ngx-markdown";
 
 @Component({
     selector: 'app-doc-section',
     standalone: true,
-    imports: [CommonModule, FaqSectionComponent, ButtonModule, TooltipModule, Panel, Highlight],
+    imports: [CommonModule, FaqSectionComponent, ButtonModule, TooltipModule, Panel, Highlight, MarkdownComponent],
     templateUrl: './doc-section.component.html',
     styleUrls: ['./doc-section.component.scss']
 })
-export class DocSectionComponent implements OnInit{
+export class DocSectionComponent implements OnInit {
     @Input() metadata!: EndpointMetadata;
     @Input() sqlQuery?: string | string[];
     @Input() sqlQueryLoading: boolean = false;
@@ -44,9 +45,6 @@ export class DocSectionComponent implements OnInit{
             this.swaggerUrl = `${baseUrl}/swagger-ui/index.html#/${encodedTag}/${operationId}`;
         }
     }
-
-
-
 
     // Helper methods to check the type of the sqlQuery for correct display
     isString(value: any): value is string {

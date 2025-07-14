@@ -14,7 +14,7 @@ import { appRoutes } from './app.routes';
 import {jwtInterceptor} from './app/core/interceptors/JwtInterceptor';
 import {HighlightModule, HIGHLIGHT_OPTIONS, provideHighlightOptions} from 'ngx-highlightjs';
 import {MessageService} from "primeng/api";
-
+import { provideMarkdown } from 'ngx-markdown';
 
 export let appConfig: ApplicationConfig;
 appConfig = {
@@ -42,6 +42,7 @@ appConfig = {
         ),
         provideAnimationsAsync(),
         MessageService,
+        provideMarkdown(),
         providePrimeNG({ theme: { preset: Aura, options: { darkModeSelector: '.app-dark' } } })
     ]
 };
