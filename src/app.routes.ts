@@ -21,6 +21,7 @@ export const appRoutes: Routes = [
             { path: 'interest-rate', component: EndpointPageComponent, data: { endpointKey: 'interest-rate' } },
             { path: 'fx-rates', component: EndpointPageComponent, data: { endpointKey: 'fx-rates' } },
             { path: 'org-ratings', component: EndpointPageComponent, data: { endpointKey: 'org-ratings' } },
+            { path: 'org-contacts', component: EndpointPageComponent, data: { endpointKey: 'org-contacts' } },
 
         ]
     },
