@@ -3,7 +3,7 @@ import { ActivatedRoute } from '@angular/router';
 import { EndpointMetadata, ENDPOINTS_METADATA } from '../../core/constants/endpoints-metadata';
 import { CommonModule } from '@angular/common';
 import { saveAs } from 'file-saver';
-import { MessageService } from 'primeng/api';
+import {MessageService, PrimeTemplate} from 'primeng/api';
 // --- NEW ---
 import { ExecutionFormComponent } from './execution-form-section/execution-form.component';
 import { DocSectionComponent } from './doc-section/doc-section.component';
@@ -11,17 +11,23 @@ import { ExcelService } from '../../services/excel.service';
 import { DbManagementService } from '../../services/db-management.service';
 import { DatabaseType, GlobalStateService } from '../../services/gloable-state.service';
 import {Panel} from "primeng/panel";
+import {HttpResponse} from "@angular/common/http";
+import {Message} from "primeng/message";
+import {TabPanel, TabView} from "primeng/tabview";
+import {FaqSectionComponent} from "./doc-section/faq-section.component";
 
 
 @Component({
     selector: 'app-endpoint-page',
     standalone: true,
     templateUrl: './endpoint-page.component.html',
-    imports: [CommonModule, DocSectionComponent, ExecutionFormComponent, Panel], // Simplified imports
+    imports: [CommonModule, DocSectionComponent, ExecutionFormComponent, Panel, Message, TabPanel, TabView, FaqSectionComponent, PrimeTemplate], // Simplified imports
     styleUrls: ['./endpoint-page.component.scss'],
     providers: [MessageService]
 })
 export class EndpointPageComponent implements OnInit {
+    executionResult: { successMessage?: string; warnings?: string; error?: string } | null = null;
+    activeTabIndex = 0; // 0 for Execution tab, 1 for Result tab
     metadata!: EndpointMetadata;
     // --- State managed by this component ---
     result: any = null;
@@ -98,19 +104,44 @@ export class EndpointPageComponent implements OnInit {
         this.error = null;
         this.result = null;
         this.loading = true;
-
+        this.executionResult = null;
+        this.loading = true;
         const { file, numRows, databaseType, clearWarnings } = formData;
 
-        // ✅ Make the service call and filename dynamic
         this.excelService.generate(this.metadata.key, formData).subscribe({
-            next: (blob: Blob) => {
-                saveAs(blob, `${this.metadata.key}.xlsx`);
-                this.result = 'File downloaded successfully!';
+            // ✅ THE 'next' HANDLER RECEIVES THE FULL HttpResponse
+            next: (response: HttpResponse<Blob>) => {
                 this.loading = false;
+
+                // ✅ Use response.headers.get() to read the header
+                const warnings = response.headers.get('X-Warnings') ;
+                console.log(warnings)
+                const body = response.body;
+
+                if (body) {
+                    saveAs(body, `${this.metadata.key}.xlsx`);
+                    this.executionResult = {
+                        successMessage: 'File downloaded successfully!',
+                        warnings: warnings || undefined
+                    };
+                } else {
+                    this.executionResult = { error: 'Received an empty file from the server.' };
+                }
+                this.activeTabIndex = 1;
             },
+            // ✅ THE 'error' HANDLER RECEIVES AN HttpErrorResponse
             error: (err) => {
-                this.error = 'Failed to generate file: ' + (err.error?.message || err.statusText || 'Unknown error');
                 this.loading = false;
+
+                // ✅ Use err.headers.get() to read the header from the error response
+                const errorHeader = err.headers.get('X-Error');
+                const warningHeader = err.headers.get('X-Warnings');
+
+                this.executionResult = {
+                    error: errorHeader || 'An error occurred, see warnings for details.',
+                    warnings: warningHeader || undefined
+                };
+                this.activeTabIndex = 1;
             }
         });
     }
@@ -119,6 +150,8 @@ export class EndpointPageComponent implements OnInit {
     handleReset() {
         this.result = null;
         this.error = null;
+        this.executionResult = null;
+        this.activeTabIndex = 0;
     }
 
     private fetchSqlQueryOnLoad() {}

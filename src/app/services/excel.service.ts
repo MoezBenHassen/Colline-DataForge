@@ -1,6 +1,6 @@
 // src/app/services/excel.service.ts
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpParams } from '@angular/common/http';
+import {HttpClient, HttpParams, HttpResponse} from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../environments/environment';
 
@@ -16,7 +16,7 @@ export class ExcelService {
      * @param endpointKey The key for the endpoint (e.g., 'interest-rate', 'fx-rates').
      * @param formData The complete form data from the component.
      */
-    generate(endpointKey: string, formData: any): Observable<Blob> {
+    generate(endpointKey: string, formData: any): Observable<HttpResponse<Blob>> {
         const url = `${this.BASE_URL}/${endpointKey}`;
 
         const data = new FormData();
@@ -29,6 +29,7 @@ export class ExcelService {
         }
 
         return this.http.post(url, data, {
+            observe: 'response',
             responseType: 'blob'
         });
     }

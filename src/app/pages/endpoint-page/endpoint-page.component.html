@@ -6,12 +6,64 @@
 
     <div class="grid grid-cols-12 gap-6" *ngIf="metadata">
         <div class="col-span-12 lg:col-span-7">
-            <app-execution-form
-                [metadata]="metadata"
-                [loading]="loading"
-                (execute)="handleExecute($event)"
-                (formReset)="handleReset()">
-            </app-execution-form>
+            <p-tabView [(activeIndex)]="activeTabIndex" class="v">
+
+                <p-tabPanel header="Execution" class="corners">
+                    <app-execution-form
+                        [metadata]="metadata"
+                        [loading]="loading"
+                        (execute)="handleExecute($event)"
+                        (formReset)="handleReset()">
+                    </app-execution-form>
+                </p-tabPanel>
+
+
+                <p-tabPanel header="Result">
+                    <div class="card px-8 py-6 shadow-xl rounded-2xl">
+
+                        @if (executionResult) {
+
+                            @if (executionResult.successMessage && !executionResult.error) {
+                                <p-message severity="success" [text]="executionResult.successMessage"></p-message>
+                                {{executionResult.warnings}}
+                            }
+
+                            @if (executionResult.warnings) {
+                                <p-message severity="warn" styleClass="mt-2">
+                                    <ng-template pTemplate="content">
+                                        <div class="flex flex-col">
+                                            <span class="font-bold">Warnings</span>
+                                            <span class="mt-1 break-words">{{ executionResult.warnings }}</span>
+                                        </div>
+                                    </ng-template>
+                                </p-message>
+                            }
+
+                            @if (executionResult.error) {
+                                <p-message severity="error" [text]="executionResult.error"></p-message>
+                            }
+
+                        } @else {
+                            <div class="text-center text-color-secondary p-4">
+                                <i class="pi pi-info-circle text-2xl"></i>
+                                <p class="mt-2">Execution results will appear here.</p>
+                            </div>
+                        }
+                    </div>
+                </p-tabPanel>
+            </p-tabView>
+
+
+<!--            FAQ SECTION -->
+            @if (metadata.faq && metadata.faq.length > 0) {
+                <p-panel [toggleable]="true" [collapsed]="true" styleClass="mt-6">
+                    <ng-template pTemplate="header">
+                        <h4 class="font-semibold mb-0">Frequently Asked Questions</h4>
+                    </ng-template>
+                    <app-faq-section [faq]="metadata.faq"></app-faq-section>
+                </p-panel>
+            }
+
         </div>
 
         <div class="col-span-12 lg:col-span-5">

@@ -1,5 +1,6 @@
 @if (metadata) {
     <div class="flex flex-col">
+<!--        API PATH SECTION -->
         <div class="card mb-1">
             <div class="flex justify-between items-center">
                 <a [href]="swaggerUrl"
@@ -19,40 +20,7 @@
             </div>
         </div>
 
-        <p-panel [toggleable]="true" [collapsed]="false" [style]="{marginBottom: '1rem'}">
-            <ng-template pTemplate="header">
-                <h4 class="font-semibold mb-0">Documentation</h4>
-            </ng-template>
-            <section class="flex flex-col gap-4">
-                <div class="text-color-secondary leading-relaxed">
-                    <markdown [data]="metadata.docs || 'No additional documentation for this endpoint.'"></markdown>
-                </div>
-
-                @if (metadata.usage && metadata.usage.length > 0) {
-                    <div>
-                        <h5 class="font-semibold mb-2">How It Works</h5>
-                        <ul class="list-disc pl-5 text-color-secondary space-y-1">
-                            @for (step of metadata.usage; track step) {
-                                <li>{{ step }}</li>
-                            }
-                        </ul>
-                    </div>
-                }
-
-                @if (metadata.notes) {
-                    <div class="surface-100 dark:surface-800 p-3 border-round border-l-4 border-primary-500">
-                        <div class="flex items-center">
-                            <i class="pi pi-info-circle mr-2 text-primary-500"></i>
-                            <div class="font-semibold text-primary-500">Pro Tip</div>
-                        </div>
-                        <div class="text-color-secondary mt-1 mb-0">
-                            <markdown [data]="metadata.notes"></markdown>
-                        </div>
-                    </div>
-                }
-            </section>
-        </p-panel>
-
+<!--        SQL QUERY SECTION -->
         <p-panel [toggleable]="true" [collapsed]="false" [style]="{marginBottom: '1rem'}">
             <ng-template pTemplate="header">
                 <h4 class="font-semibold mb-0">SQL Query</h4>
@@ -86,14 +54,42 @@
                 </div>
             }
         </p-panel>
+<!--        DOCUMENTATION SECTION -->
+        <p-panel [toggleable]="true" [collapsed]="false" [style]="{marginBottom: '1rem'}">
 
-        @if (metadata.faq && metadata.faq.length > 0) {
-            <p-panel [toggleable]="true" [collapsed]="true" [style]="{marginBottom: '1rem'}">
-                <ng-template pTemplate="header">
-                    <h4 class="font-semibold mb-0">Frequently Asked Questions</h4>
-                </ng-template>
-                <app-faq-section [faq]="metadata.faq"></app-faq-section>
-            </p-panel>
-        }
+            <ng-template pTemplate="header">
+                <h4 class="font-semibold mb-0">Documentation</h4>
+            </ng-template>
+            <section class="flex flex-col gap-4">
+                <div class="text-color-secondary leading-relaxed">
+                    <markdown [data]="metadata.docs || 'No additional documentation for this endpoint.'"></markdown>
+                </div>
+
+                @if (metadata.usage && metadata.usage.length > 0) {
+                    <p-fieldset [toggleable]="true" [collapsed]="true" legend="How It Works">
+
+<!--                        <h5 class="font-semibold mb-2"></h5>-->
+                        <ul class="list-disc pl-5 text-color-secondary space-y-1">
+                            @for (step of metadata.usage; track step) {
+                                <li>{{ step }}</li>
+                            }
+                        </ul>
+                    </p-fieldset>
+                }
+
+                @if (metadata.notes) {
+                    <div class="surface-100 dark:surface-800 p-3 border-round border-l-4 border-primary-500">
+                        <div class="flex items-center">
+                            <i class="pi pi-info-circle mr-2 text-primary-500"></i>
+                            <div class="font-semibold text-primary-500">Pro Tip</div>
+                        </div>
+                        <div class="text-color-secondary mt-1 mb-0">
+                            <markdown [data]="metadata.notes"></markdown>
+                        </div>
+                    </div>
+                }
+            </section>
+        </p-panel>
+
     </div>
 }

@@ -10,11 +10,12 @@ import {Highlight} from "ngx-highlightjs";
 import {HighlightLineNumbers} from "ngx-highlightjs/line-numbers";
 import { environment } from '../../../../environments/environment';
 import {MarkdownComponent} from "ngx-markdown";
+import {Fieldset} from "primeng/fieldset";
 
 @Component({
     selector: 'app-doc-section',
     standalone: true,
-    imports: [CommonModule, FaqSectionComponent, ButtonModule, TooltipModule, Panel, Highlight, MarkdownComponent],
+    imports: [CommonModule, FaqSectionComponent, ButtonModule, TooltipModule, Panel, Highlight, MarkdownComponent, Fieldset],
     templateUrl: './doc-section.component.html',
     styleUrls: ['./doc-section.component.scss']
 })
