@@ -81,9 +81,22 @@ export class AppTopbar implements OnInit {
         this.globalStateService.refreshDbStatus().subscribe({
             // When the refresh is complete, hide the spinner
             complete: () => {
+                this.messageService.add({
+                    severity: 'success',
+                    summary: 'Queries Reloaded',
+                    detail: ' 📀🔮 Database status refreshed successfully',
+                    life: 3000
+                });
                 this.isRefreshingDbStatus = false;
             },
             error: () => {
+                const detail = 'Failed to connect to the server';
+                this.messageService.add({
+                    severity: 'error',
+                    summary: 'Error Refreshing DB Status',
+                    detail: detail,
+                    life: 3000
+                });
                 this.isRefreshingDbStatus = false; // Also hide on error
             }
         });

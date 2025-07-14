@@ -120,9 +120,18 @@ export class EndpointPageComponent implements OnInit {
 
                 if (body) {
                     saveAs(body, `${this.metadata.key}.xlsx`);
+                }
+
+                if (warnings) {
                     this.executionResult = {
-                        successMessage: 'File downloaded successfully!',
-                        warnings: warnings || undefined
+                        // We can still include a success message for clarity if you want
+                        successMessage: 'File downloaded, but with warnings.',
+                        warnings: warnings
+                    };
+                } else if (body) {
+                    // Only show a pure success message if there are NO warnings.
+                    this.executionResult = {
+                        successMessage: 'File downloaded successfully! No warnings detected.'
                     };
                 } else {
                     this.executionResult = { error: 'Received an empty file from the server.' };
