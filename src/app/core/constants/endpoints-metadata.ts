@@ -12,7 +12,9 @@ export interface EndpointMetadata {
     title: string;
     path: string;
     shortDescription: string;
-    docs: string;
+    docs: string; // We'll keep this for a general description
+    usage?: string[]; // For bulleted "How it works" steps
+    notes?: string;   // For special tips or warnings
     params: EndpointParam[];
     swaggerTag: string;      // The 'name' from the @Tag annotation in Spring Boot
     operationId: string;     // The controller method name, used by Swagger as an ID
@@ -34,228 +36,257 @@ export const GENERAL_FAQ_XLS = [
     { q: 'What should my template include?', a: 'Include all columns you want to fill—missing or mismatched columns will be flagged in warnings.' },
 ];
 
+/**
+ * A shared set of common parameters for most Excel generation endpoints.
+ */
+export const GENERAL_XLS_PARAMS: EndpointParam[] = [
+    {
+        name: 'databaseType',
+        label: 'Database Type',
+        type: 'select',
+        required: true,
+        options: ['ORACLE', 'POSTGRESQL', 'MSSQL']
+    },
+    {
+        name: 'numRows',
+        label: 'Number of Rows',
+        type: 'number',
+        required: true,
+        placeholder: 'Enter number of rows'
+    },
+    {
+        name: 'clearWarnings',
+        type: 'checkbox',
+        label: 'Clear warnings',
+        required: false
+    },
+    {
+        name: 'file',
+        label: 'Excel Template',
+        type: 'file',
+        required: true
+    }
+];
+
+/**
+ * The main metadata configuration object for the application.
+ */
 export const ENDPOINTS_METADATA: Record<string, EndpointMetadata> = {
     'interest-rate': {
         key: 'interest-rate',
         title: 'Interest Rate Generator',
         path: '/api/excel/interest-rate',
-        shortDescription: 'Generate an Excel file filled with live or demo interest rates, tailored for your business needs. Upload a template and get back a ready-to-use .xlsx file.',
+        shortDescription: 'Generate an Excel file filled with live or demo interest rates.',
         swaggerTag: 'Excel Generation',
         operationId: 'generateExcel',
-        docs: `
-            **How it works:**
-            - Upload your Excel template (with headers matching your required format).
-            - Choose the target database (Oracle, PostgreSQL, or MSSQL).
-            - Enter the number of rows to generate.
-            - (Optional) Enable "Clear warnings" to reset template tracking info.
-
-            This endpoint fills your Excel template with real or simulated interest rate data, validating columns and warning about any changes via the \`X-Warnings\` response header.
-
-            _Use cases: test data generation, integration validation, Excel template onboarding._
-        `,
-        params: [
-            {
-                name: 'databaseType',
-                label: 'Database Type',
-                type: 'select',
-                required: true,
-                options: ['ORACLE', 'POSTGRESQL', 'MSSQL']
-            },
-            {
-                name: 'numRows',
-                label: 'Number of Rows',
-                type: 'number',
-                required: true,
-                placeholder: 'Enter number of rows'
-            },
-            {
-                name: 'clearWarnings',
-                type: 'checkbox',
-                label: 'Clear warnings',
-                required: false
-            },
-            {
-                name: 'file',
-                label: 'Excel Template',
-                type: 'file',
-                required: true
-            }
+        docs: 'This endpoint fills your Excel template with real or simulated interest rate data, validating columns and warning about any changes.',
+        usage: [
+            "Upload your Excel template (with headers matching your required format).",
+            "Choose the target database.",
+            "Enter the number of rows to generate.",
+            "Optionally, enable 'Clear warnings' to reset template tracking info."
         ],
-        sampleFiles: ['/assets/screenshots/interest-rate-example.png'],
-        sqlQuery: `SELECT ... FROM ... WHERE ... FETCH FIRST ? ROWS ONLY`,
+        notes: "All validation warnings are returned in the `X-Warnings` response header. Check this after each run!",
+        params: GENERAL_XLS_PARAMS,
         sqlQueryKey: 'interest_rate',
-        faq: [
-        ],
-        docSection: 'interest-rates',
+        faq: GENERAL_FAQ_XLS
     },
-
     'fx-rates': {
         key: 'fx-rates',
         title: 'FX Rates Generator',
         path: '/api/excel/fx-rates',
-        shortDescription: 'Create an Excel spreadsheet with real or simulated Foreign Exchange (FX) rates, using your template and live data from Oracle, PostgreSQL, or MSSQL.',
+        shortDescription: 'Create an Excel spreadsheet with real or simulated Foreign Exchange (FX) rates.',
         swaggerTag: 'Excel Generation',
         operationId: 'generateFXRatesExcel',
-        docs: `
-            **How it works:**
-            - Upload your FX rates Excel template.
-            - Select the database connection.
-            - Choose how many FX rate rows you want.
-            - Optionally, enable "Clear warnings".
-
-            This endpoint samples currencies from your DB, generates rates, and inserts them into your template. You’ll be alerted to missing data or header mismatches through the \`X-Warnings\` header.
-
-            _Use cases: back-office FX testing, pricing tool demos, rapid Excel sample creation._
-        `,
-        params: [
-            {
-                name: 'databaseType',
-                label: 'Database Type',
-                type: 'select',
-                required: true,
-                options: ['ORACLE', 'POSTGRESQL', 'MSSQL']
-            },
-            {
-                name: 'numRows',
-                label: 'Number of Rows',
-                type: 'number',
-                required: true,
-                placeholder: 'Enter number of rows'
-            },
-            {
-                name: 'clearWarnings',
-                type: 'checkbox',
-                label: 'Clear warnings',
-                required: false
-            },
-            {
-                name: 'file',
-                label: 'Excel Template',
-                type: 'file',
-                required: true
-            }
+        docs: 'This endpoint samples currencies from your DB, generates random rates, and inserts them into your template.',
+        usage: [
+            "Upload your FX rates Excel template.",
+            "Select the database connection.",
+            "Choose how many FX rate rows you want.",
         ],
-        sampleFiles: ['/assets/screenshots/fx-rates-example.png'],
-        sqlQuery: `SELECT ... FROM ... WHERE ... FETCH FIRST ? ROWS ONLY`,
+        notes: "The number of rows generated will be limited by the number of unique currencies available in your database.",
+        params: GENERAL_XLS_PARAMS,
         sqlQueryKey: 'fx_rates',
         faq: [
-            { q: 'What fields are included?', a: 'Each row will include FX market set, currency, FX rate, and any columns required by your template.' },
             { q: 'How are currencies chosen?', a: 'Currencies are randomly sampled from your database’s available set.' },
             ...GENERAL_FAQ_XLS
-        ],
-        docSection: 'fx-rates',
+        ]
     },
-
     'org-ratings': {
         key: 'org-ratings',
         title: 'Organisation Ratings Generator',
         path: '/api/excel/org-ratings',
-        shortDescription: 'Download Excel sheets of simulated or real organisation ratings. Just upload your template and choose how many sample rows you need.',
+        shortDescription: 'Download Excel sheets of simulated or real organisation ratings.',
         swaggerTag: 'Excel Generation',
         operationId: 'generateOrganisationRatings',
-        docs: `
-            **How it works:**
-            - Upload your organisation ratings Excel template.
-            - Select your database connection.
-            - Enter the desired number of rows.
-            - "Clear warnings" is optional.
-
-            This endpoint fetches ratings from your DB, combines organisation parent names, and fills your template, while tracking any changes in columns. All warnings are returned in the \`X-Warnings\` response header.
-
-            _Use cases: mock regulatory reports, analytics demos, QA data provisioning._
-        `,
-        params: [
-            {
-                name: 'databaseType',
-                label: 'Database Type',
-                type: 'select',
-                required: true,
-                options: ['ORACLE', 'POSTGRESQL', 'MSSQL']
-            },
-            {
-                name: 'numRows',
-                label: 'Number of Rows',
-                type: 'number',
-                required: true,
-                placeholder: 'Enter number of rows'
-            },
-            {
-                name: 'clearWarnings',
-                type: 'checkbox',
-                label: 'Clear warnings',
-                required: false
-            },
-            {
-                name: 'file',
-                label: 'Excel Template',
-                type: 'file',
-                required: true
-            }
+        docs: 'Fetches ratings from your DB, combines organisation parent names, and fills your template.',
+        usage: [
+            "Upload your organisation ratings Excel template.",
+            "Select your database connection.",
+            "Enter the desired number of rows.",
         ],
-        sampleFiles: ['/assets/screenshots/org-ratings-example.png'],
-        sqlQuery: `SELECT ... FROM ... WHERE ... FETCH FIRST ? ROWS ONLY`,
+        params: GENERAL_XLS_PARAMS,
         sqlQueryKey: 'organisation_ratings',
         faq: [
-            { q: 'How is the parent organisation shown?', a: 'The parent organisation is formed by combining parent_short_name and parent_long_name columns.' },
+            { q: 'How is the parent organisation shown?', a: 'The `parent` column is automatically created by combining the `parent_short_name` and `parent_long_name` columns from the database.' },
             ...GENERAL_FAQ_XLS
-        ],
-        docSection: 'org-ratings',
+        ]
     },
-
     'org-contacts': {
         key: 'org-contacts',
         title: 'Organisation Contacts Generator',
         path: '/api/excel/org-contacts',
-        shortDescription: 'Generate Excel files with synthetic or real organisation contact information, formatted according to your template and chosen database.',
+        shortDescription: 'Generate Excel files with synthetic or real organisation contact information.',
         swaggerTag: 'Excel Generation',
         operationId: 'generateOrganisationContacts',
-        docs: `
-            **How it works:**
-            - Upload your Excel template for organisation contacts.
-            - Choose your database connection.
-            - Specify the number of rows to generate.
-            - (Optional) Enable "Clear warnings" to reset template validation.
-
-            This endpoint fills your template with contact data, auto-generating names, and combining parent organisation details. It tracks column changes and highlights issues in the X-Warnings header.
-
-            _Use cases: test data for CRM integration, mass import dry runs, demo environments._
-        `,
-        params: [
-            {
-                name: 'databaseType',
-                label: 'Database Type',
-                type: 'select',
-                required: true,
-                options: ['ORACLE', 'POSTGRESQL', 'MSSQL']
-            },
-            {
-                name: 'numRows',
-                label: 'Number of Rows',
-                type: 'number',
-                required: true,
-                placeholder: 'Enter number of rows'
-            },
-            {
-                name: 'clearWarnings',
-                type: 'checkbox',
-                label: 'Clear warnings',
-                required: false
-            },
-            {
-                name: 'file',
-                label: 'Excel Template',
-                type: 'file',
-                required: true
-            }
+        docs: 'Fills your template with contact data, auto-generating names, and combining parent organisation details.',
+        usage: [
+            "Upload your Excel template for organisation contacts.",
+            "Choose your database connection.",
+            "Specify the number of rows to generate.",
         ],
-        sampleFiles: ['/assets/screenshots/org-contacts-example.png'],
-        sqlQuery: `SELECT ... FROM ... WHERE ... FETCH FIRST ? ROWS ONLY`,
+        notes: "If a `contact_name` column exists in your template, it will be populated with a randomly selected name.",
+        params: GENERAL_XLS_PARAMS,
         sqlQueryKey: 'organisation_contacts',
         faq: [
             { q: 'How are contact names generated?', a: 'Contact names are randomly assigned from a preset list to simulate realistic user data.' },
-            { q: 'Are parent organisation names shown?', a: 'Yes, parent_short_name and parent_long_name are combined into a "parent" column.' },
             ...GENERAL_FAQ_XLS
-        ],
-        docSection: '',
+        ]
     },
+    'interest-amount': {
+        key: 'interest-amount',
+        title: 'Interest Amount Generator',
+        path: '/api/excel/interest-amount',
+        shortDescription: 'Produce Excel files with interest amount and event data for financial agreements.',
+        swaggerTag: 'Excel Generation',
+        operationId: 'generateInterestManagerExcel',
+        docs: 'This endpoint populates your template with detailed interest event data, including agreement IDs, sources, and dates.',
+        usage: [
+            "Upload your interest amount template.",
+            "Select the database and number of rows.",
+            "Optionally, bypass field tracking for advanced use cases.",
+        ],
+        params: [
+            ...GENERAL_XLS_PARAMS,
+            { name: 'fieldTrackingBypass', label: 'Bypass Field Tracking', type: 'checkbox', required: false }
+        ],
+        sqlQueryKey: 'interest_amount',
+        faq: GENERAL_FAQ_XLS
+    },
+    'asset-booking': {
+        key: 'asset-booking',
+        title: 'Asset Booking Generator',
+        path: '/api/excel/asset-booking',
+        shortDescription: 'Generate Excel files containing asset booking and settlement data.',
+        swaggerTag: 'Excel Generation',
+        operationId: 'generateAssetBookingExcel',
+        docs: 'Fills your template with asset booking records, including settlement status, par amount, and instrument IDs.',
+        usage: [
+            "Upload your asset booking template.",
+            "Select the database and number of rows.",
+        ],
+        params: GENERAL_XLS_PARAMS,
+        sqlQueryKey: 'asset_booking',
+        faq: GENERAL_FAQ_XLS
+    },
+    'security': {
+        key: 'security',
+        title: 'Security Data Generator',
+        path: '/api/excel/security',
+        shortDescription: 'Create sample Excel files with financial security data, including asset types and issuers.',
+        swaggerTag: 'Excel Generation',
+        operationId: 'generateSecurityExcel',
+        docs: 'This endpoint uses two separate queries to gather asset and issuer information to populate your template.',
+        usage: [
+            "Upload your security data template.",
+            "Select the database and number of rows.",
+            "Optionally, bypass field tracking.",
+        ],
+        params: [
+            ...GENERAL_XLS_PARAMS,
+            { name: 'fieldTrackingBypass', label: 'Bypass Field Tracking', type: 'checkbox', required: false }
+        ],
+        sqlQueryKey: 'security',
+        faq: GENERAL_FAQ_XLS
+    },
+    'mtm-feed': {
+        key: 'mtm-feed',
+        title: 'MTM Feed Generator',
+        path: '/api/excel/mtm-feed',
+        shortDescription: 'Generate a Mark-to-Market (MTM) feed file based on your template.',
+        swaggerTag: 'Excel Generation',
+        operationId: 'generateMTMFeedExcel',
+        docs: 'Populates your template with MTM data, including trade references and product information from your database.',
+        usage: [
+            "Upload your MTM feed template.",
+            "Select the database and number of rows.",
+        ],
+        params: GENERAL_XLS_PARAMS,
+        sqlQueryKey: 'mtm_feed',
+        faq: GENERAL_FAQ_XLS
+    },
+    'trade-data': {
+        key: 'trade-data',
+        title: 'Trade Data Feed Generator',
+        path: '/api/excel/tradeData',
+        shortDescription: 'Create a standard trade data feed file from your template.',
+        swaggerTag: 'Excel Generation',
+        operationId: 'generateTradeDataFeed',
+        docs: 'Generates a trade data feed, including legal IDs, trade references, and product details.',
+        usage: [
+            "Upload your trade data template.",
+            "Select the database and number of rows.",
+        ],
+        params: GENERAL_XLS_PARAMS,
+        sqlQueryKey: 'trade_data_feed',
+        faq: GENERAL_FAQ_XLS
+    },
+    'trade-data2': {
+        key: 'trade-data2',
+        title: 'Trade Data Feed V2 (Agreements)',
+        path: '/api/excel/tradeData2',
+        shortDescription: 'Generate a trade data feed with special logic for agreement relations.',
+        swaggerTag: 'Excel Generation',
+        operationId: 'generateTradeDataFeed2',
+        docs: 'This version of the trade data feed includes enhanced logic for handling agreement relationships.',
+        usage: [
+            "Upload your trade data template.",
+            "Select the database and number of rows.",
+        ],
+        params: GENERAL_XLS_PARAMS,
+        sqlQueryKey: 'trade_data_feed_joined',
+        faq: GENERAL_FAQ_XLS
+    },
+    'agreement-udf': {
+        key: 'agreement-udf',
+        title: 'Agreement UDF Generator',
+        path: '/api/excel/agreement-udf',
+        shortDescription: 'Populate a template with Agreement User-Defined Fields (UDFs).',
+        swaggerTag: 'Excel Generation',
+        operationId: 'generateAgreementUDFExcel',
+        docs: 'This endpoint is designed to fill templates that require custom, user-defined fields associated with agreements.',
+        usage: [
+            "Upload your UDF template.",
+            "Select the database and number of rows.",
+        ],
+        params: GENERAL_XLS_PARAMS,
+        sqlQueryKey: 'udf_headers_defined',
+        faq: GENERAL_FAQ_XLS
+    },
+    'counterparty-amount': {
+        key: 'counterparty-amount',
+        title: 'Counterparty Amount Generator',
+        path: '/api/excel/counterparty-amount',
+        shortDescription: 'Generate Excel files with counterparty amount and event data.',
+        swaggerTag: 'Excel Generation',
+        operationId: 'generateCounterpartyAmountExcel',
+        docs: 'Fills your template with data related to counterparty amounts, including event types and agreement details.',
+        usage: [
+            "Upload your counterparty amount template.",
+            "Select the database and number of rows.",
+        ],
+        params: GENERAL_XLS_PARAMS,
+        sqlQueryKey: 'counterparty_amount',
+        faq: GENERAL_FAQ_XLS
+    }
 };

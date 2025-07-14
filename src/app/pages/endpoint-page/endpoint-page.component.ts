@@ -10,13 +10,14 @@ import { DocSectionComponent } from './doc-section/doc-section.component';
 import { ExcelService } from '../../services/excel.service';
 import { DbManagementService } from '../../services/db-management.service';
 import { DatabaseType, GlobalStateService } from '../../services/gloable-state.service';
+import {Panel} from "primeng/panel";
 
 
 @Component({
     selector: 'app-endpoint-page',
     standalone: true,
     templateUrl: './endpoint-page.component.html',
-    imports: [ CommonModule, DocSectionComponent, ExecutionFormComponent ], // Simplified imports
+    imports: [CommonModule, DocSectionComponent, ExecutionFormComponent, Panel], // Simplified imports
     styleUrls: ['./endpoint-page.component.scss'],
     providers: [MessageService]
 })
@@ -64,7 +65,6 @@ export class EndpointPageComponent implements OnInit {
         this.sqlQueryLoading = true;
         this.dbService.getQueryByKey(dbType, queryKey).subscribe({
             next: (responseText: string | string[]) => {
-
                 // ✅ --- THIS IS THE NEW LOGIC ---
                 // We expect a string, but handle both cases for safety.
                 const queryText = Array.isArray(responseText) ? JSON.stringify(responseText) : responseText;
@@ -121,7 +121,5 @@ export class EndpointPageComponent implements OnInit {
         this.error = null;
     }
 
-    private fetchSqlQueryOnLoad() {
-
-    }
+    private fetchSqlQueryOnLoad() {}
 }
