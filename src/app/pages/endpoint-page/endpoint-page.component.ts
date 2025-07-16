@@ -139,6 +139,7 @@ export class EndpointPageComponent implements OnInit {
                         summary: 'File Downloaded with Warnings',
                         detail: warnings
                     };
+                    console.log("Warnings detected:", this.executionResult);
                 } else if (body) {
                     // If no warnings and there's a body, it's a clean 'success'.
                     this.executionResult = {
@@ -146,6 +147,7 @@ export class EndpointPageComponent implements OnInit {
                         summary: 'Success',
                         detail: 'File downloaded successfully! No warnings detected.'
                     };
+                    console.log("SUCC detected:", this.executionResult);
                 } else {
                     // If no body, it's an 'error'.
                     this.executionResult = {
@@ -153,6 +155,7 @@ export class EndpointPageComponent implements OnInit {
                         summary: 'Error',
                         detail: 'Received an empty file from the server.'
                     };
+                    console.log("ERRORS detected:", this.executionResult);
                 }
 
                 this.activeTabValue = '1';

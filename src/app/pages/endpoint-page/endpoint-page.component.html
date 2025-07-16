@@ -9,16 +9,18 @@
             <div class="card ccard m-0 p-0">
                 <p-tabs [(value)]="activeTabValue">
                     <p-tablist>
-                        <!-- Tab 1: Execution -->
                         <p-tab value="0" >Execution</p-tab>
-                        <!-- Tab 2: Result (with a notification badge) -->
+
                         <p-tab value="1" >
-                            @if(executionResult?.warnings || executionResult?.error) {
-                                <p-badge value="!" severity="danger" />
-                            } @else if (executionResult?.successMessage) {
-                                <p-badge severity="success" />
+                            @if(executionResult) {
+                                @if(executionResult.severity === 'warn' || executionResult.severity === 'error') {
+                                    <p-badge value="!" severity="danger" />
+                                }
+                                @if(executionResult.severity === 'success') {
+                                    <p-badge severity="success" />
+                                }
                             }
-                            Result
+                            Results
                         </p-tab>
                     </p-tablist>
 
@@ -37,20 +39,17 @@
                             @if (executionResult) {
                                 @switch (executionResult.severity) {
                                     @case ('success') {
-                                        <p-message severity="success" [text]="executionResult.detail"></p-message>
+                                        <p-message icon="pi pi-check-circle" severity="success" [text]="executionResult.detail"></p-message>
+                                        {{executionResult.detail}}
                                     }
                                     @case ('warn') {
-                                        <p-message severity="warn">
-                                            <ng-template pTemplate="content">
-                                                <div class="flex flex-col">
-                                                    <span class="font-bold">{{ executionResult.summary }}</span>
-                                                    <span class="mt-1 break-words">{{ executionResult.detail }}</span>
-                                                </div>
-                                            </ng-template>
+                                        <p-message severity="warn" icon="pi pi-exclamation-triangle">
+                                            <span class="font-bold">{{ executionResult.summary }} : &nbsp;</span>
+                                            <span class="mt-1 break-words">{{ executionResult.detail }}</span>
                                         </p-message>
                                     }
                                     @case ('error') {
-                                        <p-message severity="error" [text]="executionResult.detail"></p-message>
+                                        <p-message icon="pi pi-ban" severity="error" [text]="executionResult.detail"></p-message>
                                     }
                                 }
                             } @else {
@@ -63,58 +62,7 @@
                     </p-tabpanel>
                 </p-tabpanels>
                 </p-tabs>
-
-
-
             </div>
-<!--            <p-tabView [(activeIndex)]="activeTabIndex" class="v">-->
-
-<!--                <p-tabPanel header="Execution" class="corners">-->
-<!--                    <app-execution-form-->
-<!--                        [metadata]="metadata"-->
-<!--                        [loading]="loading"-->
-<!--                        (execute)="handleExecute($event)"-->
-<!--                        (formReset)="handleReset()">-->
-<!--                    </app-execution-form>-->
-<!--                </p-tabPanel>-->
-
-
-<!--                <p-tabPanel header="Result">-->
-<!--                    <div class="card px-8 py-6 shadow-xl rounded-2xl">-->
-
-<!--                        @if (executionResult) {-->
-
-<!--                            @if (executionResult.successMessage && !executionResult.error) {-->
-<!--                                <p-message severity="success" [text]="executionResult.successMessage"></p-message>-->
-<!--                                {{executionResult.warnings}}-->
-<!--                            }-->
-
-<!--                            @if (executionResult.warnings) {-->
-<!--                                <p-message severity="warn" styleClass="mt-2">-->
-<!--                                    <ng-template pTemplate="content">-->
-<!--                                        <div class="flex flex-col">-->
-<!--                                            <span class="font-bold">Warnings</span>-->
-<!--                                            <span class="mt-1 break-words">{{ executionResult.warnings }}</span>-->
-<!--                                        </div>-->
-<!--                                    </ng-template>-->
-<!--                                </p-message>-->
-<!--                            }-->
-
-<!--                            @if (executionResult.error) {-->
-<!--                                <p-message severity="error" [text]="executionResult.error"></p-message>-->
-<!--                            }-->
-
-<!--                        } @else {-->
-<!--                            <div class="text-center text-color-secondary p-4">-->
-<!--                                <i class="pi pi-info-circle text-2xl"></i>-->
-<!--                                <p class="mt-2">Execution results will appear here.</p>-->
-<!--                            </div>-->
-<!--                        }-->
-<!--                    </div>-->
-<!--                </p-tabPanel>-->
-<!--            </p-tabView>-->
-
-
 <!--            FAQ SECTION -->
             @if (metadata.faq && metadata.faq.length > 0) {
                 <p-panel [toggleable]="true" [collapsed]="false" styleClass="mt-6">
