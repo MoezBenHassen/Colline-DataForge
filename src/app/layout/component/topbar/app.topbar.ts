@@ -83,9 +83,9 @@ export class AppTopbar implements OnInit {
             complete: () => {
                 this.messageService.add({
                     severity: 'success',
-                    summary: 'Queries Reloaded',
-                    detail: ' 📀🔮 Database status refreshed successfully',
-                    life: 3000
+                    summary: 'Active DBs Fetched',
+                    detail: '🔮 Database status refreshed successfully',
+                    life: 2000
                 });
                 this.isRefreshingDbStatus = false;
             },

@@ -13,21 +13,29 @@ import { DatabaseType, GlobalStateService } from '../../services/gloable-state.s
 import {Panel} from "primeng/panel";
 import {HttpResponse} from "@angular/common/http";
 import {Message} from "primeng/message";
-import {TabPanel, TabView} from "primeng/tabview";
+import {TabView} from "primeng/tabview";
 import {FaqSectionComponent} from "./doc-section/faq-section.component";
+import { Tab, TabList, TabPanel, TabPanels, Tabs } from 'primeng/tabs';
+import { Badge } from 'primeng/badge';
+
+type ExecutionResult = {
+    severity: 'success' | 'warn' | 'error';
+    summary: string;
+    detail: string;
+}
 
 
 @Component({
     selector: 'app-endpoint-page',
     standalone: true,
     templateUrl: './endpoint-page.component.html',
-    imports: [CommonModule, DocSectionComponent, ExecutionFormComponent, Panel, Message, TabPanel, TabView, FaqSectionComponent, PrimeTemplate], // Simplified imports
+    imports: [CommonModule, DocSectionComponent, ExecutionFormComponent, Panel, Message, TabPanel, FaqSectionComponent, PrimeTemplate, Tabs, Tab, TabList, TabPanel, TabPanels, Badge], // Simplified imports
     styleUrls: ['./endpoint-page.component.scss'],
     providers: [MessageService]
 })
 export class EndpointPageComponent implements OnInit {
-    executionResult: { successMessage?: string; warnings?: string; error?: string } | null = null;
-    activeTabIndex = 0; // 0 for Execution tab, 1 for Result tab
+    executionResult: ExecutionResult | null = null;
+    activeTabValue: string = '0'; // '0' for Execution, '1' for Result
     metadata!: EndpointMetadata;
     // --- State managed by this component ---
     result: any = null;
@@ -114,43 +122,55 @@ export class EndpointPageComponent implements OnInit {
                 this.loading = false;
 
                 // ✅ Use response.headers.get() to read the header
-                const warnings = response.headers.get('X-Warnings') ;
-                console.log(warnings)
+                const warnings = response.headers.get('X-Warnings');
+                console.log(warnings);
                 const body = response.body;
 
                 if (body) {
                     saveAs(body, `${this.metadata.key}.xlsx`);
                 }
 
+                // ✅ --- CORRECTED LOGIC ---
+                // Now we set a single, clear state for the result.
                 if (warnings) {
+                    // If there are warnings, the result state is 'warn'.
                     this.executionResult = {
-                        // We can still include a success message for clarity if you want
-                        successMessage: 'File downloaded, but with warnings.',
-                        warnings: warnings
+                        severity: 'warn',
+                        summary: 'File Downloaded with Warnings',
+                        detail: warnings
                     };
                 } else if (body) {
-                    // Only show a pure success message if there are NO warnings.
+                    // If no warnings and there's a body, it's a clean 'success'.
                     this.executionResult = {
-                        successMessage: 'File downloaded successfully! No warnings detected.'
+                        severity: 'success',
+                        summary: 'Success',
+                        detail: 'File downloaded successfully! No warnings detected.'
                     };
                 } else {
-                    this.executionResult = { error: 'Received an empty file from the server.' };
+                    // If no body, it's an 'error'.
+                    this.executionResult = {
+                        severity: 'error',
+                        summary: 'Error',
+                        detail: 'Received an empty file from the server.'
+                    };
                 }
-                this.activeTabIndex = 1;
+
+                this.activeTabValue = '1';
             },
             // ✅ THE 'error' HANDLER RECEIVES AN HttpErrorResponse
             error: (err) => {
                 this.loading = false;
-
-                // ✅ Use err.headers.get() to read the header from the error response
                 const errorHeader = err.headers.get('X-Error');
                 const warningHeader = err.headers.get('X-Warnings');
 
+                // Construct the object with the correct properties: severity, summary, and detail.
                 this.executionResult = {
-                    error: errorHeader || 'An error occurred, see warnings for details.',
-                    warnings: warningHeader || undefined
+                    severity: 'error',
+                    summary: 'Execution Failed',
+                    detail: errorHeader || warningHeader || 'An unknown error occurred.'
                 };
-                this.activeTabIndex = 1;
+
+                this.activeTabValue = "1";
             }
         });
     }
@@ -160,7 +180,7 @@ export class EndpointPageComponent implements OnInit {
         this.result = null;
         this.error = null;
         this.executionResult = null;
-        this.activeTabIndex = 0;
+        this.activeTabValue = '0';
     }
 
     private fetchSqlQueryOnLoad() {}
