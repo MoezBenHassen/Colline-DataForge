@@ -21,6 +21,7 @@ import { FormsModule } from '@angular/forms';
 import { InputText } from 'primeng/inputtext';
 import { IconField } from 'primeng/iconfield';
 import { InputIcon } from 'primeng/inputicon';
+import { HighlightPipe } from '../../core/pipes/highlight.pipe';
 
 type ExecutionResult = {
     severity: 'success' | 'warn' | 'error';
@@ -34,9 +35,10 @@ type FaqItem = { q: string; a: string }; // Helper type
     selector: 'app-endpoint-page',
     standalone: true,
     templateUrl: './endpoint-page.component.html',
-    imports: [CommonModule, DocSectionComponent, ExecutionFormComponent, Panel, Message, TabPanel, FaqSectionComponent, PrimeTemplate, Tabs, Tab, TabList, TabPanel, TabPanels, Badge, FormsModule, InputText, IconField, InputIcon], // Simplified imports
+    imports: [CommonModule, DocSectionComponent, ExecutionFormComponent, Panel, Message, TabPanel,
+        FaqSectionComponent, PrimeTemplate, Tabs, Tab, TabList, TabPanel, TabPanels, Badge, FormsModule, InputText, IconField, InputIcon, ], // Simplified imports
     styleUrls: ['./endpoint-page.component.scss'],
-    providers: [MessageService]
+    providers: [MessageService, HighlightPipe]
 })
 export class EndpointPageComponent implements OnInit {
     executionResult: ExecutionResult | null = null;
@@ -49,12 +51,14 @@ export class EndpointPageComponent implements OnInit {
     sqlQuery?: string | string[];
     sqlQueryLoading = false;
     faqSearchTerm: string = '';
-    filteredFaq: FaqItem[] = [];
+    filteredFaq: { q: any; a: any }[] = [];
+    public searchTerm: string = '';
     constructor(
         private route: ActivatedRoute,
         private excelService: ExcelService,
         private dbService: DbManagementService,
-        private globalStateService: GlobalStateService
+        private globalStateService: GlobalStateService,
+        private highlightPipe: HighlightPipe
     ) {
         effect(() => {
             // It will run automatically whenever the global default DB changes.
@@ -84,9 +88,18 @@ export class EndpointPageComponent implements OnInit {
         const sourceFaq = this.metadata?.faq || [];
 
         if (!term) {
+            // If no search term, just use the original text
             this.filteredFaq = [...sourceFaq];
         } else {
-            this.filteredFaq = sourceFaq.filter((item) => item.q.toLowerCase().includes(term) || item.a.toLowerCase().includes(term));
+            // If there is a search term, transform the text into highlighted SafeHtml
+            this.filteredFaq = sourceFaq
+                .filter(item =>
+                    item.q.toLowerCase().includes(term) || item.a.toLowerCase().includes(term)
+                )
+                .map(item => ({
+                    q: this.highlightPipe.transform(item.q, this.faqSearchTerm),
+                    a: this.highlightPipe.transform(item.a, this.faqSearchTerm)
+                }));
         }
     }
     fetchSqlQuery(dbType: DatabaseType | null) {

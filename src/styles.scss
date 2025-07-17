@@ -40,3 +40,11 @@
     border-radius: 5px;
 }
 
+.highlight {
+    background-color: var(--primary-color);
+    color: var(--primary-contrast-color); // Uses the theme's text color for the primary color
+    padding: 1px 4px;
+    border-radius: 4px;
+    font-weight: 600; // Semi-bold
+}
+
