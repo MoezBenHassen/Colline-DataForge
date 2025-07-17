@@ -19,11 +19,14 @@ import { FormsModule } from '@angular/forms';
 import { Button } from 'primeng/button';
 import {DbManagementService} from "../../../services/db-management.service";
 import {Divider} from "primeng/divider";
+import { IconField } from 'primeng/iconfield';
+import { InputIcon } from 'primeng/inputicon';
+import { InputText } from 'primeng/inputtext';
 
 @Component({
     selector: 'app-topbar',
     standalone: true,
-    imports: [RouterModule, CommonModule, StyleClassModule, AppConfigurator, Tooltip, Ripple, OverlayBadgeModule, Select, FormsModule, Button],
+    imports: [RouterModule, CommonModule, StyleClassModule, AppConfigurator, Tooltip, Ripple, OverlayBadgeModule, Select, FormsModule, Button, IconField, InputIcon, InputText],
     templateUrl: 'topbar-component.html'
 })
 export class AppTopbar implements OnInit {
