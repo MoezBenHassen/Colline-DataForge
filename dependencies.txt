@@ -1,3 +1,4 @@
 https://www.npmjs.com/package/ngx-markdown#support-development
 https://www.npmjs.com/package/file-saver
 https://www.npmjs.com/package/ngx-markdown
+https://www.npmjs.com/package/xlsx

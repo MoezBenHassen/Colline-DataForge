@@ -22,11 +22,14 @@ import { InputText } from 'primeng/inputtext';
 import { IconField } from 'primeng/iconfield';
 import { InputIcon } from 'primeng/inputicon';
 import { HighlightPipe } from '../../core/pipes/highlight.pipe';
+import * as XLSX from 'xlsx';
+import { TableModule } from 'primeng/table';
 
 type ExecutionResult = {
     severity: 'success' | 'warn' | 'error';
     summary: string;
     detail: string;
+    filePreview?: string[][]
 }
 type FaqItem = { q: string; a: string }; // Helper type
 
@@ -36,7 +39,8 @@ type FaqItem = { q: string; a: string }; // Helper type
     standalone: true,
     templateUrl: './endpoint-page.component.html',
     imports: [CommonModule, DocSectionComponent, ExecutionFormComponent, Panel, Message, TabPanel,
-        FaqSectionComponent, PrimeTemplate, Tabs, Tab, TabList, TabPanel, TabPanels, Badge, FormsModule, InputText, IconField, InputIcon, ], // Simplified imports
+        FaqSectionComponent, PrimeTemplate, Tabs, Tab,
+        TabList, TabPanel, TabPanels, Badge, FormsModule, InputText, IconField, InputIcon, TableModule],
     styleUrls: ['./endpoint-page.component.scss'],
     providers: [MessageService, HighlightPipe]
 })
@@ -92,16 +96,13 @@ export class EndpointPageComponent implements OnInit {
         } else {
             // If there is a search term, transform the text into highlighted SafeHtml
             this.filteredFaq = sourceFaq
-                .filter(item =>
-                    item.q.toLowerCase().includes(term) || item.a.toLowerCase().includes(term)
-                )
-                .map(item => ({
+                .filter((item) => item.q.toLowerCase().includes(term) || item.a.toLowerCase().includes(term))
+                .map((item) => ({
                     q: this.highlightPipe.transform(item.q, this.faqSearchTerm),
                     a: this.highlightPipe.transform(item.a, this.faqSearchTerm)
                 }));
         }
     }
-
 
     /**
      * Clears the FAQ search term and re-runs the filter to show all items.
@@ -110,7 +111,6 @@ export class EndpointPageComponent implements OnInit {
         this.faqSearchTerm = '';
         this.filterFaq();
     }
-
 
     fetchSqlQuery(dbType: DatabaseType | null) {
         if (!this.metadata) return;
@@ -160,49 +160,38 @@ export class EndpointPageComponent implements OnInit {
         this.executionResult = null;
         this.loading = true;
         const { file, numRows, databaseType, clearWarnings } = formData;
-
+        let previewData: string[][] | undefined;
         this.excelService.generate(this.metadata.key, formData).subscribe({
-            // ✅ THE 'next' HANDLER RECEIVES THE FULL HttpResponse
-            next: (response: HttpResponse<Blob>) => {
-                this.loading = false;
-
-                // ✅ Use response.headers.get() to read the header
+            next: async (response: HttpResponse<Blob>) => {
                 const warnings = response.headers.get('X-Warnings');
-                console.log(warnings);
                 const body = response.body;
+
+                let previewData: string[][] | undefined;
 
                 if (body) {
                     saveAs(body, `${this.metadata.key}.xlsx`);
+                    previewData = await this.processFilePreview(body);
                 }
 
-                // ✅ --- CORRECTED LOGIC ---
-                // Now we set a single, clear state for the result.
                 if (warnings) {
-                    // If there are warnings, the result state is 'warn'.
                     this.executionResult = {
                         severity: 'warn',
                         summary: 'File Downloaded with Warnings',
-                        detail: warnings
+                        detail: warnings,
+                        filePreview: previewData
                     };
-                    console.log('Warnings detected:', this.executionResult);
                 } else if (body) {
-                    // If no warnings and there's a body, it's a clean 'success'.
                     this.executionResult = {
                         severity: 'success',
                         summary: 'Success',
-                        detail: 'File downloaded successfully! No warnings detected.'
+                        detail: 'File downloaded successfully!',
+                        filePreview: previewData
                     };
-                    console.log('SUCC detected:', this.executionResult);
                 } else {
-                    // If no body, it's an 'error'.
-                    this.executionResult = {
-                        severity: 'error',
-                        summary: 'Error',
-                        detail: 'Received an empty file from the server.'
-                    };
-                    console.log('ERRORS detected:', this.executionResult);
+                    this.executionResult = { severity: 'error', summary: 'Error', detail: 'Received an empty file from the server.' };
                 }
 
+                this.loading = false;
                 this.activeTabValue = '1';
             },
             // ✅ THE 'error' HANDLER RECEIVES AN HttpErrorResponse
@@ -223,6 +212,31 @@ export class EndpointPageComponent implements OnInit {
         });
     }
 
+    /**
+     * ✅ ADD THIS NEW HELPER METHOD
+     * Uses SheetJS to read a Blob and extract the top 5 data rows.
+     * @param blob The file blob received from the API.
+     */
+    private async processFilePreview(blob: Blob): Promise<string[][]> {
+        try {
+            const buffer = await blob.arrayBuffer();
+            const workbook = XLSX.read(buffer, { type: 'buffer' });
+            const sheetName = workbook.SheetNames[0];
+            const worksheet = workbook.Sheets[sheetName];
+
+            // Convert sheet to an array of arrays, taking the header + 5 data rows
+            const data = XLSX.utils.sheet_to_json<string[]>(worksheet, {
+                header: 1,
+                defval: '', // Default value for empty cells
+                range: `A1:Z6` // Limit parsing to the first 6 rows (A1 to Z6)
+            });
+
+            return data;
+        } catch (e) {
+            console.error('Error parsing Excel preview:', e);
+            return [];
+        }
+    }
     // Event handler for when the child form is reset
     handleReset() {
         this.result = null;

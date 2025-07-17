@@ -14,7 +14,7 @@ export const appRoutes: Routes = [
         component: AppLayout,
         canActivate: [AuthGuard],
         children: [
-            { path: '', component: EndpointPageComponent, data: { endpointKey: 'interest-rate' } },
+            {path: '', component: Dashboard},
             { path: `${RoutePaths.UIKIT}`, loadChildren: () => import('./app/pages/uikit/uikit.routes'), canActivate: [AuthGuard] },
             { path: `${RoutePaths.DOCUMENTATION}`, component: Documentation, canActivate: [AuthGuard] },
             { path: `${RoutePaths.PAGES}`, loadChildren: () => import('./app/pages/pages.routes'), canActivate: [AuthGuard] },
