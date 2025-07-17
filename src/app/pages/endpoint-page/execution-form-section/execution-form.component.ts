@@ -60,7 +60,16 @@ export class ExecutionFormComponent implements OnInit, OnDestroy {
         const controls: { [key: string]: FormControl } = {};
         for (const param of this.metadata.params) {
             const defaultValue = param.type === 'checkbox' ? false : null;
-            const validators = param.required ? [Validators.required] : [];
+            // ✅ Start with an empty array for validators
+            const validators = [];
+            if (param.required) {
+                validators.push(Validators.required);
+            }
+
+            // ✅ Add a specific validator for the 'numRows' field
+            if (param.name === 'numRows') {
+                validators.push(Validators.min(1));
+            }
             controls[param.name] = new FormControl(defaultValue, validators);
         }
         this.form = new FormGroup(controls);

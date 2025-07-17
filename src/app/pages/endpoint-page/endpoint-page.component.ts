@@ -79,7 +79,6 @@ export class EndpointPageComponent implements OnInit {
         this.filterFaq();
     }
 
-    // ✅ ADD THIS METHOD TO THE PARENT
     /**
      * Filters the metadata's FAQ list based on the faqSearchTerm.
      */
@@ -102,6 +101,17 @@ export class EndpointPageComponent implements OnInit {
                 }));
         }
     }
+
+
+    /**
+     * Clears the FAQ search term and re-runs the filter to show all items.
+     */
+    clearFaqSearch(): void {
+        this.faqSearchTerm = '';
+        this.filterFaq();
+    }
+
+
     fetchSqlQuery(dbType: DatabaseType | null) {
         if (!this.metadata) return;
 

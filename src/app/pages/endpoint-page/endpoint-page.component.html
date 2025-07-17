@@ -82,7 +82,11 @@
                                             [(ngModel)]="faqSearchTerm"
                                             (input)="filterFaq()"
                                             (click)="$event.stopPropagation()" />
+                                        @if (faqSearchTerm) {
+                                            <p-inputicon class="pi pi-times cursor-pointer" (click)="clearFaqSearch()"></p-inputicon>
+                                        }
                                     </p-iconfield>
+
                             </span>
                         </div>
                     </ng-template>
