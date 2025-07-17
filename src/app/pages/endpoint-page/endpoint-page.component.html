@@ -67,9 +67,33 @@
             @if (metadata.faq && metadata.faq.length > 0) {
                 <p-panel [toggleable]="true" [collapsed]="false" styleClass="mt-6">
                     <ng-template pTemplate="header">
-                        <h4 class="font-semibold mb-0">Frequently Asked Questions</h4>
+                        <div class="flex items-center justify-between w-full">
+                            <h4 class="font-semibold mb-0">Frequently Asked Questions</h4>
+                            <span class="p-input-icon-left ml-4">
+                                    <p-iconfield iconPosition="left" class="ml-auto">
+                                        <p-inputicon>
+                                            <i class="pi pi-search"></i>
+                                        </p-inputicon>
+                                        <input
+                                            type="text"
+                                            pInputText
+                                            placeholder="Search FAQ..."
+                                            class="p-inputtext-sm"
+                                            [(ngModel)]="faqSearchTerm"
+                                            (input)="filterFaq()"
+                                            (click)="$event.stopPropagation()" />
+                                    </p-iconfield>
+                            </span>
+                        </div>
                     </ng-template>
-                    <app-faq-section [faq]="metadata.faq"></app-faq-section>
+
+                    <app-faq-section [faq]="filteredFaq"></app-faq-section>
+
+                    @if (filteredFaq.length === 0 && faqSearchTerm) {
+                        <div class="text-center p-4 text-color-secondary">
+                            No results found for "{{ faqSearchTerm }}"
+                        </div>
+                    }
                 </p-panel>
             }
 

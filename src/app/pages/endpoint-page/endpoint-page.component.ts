@@ -17,19 +17,24 @@ import {TabView} from "primeng/tabview";
 import {FaqSectionComponent} from "./doc-section/faq-section.component";
 import { Tab, TabList, TabPanel, TabPanels, Tabs } from 'primeng/tabs';
 import { Badge } from 'primeng/badge';
+import { FormsModule } from '@angular/forms';
+import { InputText } from 'primeng/inputtext';
+import { IconField } from 'primeng/iconfield';
+import { InputIcon } from 'primeng/inputicon';
 
 type ExecutionResult = {
     severity: 'success' | 'warn' | 'error';
     summary: string;
     detail: string;
 }
+type FaqItem = { q: string; a: string }; // Helper type
 
 
 @Component({
     selector: 'app-endpoint-page',
     standalone: true,
     templateUrl: './endpoint-page.component.html',
-    imports: [CommonModule, DocSectionComponent, ExecutionFormComponent, Panel, Message, TabPanel, FaqSectionComponent, PrimeTemplate, Tabs, Tab, TabList, TabPanel, TabPanels, Badge], // Simplified imports
+    imports: [CommonModule, DocSectionComponent, ExecutionFormComponent, Panel, Message, TabPanel, FaqSectionComponent, PrimeTemplate, Tabs, Tab, TabList, TabPanel, TabPanels, Badge, FormsModule, InputText, IconField, InputIcon], // Simplified imports
     styleUrls: ['./endpoint-page.component.scss'],
     providers: [MessageService]
 })
@@ -43,7 +48,8 @@ export class EndpointPageComponent implements OnInit {
     loading = false;
     sqlQuery?: string | string[];
     sqlQueryLoading = false;
-
+    faqSearchTerm: string = '';
+    filteredFaq: FaqItem[] = [];
     constructor(
         private route: ActivatedRoute,
         private excelService: ExcelService,
@@ -65,8 +71,24 @@ export class EndpointPageComponent implements OnInit {
             return;
         }
         this.metadata = ENDPOINTS_METADATA[endpointKey];
+        // Initialize the filtered list with all FAQs
+        this.filterFaq();
     }
 
+    // ✅ ADD THIS METHOD TO THE PARENT
+    /**
+     * Filters the metadata's FAQ list based on the faqSearchTerm.
+     */
+    filterFaq(): void {
+        const term = this.faqSearchTerm.toLowerCase().trim();
+        const sourceFaq = this.metadata?.faq || [];
+
+        if (!term) {
+            this.filteredFaq = [...sourceFaq];
+        } else {
+            this.filteredFaq = sourceFaq.filter((item) => item.q.toLowerCase().includes(term) || item.a.toLowerCase().includes(term));
+        }
+    }
     fetchSqlQuery(dbType: DatabaseType | null) {
         if (!this.metadata) return;
 
@@ -139,7 +161,7 @@ export class EndpointPageComponent implements OnInit {
                         summary: 'File Downloaded with Warnings',
                         detail: warnings
                     };
-                    console.log("Warnings detected:", this.executionResult);
+                    console.log('Warnings detected:', this.executionResult);
                 } else if (body) {
                     // If no warnings and there's a body, it's a clean 'success'.
                     this.executionResult = {
@@ -147,7 +169,7 @@ export class EndpointPageComponent implements OnInit {
                         summary: 'Success',
                         detail: 'File downloaded successfully! No warnings detected.'
                     };
-                    console.log("SUCC detected:", this.executionResult);
+                    console.log('SUCC detected:', this.executionResult);
                 } else {
                     // If no body, it's an 'error'.
                     this.executionResult = {
@@ -155,7 +177,7 @@ export class EndpointPageComponent implements OnInit {
                         summary: 'Error',
                         detail: 'Received an empty file from the server.'
                     };
-                    console.log("ERRORS detected:", this.executionResult);
+                    console.log('ERRORS detected:', this.executionResult);
                 }
 
                 this.activeTabValue = '1';
@@ -173,7 +195,7 @@ export class EndpointPageComponent implements OnInit {
                     detail: errorHeader || warningHeader || 'An unknown error occurred.'
                 };
 
-                this.activeTabValue = "1";
+                this.activeTabValue = '1';
             }
         });
     }

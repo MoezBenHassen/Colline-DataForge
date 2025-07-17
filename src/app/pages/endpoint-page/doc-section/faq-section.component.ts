@@ -7,13 +7,6 @@ import { FormsModule } from '@angular/forms';
     selector: 'app-faq-section',
     imports: [NgForOf, PanelModule, FormsModule],
     template: `
-        <div class="mb-4">
-            <span class="p-input-icon-left w-full">
-                <i class="pi pi-search"></i>
-                <input type="text" pInputText [(ngModel)]="searchTerm" (input)="filterFaq()" placeholder="Search FAQ..." class="w-full" />
-            </span>
-        </div>
-
         <div class="flex flex-col gap-2">
             <p-panel *ngFor="let item of filteredFaq" [toggleable]="true" [collapsed]="true">
                 <ng-template pTemplate="header">
