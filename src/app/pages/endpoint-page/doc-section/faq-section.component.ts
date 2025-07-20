@@ -6,7 +6,7 @@ import { HighlightPipe } from '../../../core/pipes/highlight.pipe';
 
 @Component({
     selector: 'app-faq-section',
-    imports: [NgForOf, PanelModule, FormsModule, HighlightPipe],
+    imports: [NgForOf, PanelModule, FormsModule],
     template: `
         <div class="flex flex-col gap-2">
             <p-panel *ngFor="let item of faq" [toggleable]="true" [collapsed]="true">

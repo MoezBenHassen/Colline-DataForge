@@ -24,72 +24,72 @@
                         </p-tab>
                     </p-tablist>
 
-                <p-tabpanels>
-                    <p-tabpanel value="0">
-                        <app-execution-form
-                            [metadata]="metadata"
-                            [loading]="loading"
-                            (execute)="handleExecute($event)"
-                            (formReset)="handleReset()">
-                        </app-execution-form>
-                    </p-tabpanel>
-                    <p-tabpanel value="1">
-                        <div class="card px-8 py-6 shadow-xl rounded-2xl">
+                    <p-tabpanels>
+                        <p-tabpanel value="0">
+                            <app-execution-form
+                                [metadata]="metadata"
+                                [loading]="loading"
+                                (execute)="handleExecute($event)"
+                                (formReset)="handleReset()">
+                            </app-execution-form>
+                        </p-tabpanel>
+                        <p-tabpanel value="1">
+                            <div class="card px-8 py-6 shadow-xl rounded-2xl">
 
-                            @if (executionResult) {
-                                @switch (executionResult.severity) {
-                                    @case ('success') {
-                                        <p-message size="large" icon="pi pi-check-circle" severity="success" [text]="executionResult.detail"></p-message>
+                                @if (executionResult) {
+                                    @switch (executionResult.severity) {
+                                        @case ('success') {
+                                            <p-message size="large" icon="pi pi-check-circle" severity="success" [text]="executionResult.detail"></p-message>
+                                        }
+                                        @case ('warn') {
+                                            <p-message size="large" severity="warn" icon="pi pi-exclamation-triangle">
+                                                        <span class="font-bold">{{ executionResult.summary }} : &nbsp;</span>
+                                                        <span class="mt-1 break-words">{{ executionResult.detail }}</span>
+                                            </p-message>
+                                        }
+                                        @case ('error') {
+                                            <p-message size="large" icon="pi pi-ban" severity="error" [text]="executionResult.detail"></p-message>
+                                        }
                                     }
-                                    @case ('warn') {
-                                        <p-message size="large" severity="warn" icon="pi pi-exclamation-triangle">
-                                                    <span class="font-bold">{{ executionResult.summary }} : &nbsp;</span>
-                                                    <span class="mt-1 break-words">{{ executionResult.detail }}</span>
-                                        </p-message>
+
+                                    @if (executionResult.filePreview && executionResult.filePreview.length > 0) {
+                                        <div class="mt-4 border-t pt-4">
+                                            <h5 class="font-semibold mb-2 text-color-secondary">File Preview (First 5 Rows)</h5>
+
+                                            <p-table
+                                                [resizableColumns]="true"
+                                                [value]="executionResult.filePreview.slice(1)"
+                                                [columns]="executionResult.filePreview[0]"
+                                                size="small"
+                                                stripedRows
+                                                styleClass="p-datatable-sm">
+
+                                                <ng-template pTemplate="header" let-columns>
+                                                    <tr>
+                                                        @for (col of columns; track col) {
+                                                            <th pResizableColumn>{{ col }}</th>
+                                                        }
+                                                    </tr>
+                                                </ng-template>
+                                                <ng-template pTemplate="body" let-rowData>
+                                                    <tr>
+                                                        @for (cell of rowData; track cell) {
+                                                            <td>{{ cell }}</td>
+                                                        }
+                                                    </tr>
+                                                </ng-template>
+                                            </p-table>
+                                        </div>
                                     }
-                                    @case ('error') {
-                                        <p-message size="large" icon="pi pi-ban" severity="error" [text]="executionResult.detail"></p-message>
-                                    }
-                                }
-
-                                @if (executionResult.filePreview && executionResult.filePreview.length > 0) {
-                                    <div class="mt-4">
-                                        <h5 class="font-semibold mb-2 text-color-secondary">File Preview (First 5 Rows)</h5>
-
-                                        <p-table
-                                            [resizableColumns]="true"
-                                            [value]="executionResult.filePreview.slice(1)"
-                                            [columns]="executionResult.filePreview[0]"
-                                            size="small"
-                                            stripedRows
-                                            styleClass="p-datatable-sm">
-
-                                            <ng-template pTemplate="header" let-columns>
-                                                <tr>
-                                                    @for (col of columns; track col) {
-                                                        <th pResizableColumn>{{ col }}</th>
-                                                    }
-                                                </tr>
-                                            </ng-template>
-                                            <ng-template pTemplate="body" let-rowData>
-                                                <tr>
-                                                    @for (cell of rowData; track cell) {
-                                                        <td>{{ cell }}</td>
-                                                    }
-                                                </tr>
-                                            </ng-template>
-                                        </p-table>
+                                } @else {
+                                    <div class="text-center text-color-secondary p-4">
+                                        <i class="pi pi-info-circle text-2xl"></i>
+                                        <p class="mt-2">Execution results will appear here.</p>
                                     </div>
                                 }
-                            } @else {
-                                <div class="text-center text-color-secondary p-4">
-                                    <i class="pi pi-info-circle text-2xl"></i>
-                                    <p class="mt-2">Execution results will appear here.</p>
-                                </div>
-                            }
-                        </div>
-                    </p-tabpanel>
-                </p-tabpanels>
+                            </div>
+                        </p-tabpanel>
+                    </p-tabpanels>
                 </p-tabs>
             </div>
 <!--            FAQ SECTION -->
