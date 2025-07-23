@@ -76,19 +76,38 @@
                             A file is required.
                         </div>
                     </ng-container>
+
                 </div>
+
+
+
                 <div class="flex items-center gap-2">
-                    <ng-container *ngIf="getParam('clearWarnings') as checkboxParam">
+                    @if (clearWarningsParam; as param) {
                         <p-checkbox
-                            [inputId]="checkboxParam.name"
+                            [inputId]="param.name"
                             binary="true"
-                            [formControlName]="checkboxParam.name"
-                            [indeterminate]="true"
-                        >
+                            [formControlName]="param.name">
                         </p-checkbox>
-                        <label [for]="checkboxParam.name" class="font-medium">{{ checkboxParam.label }}</label>
-                    </ng-container>
+                        <label [for]="param.name" class="font-medium">{{ param.label }}</label>
+                    }
+
                 </div>
+                @if (optionalCheckboxParams && optionalCheckboxParams.length > 0) {
+
+
+                    @for (param of optionalCheckboxParams; track param.name) {
+                        <div class="flex items-center gap-2">
+                            <p-checkbox
+                                [inputId]="param.name"
+                                binary="true"
+                                [formControlName]="param.name">
+                            </p-checkbox>
+                            <label [for]="param.name" class="font-medium">{{ param.label }}</label>
+                        </div>
+                    }
+
+                }
+
             </div>
         </div>
 

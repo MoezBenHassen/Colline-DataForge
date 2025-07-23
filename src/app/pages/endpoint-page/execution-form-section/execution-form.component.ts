@@ -119,6 +119,14 @@ export class ExecutionFormComponent implements OnInit, OnDestroy {
         this.formReset.emit();
     }
 
+    get clearWarningsParam() {
+        return this.metadata?.params.find(p => p.name === 'clearWarnings');
+    }
+    get optionalCheckboxParams() {
+        // Finds all checkboxes that are NOT 'clearWarnings'
+        return this.metadata?.params.filter(p => p.type === 'checkbox' && p.name !== 'clearWarnings');
+    }
+
     // --- Helper Methods (moved from parent) ---
     public getParam(name: string): EndpointParam | undefined {
         return this.metadata?.params.find((p) => p.name === name);

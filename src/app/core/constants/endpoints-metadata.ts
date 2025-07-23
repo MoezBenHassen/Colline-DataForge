@@ -160,16 +160,17 @@ export const ENDPOINTS_METADATA: Record<string, EndpointMetadata> = {
         shortDescription: 'Produce Excel files with interest amount and event data for financial agreements.',
         swaggerTag: 'Excel Generation',
         operationId: 'generateInterestManagerExcel',
-        docs: 'This endpoint populates your template with detailed interest event data, including agreement IDs, sources, and dates.',
+        docs: 'This endpoint populates your template with detailed interest event data, including agreement IDs, sources, and dates. It also transforms codes for `direction` (Pay/Receive) and `interestSource` (Net, VM, IM, etc.) into readable text.',
         usage: [
-            "Upload your interest amount template.",
-            "Select the database and number of rows.",
-            "Optionally, bypass field tracking for advanced use cases.",
-        ],
+        "Upload your interest amount template.",
+        "Select the database and number of rows.",
+        "Optionally, bypass the template column validation for advanced use cases."
+    ],
+        notes: "If your template includes an `agreedAmount` column, it will be populated with a randomly generated number.",
         params: [
-            ...GENERAL_XLS_PARAMS,
-            { name: 'fieldTrackingBypass', label: 'Bypass Field Tracking', type: 'checkbox', required: false }
-        ],
+        ...GENERAL_XLS_PARAMS,
+        { name: 'fieldTrackingBypass', label: 'Bypass Field Tracking', type: 'checkbox', required: false }
+    ],
         sqlQueryKey: 'interest_amount',
         faq: GENERAL_FAQ_XLS
     },
