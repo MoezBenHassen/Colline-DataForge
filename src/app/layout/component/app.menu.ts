@@ -29,6 +29,7 @@ export class AppMenu {
                 items: [
                     { label: 'Interest Rate', icon: 'pi pi-fw pi-file-excel', routerLink: ['/interest-rate'] },
                     { label: 'Interest Amount', icon: 'pi pi-fw pi-file-excel', routerLink: ['/interest-amount'] },
+                    { label: 'Counterparty Amount', icon: 'pi pi-fw pi-file-excel', routerLink: ['/counterparty-amount'] },
                     { label: 'FX Rates', icon: 'pi pi-fw pi-file-excel', routerLink: ['/fx-rates'] },
                     { label: 'Org Ratings', icon: 'pi pi-fw pi-file-excel', routerLink: ['/org-ratings'] },
                     { label: 'Org Contacts', icon: 'pi pi-fw pi-file-excel', routerLink: ['/org-contacts'] },

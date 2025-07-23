@@ -281,13 +281,21 @@ export const ENDPOINTS_METADATA: Record<string, EndpointMetadata> = {
         shortDescription: 'Generate Excel files with counterparty amount and event data.',
         swaggerTag: 'Excel Generation',
         operationId: 'generateCounterpartyAmountExcel',
-        docs: 'Fills your template with data related to counterparty amounts, including event types and agreement details.',
+        docs: 'This endpoint populates your Excel template with counterparty event data. It automatically transforms raw database codes for `action` (e.g., \'54\' becomes \'Return\') and `eventType` (e.g., \'1\' becomes \'VM\') into human-readable text, making the output clear and easy to understand.',
         usage: [
-            "Upload your counterparty amount template.",
-            "Select the database and number of rows.",
+            "Upload your Excel template for counterparty amounts.",
+            "Select the target database and specify the number of rows you need.",
+            "The system will fetch data and apply the necessary transformations.",
+            "Download the generated .xlsx file, ready for use."
         ],
+        notes: "If your template includes a `counterpartyamount` column, it will be automatically populated with a randomly generated number. The `action` and `eventType` columns are translated from numeric codes to descriptive text based on predefined mappings.",
         params: GENERAL_XLS_PARAMS,
         sqlQueryKey: 'counterparty_amount',
-        faq: GENERAL_FAQ_XLS
+        faq: [
+            { q: 'How is the "action" column populated?', a: 'The action code from the database (e.g., 51, 54) is mapped to its corresponding text value (e.g., "Recall", "Return").' },
+            { q: 'What happens to the "eventType" column?', a: 'Similar to action, the eventType code (e.g., 0, 1, 2) is converted to a readable format like "Net", "VM", or "IM".' },
+            { q: 'Is the "counterpartyamount" column required?', a: 'No, but if you include it in your template, the system will fill it with a randomly generated numeric value to simulate real data.' },
+            ...GENERAL_FAQ_XLS
+        ]
     }
 };

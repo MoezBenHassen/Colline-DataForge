@@ -20,6 +20,7 @@ export const appRoutes: Routes = [
             { path: `${RoutePaths.PAGES}`, loadChildren: () => import('./app/pages/pages.routes'), canActivate: [AuthGuard] },
             { path: 'interest-rate', component: EndpointPageComponent, data: { endpointKey: 'interest-rate' } },
             { path: 'interest-amount', component: EndpointPageComponent, data: { endpointKey: 'interest-amount' } },
+            { path: 'counterparty-amount', component: EndpointPageComponent, data: { endpointKey: 'counterparty-amount' } },
             { path: 'fx-rates', component: EndpointPageComponent, data: { endpointKey: 'fx-rates' } },
             { path: 'org-ratings', component: EndpointPageComponent, data: { endpointKey: 'org-ratings' } },
             { path: 'org-contacts', component: EndpointPageComponent, data: { endpointKey: 'org-contacts' } },
