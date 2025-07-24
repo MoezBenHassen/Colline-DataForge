@@ -33,6 +33,11 @@ export class AppMenu {
                     { label: 'FX Rates', icon: 'pi pi-fw pi-file-excel', routerLink: ['/fx-rates'] },
                     { label: 'Org Ratings', icon: 'pi pi-fw pi-file-excel', routerLink: ['/org-ratings'] },
                     { label: 'Org Contacts', icon: 'pi pi-fw pi-file-excel', routerLink: ['/org-contacts'] },
+                    { label: 'Asset Bookings', icon: 'pi pi-fw pi-file-excel', routerLink: ['/asset-booking'] },
+                    { label: 'Agreement UDF', icon: 'pi pi-fw pi-file-excel', routerLink: ['/agreement-udf'] },
+                    { label: 'Security', icon: 'pi pi-fw pi-file-excel', routerLink: ['/security'] },
+                    { label: 'Trade Data', icon: 'pi pi-fw pi-file-excel', routerLink: ['/tradeData'] },
+                    { label: 'MTM', icon: 'pi pi-fw pi-file-excel', routerLink: ['/mtm-feed'] },
                 ]
             },
             {
