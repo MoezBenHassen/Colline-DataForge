@@ -8,11 +8,17 @@ export type DbStatus = {
     db: DatabaseType;
     online: boolean;
 };
-
+export interface DirectorySizeInfo {
+    directorySizeBytes: number;
+}
 
 export interface UptimeInfo {
     uptimeSeconds: number;
     lastRestart: string; // ISO date string
+}
+export interface EndpointMetric {
+    path: string;
+    hits: number;
 }
 
 export interface ResourceMetrics {
@@ -21,6 +27,7 @@ export interface ResourceMetrics {
     memoryMaxBytes: number;
     diskFreeBytes: number;
     diskTotalBytes: number;
+    directorySizeBytes?: number;
 }
 
 @Injectable({
@@ -30,6 +37,14 @@ export class DashboardService {
     private readonly baseUrl = `${environment.apiUrl}/api/database-management`;
 
     constructor(private http: HttpClient) {}
+
+    // Add this method to the service class
+    /**
+     * Fetches the most frequently used endpoints.
+     */
+    getTopEndpoints(): Observable<EndpointMetric[]> {
+        return this.http.get<EndpointMetric[]>(`${environment.apiUrl}/api/system-metrics/top-endpoints`);
+    }
 
     /**
      * Fetches the list of all configured database types.
@@ -65,5 +80,9 @@ export class DashboardService {
      */
     getResourceMetrics(): Observable<ResourceMetrics> {
         return this.http.get<ResourceMetrics>(`${environment.apiUrl}/api/system-metrics/resources`);
+    }
+
+    getDirectorySize(): Observable<DirectorySizeInfo> {
+        return this.http.get<DirectorySizeInfo>(`${environment.apiUrl}/api/system-metrics/directory-size`);
     }
 }

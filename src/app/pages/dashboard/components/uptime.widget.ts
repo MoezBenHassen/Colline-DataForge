@@ -10,7 +10,7 @@ import { CardModule } from 'primeng/card';
     imports: [CommonModule, SkeletonModule, CardModule, DatePipe],
     template: `
         <div class="card h-full">
-            <h5 class="font-semibold text-xl mb-4">Service Status</h5>
+            <h5 class="font-semibold text-xl mb-4">Backend Service Status</h5>
             @if (loading) {
                 <div class="flex flex-col gap-4">
                     <p-skeleton height="2rem" width="75%"></p-skeleton>

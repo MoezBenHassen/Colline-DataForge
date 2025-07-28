@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { ChartModule } from 'primeng/chart';
 import { SkeletonModule } from 'primeng/skeleton';
 import { DashboardService, ResourceMetrics } from '../../../services/dashboard.service';
-import { Subscription } from 'rxjs';
+import {forkJoin, Subscription} from 'rxjs';
 import { LayoutService } from '../../../layout/service/layout.service';
 
 @Component({
@@ -14,13 +14,14 @@ import { LayoutService } from '../../../layout/service/layout.service';
         <div class="card">
             <h5 class="font-semibold text-xl mb-4">Backend System Resources</h5>
             @if(loading) {
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-center">
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 text-center">
+                    <p-skeleton shape="circle" size="120px" styleClass="mx-auto"></p-skeleton>
                     <p-skeleton shape="circle" size="120px" styleClass="mx-auto"></p-skeleton>
                     <p-skeleton shape="circle" size="120px" styleClass="mx-auto"></p-skeleton>
                     <p-skeleton shape="circle" size="120px" styleClass="mx-auto"></p-skeleton>
                 </div>
             } @else {
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-center">
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 text-center">
                     <div>
                         <p-chart type="doughnut" [data]="cpuData" [options]="cpuChartOptions" [plugins]="[centerTextPlugin]" height="120px"></p-chart>
                         <div class="font-medium mt-2">CPU Usage</div>
@@ -33,6 +34,10 @@ import { LayoutService } from '../../../layout/service/layout.service';
                         <p-chart type="doughnut" [data]="diskData" [options]="diskChartOptions" [plugins]="[centerTextPlugin]" height="120px"></p-chart>
                         <div class="font-medium mt-2">Disk Space</div>
                     </div>
+                    <div>
+                        <p-chart type="doughnut" [data]="directoryData" [options]="directoryChartOptions" [plugins]="[centerTextPlugin]" height="120px"></p-chart>
+                        <div class="font-medium mt-2">Data Directory</div>
+                    </div>
                 </div>
             }
         </div>
@@ -43,11 +48,13 @@ export class SystemMetricsWidget implements OnInit, OnDestroy {
     cpuData: any;
     memoryData: any;
     diskData: any;
+    directoryData: any;
 
     // Use separate options for each chart to allow for custom tooltips
     cpuChartOptions: any;
     memoryChartOptions: any;
     diskChartOptions: any;
+    directoryChartOptions: any;
 
     subscription: Subscription;
     centerTextPlugin: any;
@@ -64,9 +71,19 @@ export class SystemMetricsWidget implements OnInit, OnDestroy {
     }
 
     ngOnInit(): void {
-        this.dashboardService.getResourceMetrics().subscribe(metrics => {
-            this.lastMetrics = metrics; // Save the latest metrics
-            this.createCharts(metrics);
+        this.loading = true;
+        forkJoin({
+            metrics: this.dashboardService.getResourceMetrics(),
+            dirSize: this.dashboardService.getDirectorySize()
+        }).subscribe(({ metrics, dirSize }) => {
+            // Combine the data into a single object
+            const combinedMetrics: ResourceMetrics = {
+                ...metrics,
+                directorySizeBytes: dirSize.directorySizeBytes
+            };
+
+            this.lastMetrics = combinedMetrics;
+            this.createCharts(combinedMetrics);
             this.loading = false;
         });
     }
@@ -166,6 +183,23 @@ export class SystemMetricsWidget implements OnInit, OnDestroy {
                 return `Used: ${value} of ${this.formatBytes(diskTotal)}`;
             }
             return `Free: ${value}`;
+        };
+
+        // DIR  CHART
+        const dirSizeBytes = metrics.directorySizeBytes ?? 0;
+        const dirSizePercentOfDisk = diskTotal > 0 ? Math.round((dirSizeBytes / diskTotal) * 100) : 0;
+
+        this.directoryData = this.buildChartData(
+            this.formatBytes(dirSizeBytes), // Center text shows the absolute size
+            [dirSizeBytes, diskTotal - dirSizeBytes], // Data is directory size vs. the rest of the disk
+            [documentStyle.getPropertyValue('--p-green-500'), surfaceBorder]
+        );
+        this.directoryChartOptions = getBaseOptions();
+        this.directoryChartOptions.plugins.tooltip.callbacks.label = (context: any) => {
+            if (context.dataIndex === 0) {
+                return `Directory: ${this.formatBytes(context.raw)} (${dirSizePercentOfDisk}% of disk)`;
+            }
+            return `Other Disk Space: ${this.formatBytes(context.raw)}`;
         };
     }
 
