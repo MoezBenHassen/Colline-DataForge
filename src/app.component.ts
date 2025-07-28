@@ -11,13 +11,15 @@ import { LoaderComponent } from './app/loader/loader.component';
 import { Event as RouterEvent }from '@angular/router';
 //import ngif
 import { NgIf } from '@angular/common';
+import {Toast} from "primeng/toast";
 
 @Component({
     selector: 'app-root',
     standalone: true,
-    imports: [RouterModule, LoaderComponent, NgIf],
+    imports: [RouterModule, LoaderComponent, NgIf, Toast],
     template: `
         <app-loader *ngIf="loading"></app-loader>
+
         <router-outlet></router-outlet>
     `
 })
