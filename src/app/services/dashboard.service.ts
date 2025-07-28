@@ -9,6 +9,20 @@ export type DbStatus = {
     online: boolean;
 };
 
+
+export interface UptimeInfo {
+    uptimeSeconds: number;
+    lastRestart: string; // ISO date string
+}
+
+export interface ResourceMetrics {
+    cpuUsage: number;
+    memoryUsedBytes: number;
+    memoryMaxBytes: number;
+    diskFreeBytes: number;
+    diskTotalBytes: number;
+}
+
 @Injectable({
     providedIn: 'root'
 })
@@ -37,5 +51,19 @@ export class DashboardService {
      */
     getAllQueryKeys(databaseType: DatabaseType): Observable<string[]> {
         return this.http.get<string[]>(`${this.baseUrl}/query-keys/${databaseType}`);
+    }
+
+    /**
+     * Fetches the backend service uptime and last restart time.
+     */
+    getUptimeInfo(): Observable<UptimeInfo> {
+        return this.http.get<UptimeInfo>(`${environment.apiUrl}/api/system-metrics/uptime`);
+    }
+
+    /**
+     * Fetches system resource metrics (CPU, Memory, Disk).
+     */
+    getResourceMetrics(): Observable<ResourceMetrics> {
+        return this.http.get<ResourceMetrics>(`${environment.apiUrl}/api/system-metrics/resources`);
     }
 }
