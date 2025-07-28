@@ -1,12 +1,13 @@
 import { Routes } from '@angular/router';
 import { AppLayout } from './app/layout/component/app.layout';
-import { Dashboard } from './app/pages/dashboard/dashboard';
+import { Dashboard2} from './app/pages/dashboard/dashboard';
 import { Documentation } from './app/pages/documentation/documentation';
 import { Landing } from './app/pages/landing/landing';
 import { Notfound } from './app/pages/notfound/notfound';
 import { AuthGuard } from './app/core/helpers/auth.guard';
 import { RoutePaths } from './app/core/constants/RoutePaths';
 import { EndpointPageComponent } from './app/pages/endpoint-page/endpoint-page.component';
+import {Dashboard} from "./app/core/pages/dashboard";
 
 export const appRoutes: Routes = [
     {
@@ -15,6 +16,7 @@ export const appRoutes: Routes = [
         canActivate: [AuthGuard],
         children: [
             {path: '', component: Dashboard},
+             {path: 'dash', component: Dashboard2},
             { path: `${RoutePaths.UIKIT}`, loadChildren: () => import('./app/pages/uikit/uikit.routes'), canActivate: [AuthGuard] },
             { path: `${RoutePaths.DOCUMENTATION}`, component: Documentation, canActivate: [AuthGuard] },
             { path: `${RoutePaths.PAGES}`, loadChildren: () => import('./app/pages/pages.routes'), canActivate: [AuthGuard] },

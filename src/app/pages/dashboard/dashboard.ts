@@ -22,7 +22,7 @@ import { RevenueStreamWidget } from './components/revenuestreamwidget';
         </div>
     `
 })
-export class Dashboard implements OnInit{
+export class Dashboard2 implements OnInit{
 
     ngOnInit() {
         setTimeout(() => {

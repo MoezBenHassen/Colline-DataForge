@@ -24,6 +24,7 @@ import { InputIcon } from 'primeng/inputicon';
 import { HighlightPipe } from '../../core/pipes/highlight.pipe';
 import * as XLSX from 'xlsx';
 import { TableModule } from 'primeng/table';
+import {ExecutionTrackingService} from "../../services/execution-tracking.service";
 
 type ExecutionResult = {
     severity: 'success' | 'warn' | 'error';
@@ -62,7 +63,9 @@ export class EndpointPageComponent implements OnInit {
         private excelService: ExcelService,
         private dbService: DbManagementService,
         private globalStateService: GlobalStateService,
-        private highlightPipe: HighlightPipe
+        private highlightPipe: HighlightPipe,
+        private messageService: MessageService,
+        private trackingService: ExecutionTrackingService
     ) {
         effect(() => {
             // It will run automatically whenever the global default DB changes.
@@ -124,7 +127,7 @@ export class EndpointPageComponent implements OnInit {
         this.sqlQueryLoading = true;
         this.dbService.getQueryByKey(dbType, queryKey).subscribe({
             next: (responseText: string | string[]) => {
-                // ✅ --- THIS IS THE NEW LOGIC ---
+
                 // We expect a string, but handle both cases for safety.
                 const queryText = Array.isArray(responseText) ? JSON.stringify(responseText) : responseText;
 
@@ -180,6 +183,13 @@ export class EndpointPageComponent implements OnInit {
                         detail: warnings,
                         filePreview: previewData
                     };
+                    this.messageService.add({
+                        severity: 'warning',
+                        summary: 'File Downloaded with Warnings',
+                        detail: '🔮 File Downloaded with Warnings',
+                        life: 2000
+                    });
+                    this.trackingService.addRecord({ name: this.metadata.title, status: 'warn', details: warnings });
                 } else if (body) {
                     this.executionResult = {
                         severity: 'success',
@@ -187,8 +197,10 @@ export class EndpointPageComponent implements OnInit {
                         detail: 'File downloaded successfully!',
                         filePreview: previewData
                     };
+                    this.trackingService.addRecord({ name: this.metadata.title, status: 'success', details: 'File downloaded successfully!' });
                 } else {
                     this.executionResult = { severity: 'error', summary: 'Error', detail: 'Received an empty file from the server.' };
+                    this.trackingService.addRecord({ name: this.metadata.title, status: 'error', details: 'Empty file received.' });
                 }
 
                 this.loading = false;
@@ -206,7 +218,7 @@ export class EndpointPageComponent implements OnInit {
                     summary: 'Execution Failed',
                     detail: errorHeader || warningHeader || 'An unknown error occurred.'
                 };
-
+                this.trackingService.addRecord({ name: this.metadata.title, status: 'error', details: ''});
                 this.activeTabValue = '1';
             }
         });
