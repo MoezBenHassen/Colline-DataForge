@@ -8,12 +8,13 @@ import {QuickActionsWidget} from "../../pages/dashboard/components/quick-actions
 import {SystemMetricsWidget} from "../../pages/dashboard/components/system-metrics.widget";
 import {UptimeWidget} from "../../pages/dashboard/components/uptime.widget";
 import {TopEndpointsWidget} from "../../pages/dashboard/components/top-endpoints.widget";
+import {GenerationPerformanceWidget} from "../../pages/dashboard/components/generation-performance.widget";
 
 @Component({
     selector: 'app-dashboard',
     standalone: true,
     // Import your new, dynamic widgets
-    imports: [CommonModule, DatabaseStatusWidget, RecentActivityWidget, EndpointStatsWidget, QueryExplorerWidget, QuickActionsWidget, SystemMetricsWidget, UptimeWidget, TopEndpointsWidget],
+    imports: [CommonModule, DatabaseStatusWidget, RecentActivityWidget, EndpointStatsWidget, QueryExplorerWidget, QuickActionsWidget, SystemMetricsWidget, UptimeWidget, TopEndpointsWidget, GenerationPerformanceWidget],
     template: `
         <div class="grid grid-cols-12 gap-6">
             <div class="col-span-12 lg:col-span-4"><app-endpoint-stats-widget /></div>
@@ -25,6 +26,7 @@ import {TopEndpointsWidget} from "../../pages/dashboard/components/top-endpoints
 
             <div class="col-span-12 xl:col-span-6"><app-recent-activity-widget /></div>
             <div class="col-span-12 xl:col-span-6"><app-top-endpoints-widget /></div>
+            <div class="col-span-12"><app-generation-performance-widget /></div>
 
             <div class="col-span-12"><app-query-explorer-widget /></div>
         </div>

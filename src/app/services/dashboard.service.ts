@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import {HttpClient, HttpParams} from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../environments/environment';
 import { DatabaseType } from './gloable-state.service';
@@ -29,6 +29,21 @@ export interface ResourceMetrics {
     diskTotalBytes: number;
     directorySizeBytes?: number;
 }
+export interface PrometheusMetric {
+    [key: string]: string;
+}
+export interface PrometheusResult {
+    metric: PrometheusMetric;
+    value: [number, string]; // [timestamp, value]
+}
+
+export interface PrometheusResponse {
+    status: string;
+    data: {
+        resultType: string;
+        result: PrometheusResult[];
+    };
+}
 
 @Injectable({
     providedIn: 'root'
@@ -38,7 +53,30 @@ export class DashboardService {
 
     constructor(private http: HttpClient) {}
 
-    // Add this method to the service class
+    /**
+     * Executes a PromQL query via the backend proxy.
+     * @param promql The PromQL query string.
+     */
+    executePromQL(promql: string): Observable<PrometheusResponse> {
+        const params = new HttpParams().set('query', promql);
+        return this.http.get<PrometheusResponse>(`${environment.apiUrl}/api/prometheus-proxy/query`, { params });
+    }
+
+    /**
+     * Executes a PromQL range query via the backend proxy.
+     * @param promql The PromQL query string.
+     * @param start The start time (ISO string or Unix timestamp).
+     * @param end The end time.
+     * @param step The query resolution step interval (e.g., '1h', '15m').
+     */
+    executePromQLRange(promql: string, start: string, end: string, step: string): Observable<PrometheusResponse> {
+        const params = new HttpParams()
+            .set('query', promql)
+            .set('start', start)
+            .set('end', end)
+            .set('step', step);
+        return this.http.get<PrometheusResponse>(`${environment.apiUrl}/api/prometheus-proxy/query_range`, { params });
+    }
     /**
      * Fetches the most frequently used endpoints.
      */
