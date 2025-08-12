@@ -1,0 +1,44 @@
+<!-- The Floating Chat Bubble -->
+<button pButton type="button" class="chat-bubble" [ngClass]="{'chat-bubble-open': isOpen}" (click)="toggleChat()">
+    <i class="pi" [ngClass]="isOpen ? 'pi-times' : 'pi-bolt'"></i>
+</button>
+
+<!-- The Chat Window -->
+@if (isOpen) {
+    <div class="chat-window shadow-2xl">
+        <!-- Header -->
+        <div class="chat-header">
+            <div class="font-bold text-lg">DataForge Assistant</div>
+            <div class="text-sm text-color-secondary">Your AI-powered guide</div>
+        </div>
+
+        <!-- Messages -->
+        <div class="chat-messages" #scrollContainer>
+            @for (message of messages; track $index) {
+                <div class="message" [ngClass]="'message-' + message.author">
+                    <div class="message-content">
+                        <markdown [data]="message.text"></markdown>
+                    </div>
+                </div>
+            }
+            @if (isLoading) {
+                <div class="message message-ai">
+                    <div class="message-content typing-indicator">
+                        <span></span><span></span><span></span>
+                    </div>
+                </div>
+            }
+        </div>
+
+        <!-- Input -->
+        <div class="chat-input">
+            <input type="text" pInputText placeholder="Ask a question..." class="w-full"
+                   [(ngModel)]="userInput"
+                   (keyup.enter)="sendMessage()"
+                   [disabled]="isLoading" />
+            <p-button icon="pi pi-send" styleClass="p-button-primary p-button-text"
+                      (click)="sendMessage()"
+                      [disabled]="isLoading || !userInput.trim()"></p-button>
+        </div>
+    </div>
+}

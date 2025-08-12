@@ -7,11 +7,12 @@ import { AppSidebar } from './app.sidebar';
 import { AppFooter } from './app.footer';
 import { LayoutService } from '../service/layout.service';
 import {Toast} from "primeng/toast";
+import {AiChatbotComponent} from "../../core/pages/chatbot/ai-chatbot.component";
 
 @Component({
     selector: 'app-layout',
     standalone: true,
-    imports: [CommonModule, AppTopbar, AppSidebar, RouterModule, AppFooter, Toast],
+    imports: [CommonModule, AppTopbar, AppSidebar, RouterModule, AppFooter, Toast, AiChatbotComponent ],
     template: `<div class="layout-wrapper" [ngClass]="containerClass">
         <app-topbar></app-topbar>
         <app-sidebar></app-sidebar>
@@ -22,6 +23,7 @@ import {Toast} from "primeng/toast";
             <app-footer></app-footer>
         </div>
         <div class="layout-mask animate-fadein"></div>
+        <app-ai-chatbot></app-ai-chatbot>
         <p-toast></p-toast>
     </div> `
 })
