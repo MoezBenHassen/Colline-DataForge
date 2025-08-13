@@ -5,10 +5,10 @@ import { ButtonModule } from 'primeng/button';
 import { InputTextModule } from 'primeng/inputtext';
 import { RippleModule } from 'primeng/ripple';
 import { MarkdownModule } from 'ngx-markdown';
-import {AiChatService} from "../../../services/ai-chat.service";
+import { AiChatService } from '../../../services/ai-chat.service';
 
-// Define a type for our messages
 interface ChatMessage {
+    id: string;
     author: 'user' | 'ai';
     text: string;
 }
@@ -27,7 +27,7 @@ export class AiChatbotComponent implements AfterViewChecked {
     isLoading = false;
     userInput = '';
     messages: ChatMessage[] = [
-        { author: 'ai', text: 'Hello! I am the Colline DataForge assistant. How can I help you today?' }
+        { id: crypto.randomUUID(), author: 'ai', text: 'Hello! I am the Colline DataForge assistant. How can I help you today?' }
     ];
 
     constructor(private aiChatService: AiChatService) {}
@@ -38,37 +38,47 @@ export class AiChatbotComponent implements AfterViewChecked {
 
     toggleChat(): void {
         this.isOpen = !this.isOpen;
+        setTimeout(() => this.scrollToBottom(), 0);
     }
+
+    trackById = (_: number, m: ChatMessage) => m.id;
 
     sendMessage(): void {
         const userQuery = this.userInput.trim();
-        if (!userQuery || this.isLoading) {
-            return;
-        }
+        if (!userQuery || this.isLoading) return;
 
-        // Add user message to chat
-        this.messages.push({ author: 'user', text: userQuery });
+        // push user message
+        this.messages.push({ id: crypto.randomUUID(), author: 'user', text: userQuery });
         this.userInput = '';
         this.isLoading = true;
 
-        // Send to backend
-        this.aiChatService.sendMessage(userQuery).subscribe({
-            next: (response) => {
-                this.messages.push({ author: 'ai', text: response.answer });
-                this.isLoading = false;
-            },
-            error: (err) => {
-                this.messages.push({ author: 'ai', text: 'Sorry, I encountered an error. Please try again.' });
-                this.isLoading = false;
-            }
-        });
+        // let the DOM paint before the HTTP call (ensures typing indicator appears)
+        setTimeout(() => {
+            this.aiChatService.sendMessage(userQuery).subscribe({
+                next: (response) => {
+                    // Backend returns { answer: string, status?: string } — handle either
+                    const answer = (response as any)?.answer ?? '';
+                    this.messages.push({ id: crypto.randomUUID(), author: 'ai', text: answer });
+                    this.isLoading = false;
+                },
+                error: () => {
+                    this.messages.push({
+                        id: crypto.randomUUID(),
+                        author: 'ai',
+                        text: 'Sorry, I encountered an error. Please try again.'
+                    });
+                    this.isLoading = false;
+                }
+            });
+        }, 0);
     }
 
     private scrollToBottom(): void {
         try {
             if (this.scrollContainer) {
-                this.scrollContainer.nativeElement.scrollTop = this.scrollContainer.nativeElement.scrollHeight;
+                const el = this.scrollContainer.nativeElement;
+                el.scrollTop = el.scrollHeight;
             }
-        } catch (err) { }
+        } catch {}
     }
 }

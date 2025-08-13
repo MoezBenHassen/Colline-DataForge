@@ -3,7 +3,6 @@
     <i class="pi" [ngClass]="isOpen ? 'pi-times' : 'pi-bolt'"></i>
 </button>
 
-<!-- The Chat Window -->
 @if (isOpen) {
     <div class="chat-window shadow-2xl">
         <!-- Header -->
@@ -14,17 +13,19 @@
 
         <!-- Messages -->
         <div class="chat-messages" #scrollContainer>
-            @for (message of messages; track $index) {
+            @for (message of messages; track trackById) {
                 <div class="message" [ngClass]="'message-' + message.author">
                     <div class="message-content">
                         <markdown [data]="message.text"></markdown>
                     </div>
                 </div>
             }
+
+            <!-- Dedicated typing bubble, outside the loop -->
             @if (isLoading) {
                 <div class="message message-ai">
-                    <div class="message-content typing-indicator">
-                        <span></span><span></span><span></span>
+                    <div class="message-content">
+                        <div class="typing-indicator"><span></span><span></span><span></span></div>
                     </div>
                 </div>
             }
