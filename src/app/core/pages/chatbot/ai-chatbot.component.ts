@@ -6,6 +6,7 @@ import { InputTextModule } from 'primeng/inputtext';
 import { RippleModule } from 'primeng/ripple';
 import { MarkdownModule } from 'ngx-markdown';
 import { AiChatService } from '../../../services/ai-chat.service';
+import {Message} from "primeng/message";
 
 interface ChatMessage {
     id: string;
@@ -16,7 +17,7 @@ interface ChatMessage {
 @Component({
     selector: 'app-ai-chatbot',
     standalone: true,
-    imports: [CommonModule, FormsModule, ButtonModule, InputTextModule, RippleModule, MarkdownModule],
+    imports: [CommonModule, FormsModule, ButtonModule, InputTextModule, RippleModule, MarkdownModule, Message],
     templateUrl: './ai-chatbot.component.html',
     styleUrls: ['./ai-chatbot.component.scss']
 })
@@ -26,9 +27,7 @@ export class AiChatbotComponent implements AfterViewChecked {
     isOpen = false;
     isLoading = false;
     userInput = '';
-    messages: ChatMessage[] = [
-        { id: crypto.randomUUID(), author: 'ai', text: 'Hello! I am the Colline DataForge assistant. How can I help you today?' }
-    ];
+    messages: ChatMessage[] = [{ id: crypto.randomUUID(), author: 'ai', text: 'Hello! I am the Colline DataForge assistant. How can I help you today?' }];
 
     constructor(private aiChatService: AiChatService) {}
 

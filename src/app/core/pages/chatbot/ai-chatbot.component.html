@@ -1,6 +1,23 @@
 <!-- The Floating Chat Bubble -->
-<button pButton type="button" class="chat-bubble" [ngClass]="{'chat-bubble-open': isOpen}" (click)="toggleChat()">
-    <i class="pi" [ngClass]="isOpen ? 'pi-times' : 'pi-bolt'"></i>
+<!-- Floating Chat Bubble -->
+<button
+    pButton
+    type="button"
+    class="chat-bubble neon"
+    [ngClass]="{'chat-bubble-open': isOpen}"
+    (click)="toggleChat()"
+    aria-label="Open chat"
+>
+    <!-- optional sparkle icon -->
+    <span class="sparkle-icon" aria-hidden="true">✧</span>
+    <span class="label">{{ isOpen ? 'Close' : 'Chat' }}</span>
+
+    <!-- star particles -->
+    <span class="stars">
+    <i></i><i></i><i></i><i></i><i></i>
+    <i></i><i></i><i></i><i></i><i></i>
+    <i></i><i></i>
+  </span>
 </button>
 
 @if (isOpen) {
@@ -16,7 +33,9 @@
             @for (message of messages; track trackById) {
                 <div class="message" [ngClass]="'message-' + message.author">
                     <div class="message-content">
+
                         <markdown [data]="message.text"></markdown>
+
                     </div>
                 </div>
             }

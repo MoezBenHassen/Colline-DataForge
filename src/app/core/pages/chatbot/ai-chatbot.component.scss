@@ -105,14 +105,13 @@
     span {
         height: 8px;
         width: 8px;
-        background-color: var(--text-color); // stronger than surface-400 for visibility
+        background-color: var(--text-color);
         border-radius: 50%;
         display: inline-block;
         margin: 0 2px;
         animation: bounce 1.4s infinite ease-in-out both;
     }
 }
-
 
 @keyframes bounce {
     0%, 80%, 100% {
@@ -123,3 +122,308 @@
     }
 }
 
+/* ===== Neon Gradient Chat Bubble with AMBIENT ENVIRONMENT ===== */
+.chat-bubble.neon {
+    position: relative;
+    width: 64px;
+    height: 64px;
+    border-radius: 999px;
+    border: none;
+    cursor: pointer;
+    user-select: none;
+    outline: none;
+
+    /* Solid button - matches your theme */
+    background: #2d3748;
+    border: 2px solid #4a5568;
+
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+
+    /* Keep button elevated */
+    z-index: 10;
+
+    /* Smooth transitions */
+    transition: all 0.3s ease;
+
+    .label {
+        color: #fff;
+        font-weight: 600;
+        font-size: 0.9rem;
+        letter-spacing: .2px;
+        pointer-events: none;
+        display: none;
+    }
+
+    .sparkle-icon {
+        font-size: 1.5rem;
+        line-height: 1;
+        color: #e2e8f0;
+        pointer-events: none;
+        transition: all 0.3s ease;
+    }
+
+    /* Basic button shadow */
+    box-shadow:
+        0 4px 12px rgba(0,0,0,0.4),
+        inset 0 1px 0 rgba(255,255,255,0.05);
+
+    /* ===== AMBIENT ENVIRONMENT GRADIENT - MORE VISIBLE ===== */
+    &::before {
+        content: '';
+        position: absolute;
+        width: 200px;
+        height: 200px;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        border-radius: 50%;
+
+        /* Strong, visible gradient */
+        background:
+            radial-gradient(
+                    circle at center,
+                    transparent 35px,
+                    rgba(239, 68, 68, 0.4) 50px,    /* Red glow */
+                    rgba(239, 68, 68, 0.3) 70px,
+                    rgba(168, 85, 247, 0.25) 90px,   /* Purple */
+                    rgba(59, 130, 246, 0.2) 110px,   /* Blue */
+                    rgba(34, 197, 94, 0.15) 130px,   /* Green */
+                    transparent 150px
+            );
+
+        /* Pulsing animation */
+        animation: environmentPulse 3s ease-in-out infinite;
+
+        /* Less blur for more visibility */
+        filter: blur(8px);
+
+        /* Behind the button */
+        z-index: -1;
+
+        pointer-events: none;
+        opacity: 0;
+        transition: opacity 0.4s ease;
+    }
+
+    /* Second layer - rotating colors */
+    &::after {
+        content: '';
+        position: absolute;
+        width: 250px;
+        height: 250px;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%) rotate(0deg);
+
+        /* Vibrant rotating gradient */
+        background:
+            conic-gradient(
+                    from 0deg at 50% 50%,
+                    transparent,
+                    rgba(239, 68, 68, 0.3) 90deg,
+                    transparent 180deg,
+                    rgba(168, 85, 247, 0.3) 270deg,
+                    transparent
+            );
+
+        animation: environmentRotate 8s linear infinite;
+        filter: blur(12px);
+        z-index: -2;
+        pointer-events: none;
+        opacity: 0;
+        transition: opacity 0.4s ease;
+    }
+
+    /* Normal state - show subtle glow */
+    &:not(:hover):not(.chat-bubble-open) {
+        &::before {
+            opacity: 0.3;
+        }
+        &::after {
+            opacity: 0.2;
+        }
+    }
+
+    /* Hover state - RED theme with environment */
+    &:hover,
+    &:focus-visible {
+        transform: translateY(-2px) scale(1.05);
+        background: #dc2626;  /* Red background on hover */
+        border-color: #ef4444;
+
+        .sparkle-icon {
+            color: #fff;
+            transform: rotate(15deg);
+        }
+
+        /* Intensify the ambient glow */
+        &::before {
+            opacity: 1 !important;
+            animation-duration: 1.5s;
+            background:
+                radial-gradient(
+                        circle at center,
+                        transparent 35px,
+                        rgba(239, 68, 68, 0.6) 50px,    /* Stronger red */
+                        rgba(239, 68, 68, 0.4) 80px,
+                        rgba(252, 165, 165, 0.3) 110px,
+                        transparent 150px
+                );
+        }
+
+        &::after {
+            opacity: 0.8 !important;
+            animation-duration: 4s;
+        }
+
+        box-shadow:
+            0 0 40px rgba(239, 68, 68, 0.5),
+            0 8px 32px rgba(239, 68, 68, 0.3),
+            inset 0 1px 0 rgba(255,255,255,0.2);
+    }
+
+    /* When toggled open - Blue theme */
+    &.chat-bubble-open {
+        background: #1e40af;
+        border-color: #3b82f6;
+
+        .sparkle-icon {
+            transform: rotate(180deg);
+        }
+
+        &::before {
+            opacity: 0.6;
+            background:
+                radial-gradient(
+                        circle at center,
+                        transparent 35px,
+                        rgba(59, 130, 246, 0.5) 50px,
+                        rgba(59, 130, 246, 0.3) 80px,
+                        rgba(147, 197, 253, 0.2) 110px,
+                        transparent 150px
+                );
+        }
+
+        &::after {
+            opacity: 0.4;
+        }
+
+        box-shadow:
+            0 0 40px rgba(59, 130, 246, 0.4),
+            0 8px 32px rgba(59, 130, 246, 0.2),
+            inset 0 1px 0 rgba(255,255,255,0.1);
+    }
+
+    /* ===== SPARKLE PARTICLES IN THE ENVIRONMENT ===== */
+    .stars {
+        pointer-events: none;
+        position: absolute;
+        width: 400px;
+        height: 400px;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        z-index: -1;
+    }
+
+    .stars i {
+        position: absolute;
+        width: 3px;
+        height: 3px;
+        background: linear-gradient(135deg, #a855f7, #22d3ee);
+        border-radius: 50%;
+        opacity: 0;
+        box-shadow: 0 0 10px rgba(168, 85, 247, 0.8);
+        animation: starFloat 3s ease-out infinite paused;
+    }
+
+    /* Distribute stars around the button in the environment */
+    .stars i:nth-child(1)  { left: 20%; top: 10%; animation-delay: 0s; }
+    .stars i:nth-child(2)  { left: 80%; top: 15%; animation-delay: 0.3s; }
+    .stars i:nth-child(3)  { left: 90%; top: 80%; animation-delay: 0.6s; }
+    .stars i:nth-child(4)  { left: 10%; top: 75%; animation-delay: 0.9s; }
+    .stars i:nth-child(5)  { left: 50%; top: 5%;  animation-delay: 1.2s; }
+    .stars i:nth-child(6)  { left: 95%; top: 50%; animation-delay: 1.5s; }
+    .stars i:nth-child(7)  { left: 5%;  top: 40%; animation-delay: 1.8s; }
+    .stars i:nth-child(8)  { left: 70%; top: 90%; animation-delay: 2.1s; }
+    .stars i:nth-child(9)  { left: 30%; top: 95%; animation-delay: 2.4s; }
+    .stars i:nth-child(10) { left: 15%; top: 30%; animation-delay: 2.7s; }
+    .stars i:nth-child(11) { left: 85%; top: 35%; animation-delay: 3s; }
+    .stars i:nth-child(12) { left: 40%; top: 15%; animation-delay: 3.3s; }
+
+    /* Activate stars on hover */
+    &:hover .stars i,
+    &:focus-visible .stars i {
+        animation-play-state: running;
+    }
+}
+
+/* Environment pulse animation */
+@keyframes environmentPulse {
+    0%, 100% {
+        transform: translate(-50%, -50%) scale(1);
+        opacity: 0.6;
+    }
+    50% {
+        transform: translate(-50%, -50%) scale(1.2);
+        opacity: 0.8;
+    }
+}
+
+/* Environment rotation animation */
+@keyframes environmentRotate {
+    0% { transform: translate(-50%, -50%) rotate(0deg); }
+    100% { transform: translate(-50%, -50%) rotate(360deg); }
+}
+
+/* Stars floating outward from button */
+@keyframes starFloat {
+    0% {
+        opacity: 0;
+        transform: translate(0, 0) scale(0);
+    }
+    20% {
+        opacity: 1;
+        transform: translate(0, 0) scale(1);
+    }
+    100% {
+        opacity: 0;
+        /* Float away from center */
+        transform:
+            translate(
+                    calc(var(--star-x, 0) * 50px),
+                    calc(var(--star-y, 0) * 50px)
+            )
+            scale(0.3);
+    }
+}
+
+/* Add CSS variables for star directions */
+.stars i:nth-child(1)  { --star-x: -1; --star-y: -1; }
+.stars i:nth-child(2)  { --star-x: 1;  --star-y: -1; }
+.stars i:nth-child(3)  { --star-x: 1;  --star-y: 1; }
+.stars i:nth-child(4)  { --star-x: -1; --star-y: 1; }
+.stars i:nth-child(5)  { --star-x: 0;  --star-y: -1.5; }
+.stars i:nth-child(6)  { --star-x: 1.5; --star-y: 0; }
+.stars i:nth-child(7)  { --star-x: -1.5; --star-y: 0; }
+.stars i:nth-child(8)  { --star-x: 0.7; --star-y: 1.2; }
+.stars i:nth-child(9)  { --star-x: -0.7; --star-y: 1.2; }
+.stars i:nth-child(10) { --star-x: -1.2; --star-y: -0.7; }
+.stars i:nth-child(11) { --star-x: 1.2; --star-y: -0.7; }
+.stars i:nth-child(12) { --star-x: 0; --star-y: 1.5; }
+
+/* Respect reduced motion */
+@media (prefers-reduced-motion: reduce) {
+    .chat-bubble.neon {
+        &::before,
+        &::after {
+            animation: none;
+        }
+        .stars i {
+            animation: none;
+        }
+    }
+}
