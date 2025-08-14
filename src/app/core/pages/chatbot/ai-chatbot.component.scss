@@ -122,7 +122,7 @@
     }
 }
 
-/* ===== Neon Gradient Chat Bubble with AMBIENT ENVIRONMENT ===== */
+/* ===== MERGED: Neon Gradient Button + Ambient Environment ===== */
 .chat-bubble.neon {
     overflow: visible;
     position: relative;
@@ -134,9 +134,13 @@
     user-select: none;
     outline: none;
 
-    /* Solid button - matches your theme */
-    background: #2d3748;
-    border: 2px solid #4a5568;
+    /* ANIMATED GRADIENT INSIDE THE BUTTON (from Version 1) */
+    background: linear-gradient(135deg, #2e026d 0%, #7c3aed 35%, #a855f7 60%, #22d3ee 100%);
+    background-size: 200% 200%;
+    animation: bubbleGradient 6s ease-in-out infinite;
+
+    /* Subtle border that complements the gradient */
+    border: 2px solid rgba(168, 85, 247, 0.3);
 
     display: inline-flex;
     align-items: center;
@@ -161,169 +165,167 @@
     .sparkle-icon {
         font-size: 1.5rem;
         line-height: 1;
-        color: #e2e8f0;
+        color: #fff;
+        text-shadow: 0 0 8px rgba(255,255,255,0.9);
         pointer-events: none;
         transition: all 0.3s ease;
     }
 
-    /* Basic button shadow */
+    /* Inner glossy effect for the gradient button */
     box-shadow:
-        0 4px 12px rgba(0,0,0,0.4),
-        inset 0 1px 0 rgba(255,255,255,0.05);
+        0 8px 30px rgba(124, 58, 237, 0.35),
+        inset 0 0 18px rgba(255,255,255,0.15),
+        0 4px 12px rgba(0,0,0,0.2);
 
-    /* ===== AMBIENT ENVIRONMENT GRADIENT - MORE VISIBLE ===== */
+    /* AMBIENT ENVIRONMENT OUTSIDE (from Version 2) */
     &::before {
         content: '';
         position: absolute;
-        width: 200px;
-        height: 200px;
+        width: 300px;
+        height: 300px;
         top: 50%;
         left: 50%;
         transform: translate(-50%, -50%);
         border-radius: 50%;
 
-        /* Strong, visible gradient */
+        /* Gradient environment that starts OUTSIDE the button */
         background:
             radial-gradient(
                     circle at center,
-                    transparent 35px,
-                    rgba(239, 68, 68, 0.4) 50px,    /* Red glow */
-                    rgba(239, 68, 68, 0.3) 70px,
-                    rgba(168, 85, 247, 0.25) 90px,   /* Purple */
-                    rgba(59, 130, 246, 0.2) 110px,   /* Blue */
-                    rgba(34, 197, 94, 0.15) 130px,   /* Green */
-                    transparent 150px
+                    transparent 40px,  /* Clear space for the button */
+                    rgba(124, 58, 237, 0.15) 60px,
+                    rgba(168, 85, 247, 0.2) 100px,
+                    rgba(56, 189, 248, 0.15) 140px,
+                    rgba(250, 204, 21, 0.1) 180px,
+                    transparent 250px
             );
 
         /* Pulsing animation */
-        animation: environmentPulse 3s ease-in-out infinite;
+        animation: environmentPulse 4s ease-in-out infinite;
 
-        /* Less blur for more visibility */
-        filter: blur(8px);
+        /* Soft blur for ambient effect */
+        filter: blur(20px);
 
         /* Behind the button */
-        z-index: -1;
+        z-index: -2;
 
         pointer-events: none;
-        opacity: 0;
-        transition: opacity 0.4s ease;
+        opacity: 0.6;
+        transition: opacity 0.3s ease;
     }
 
-    /* Second layer - rotating colors */
+    /* Second environment layer - rotating gradient */
     &::after {
         content: '';
         position: absolute;
-        width: 250px;
-        height: 250px;
+        width: 400px;
+        height: 400px;
         top: 50%;
         left: 50%;
         transform: translate(-50%, -50%) rotate(0deg);
+        border-radius: 50%;
 
-        /* Vibrant rotating gradient */
+        /* Rotating conic gradient */
         background:
             conic-gradient(
                     from 0deg at 50% 50%,
-                    transparent,
-                    rgba(239, 68, 68, 0.3) 90deg,
-                    transparent 180deg,
-                    rgba(168, 85, 247, 0.3) 270deg,
-                    transparent
+                    transparent 0deg,
+                    rgba(244, 63, 94, 0.1) 60deg,
+                    transparent 120deg,
+                    rgba(168, 85, 247, 0.1) 180deg,
+                    transparent 240deg,
+                    rgba(56, 189, 248, 0.1) 300deg,
+                    transparent 360deg
             );
 
-        animation: environmentRotate 8s linear infinite;
-        filter: blur(12px);
-        z-index: -2;
+        animation: environmentRotate 20s linear infinite;
+        filter: blur(30px);
+        z-index: -3;
         pointer-events: none;
-        opacity: 0;
-        transition: opacity 0.4s ease;
+        opacity: 0.5;
     }
 
-    /* Normal state - show subtle glow */
+    /* Normal state - subtle environment glow */
     &:not(:hover):not(.chat-bubble-open) {
         &::before {
-            opacity: 0.3;
+            opacity: 0.4;
         }
         &::after {
-            opacity: 0.2;
+            opacity: 0.3;
         }
     }
 
-    /* Hover state - RED theme with environment */
+    /* Hover state - intensify everything */
     &:hover,
     &:focus-visible {
         transform: translateY(-2px) scale(1.05);
-        background: #dc2626;  /* Red background on hover */
-        border-color: #ef4444;
+
+        /* Speed up the gradient animation on hover */
+        animation-duration: 3s;
+
+        /* Brighten the border */
+        border-color: rgba(168, 85, 247, 0.6);
 
         .sparkle-icon {
-            color: #fff;
             transform: rotate(15deg);
+            text-shadow: 0 0 12px rgba(255,255,255,1);
         }
 
-        /* Intensify the ambient glow */
+        /* Intensify the environment glow */
         &::before {
-            opacity: 1 !important;
-            animation-duration: 1.5s;
-            background:
-                radial-gradient(
-                        circle at center,
-                        transparent 35px,
-                        rgba(239, 68, 68, 0.6) 50px,    /* Stronger red */
-                        rgba(239, 68, 68, 0.4) 80px,
-                        rgba(252, 165, 165, 0.3) 110px,
-                        transparent 150px
-                );
+            opacity: 1;
+            filter: blur(15px);
+            animation-duration: 2s;
         }
 
         &::after {
-            opacity: 0.8 !important;
-            animation-duration: 4s;
+            opacity: 0.8;
+            animation-duration: 10s;
         }
 
+        /* Enhanced glow shadow */
         box-shadow:
-            0 0 40px rgba(239, 68, 68, 0.5),
-            0 8px 32px rgba(239, 68, 68, 0.3),
-            inset 0 1px 0 rgba(255,255,255,0.2);
+            0 0 50px rgba(124, 58, 237, 0.5),
+            0 8px 40px rgba(168, 85, 247, 0.4),
+            inset 0 0 25px rgba(255,255,255,0.2);
     }
 
-    /* When toggled open - Blue theme */
+    /* When chat is open - different color scheme */
     &.chat-bubble-open {
-        background: #1e40af;
-        border-color: #3b82f6;
+        /* Invert the gradient */
+        background: linear-gradient(135deg, #0b1020 0%, #1f1147 50%, #0e7490 100%);
+        border-color: rgba(56, 189, 248, 0.5);
 
         .sparkle-icon {
             transform: rotate(180deg);
         }
 
+        /* Blue-tinted environment */
         &::before {
-            opacity: 0.6;
+            opacity: 0.7;
             background:
                 radial-gradient(
                         circle at center,
-                        transparent 35px,
-                        rgba(59, 130, 246, 0.5) 50px,
-                        rgba(59, 130, 246, 0.3) 80px,
-                        rgba(147, 197, 253, 0.2) 110px,
-                        transparent 150px
+                        transparent 40px,
+                        rgba(56, 189, 248, 0.2) 60px,
+                        rgba(59, 130, 246, 0.15) 100px,
+                        rgba(147, 197, 253, 0.1) 140px,
+                        transparent 200px
                 );
         }
 
         &::after {
-            opacity: 0.4;
+            opacity: 0.5;
         }
-
-        box-shadow:
-            0 0 40px rgba(59, 130, 246, 0.4),
-            0 8px 32px rgba(59, 130, 246, 0.2),
-            inset 0 1px 0 rgba(255,255,255,0.1);
     }
 
-    /* ===== SPARKLE PARTICLES IN THE ENVIRONMENT ===== */
+    /* SPARKLE PARTICLES IN THE ENVIRONMENT */
     .stars {
+
         pointer-events: none;
         position: absolute;
-        width: 400px;
-        height: 400px;
+        width: 200px;
+        height: 200px;
         top: 50%;
         left: 50%;
         transform: translate(-50%, -50%);
@@ -332,37 +334,95 @@
 
     .stars i {
         position: absolute;
-        width: 3px;
-        height: 3px;
-        background: linear-gradient(135deg, #a855f7, #22d3ee);
+        width: 4px;
+        height: 4px;
+        background: #fff;
         border-radius: 50%;
+        box-shadow:
+            0 0 6px rgba(255, 255, 255, 0.8),
+            0 0 12px rgba(168, 85, 247, 0.5);
+
+        /* Varied particle colors */
+        &:nth-child(odd) {
+            width: 3px;
+            height: 3px;
+            background: linear-gradient(135deg, #fbbf24, #f59e0b);
+        }
+
+        &:nth-child(even) {
+            background: linear-gradient(135deg, #a78bfa, #8b5cf6);
+        }
+
+        &:nth-child(3n) {
+            width: 2px;
+            height: 2px;
+            background: linear-gradient(135deg, #60a5fa, #3b82f6);
+        }
+    }
+
+    /* Always active subtle sparkles */
+    .stars i:nth-child(1)  {
+        left: 20%; top: 10%;
+        animation: gentleFloat 6s ease-in-out infinite;
+        animation-delay: 0s;
+        opacity: 0.6;
+    }
+    .stars i:nth-child(2)  {
+        left: 80%; top: 15%;
+        animation: gentleFloat 6s ease-in-out infinite;
+        animation-delay: 1.5s;
+        opacity: 0.6;
+    }
+    .stars i:nth-child(3)  {
+        left: 90%; top: 80%;
+        animation: gentleFloat 6s ease-in-out infinite;
+        animation-delay: 3s;
+        opacity: 0.6;
+    }
+    .stars i:nth-child(4)  {
+        left: 10%; top: 75%;
+        animation: gentleFloat 6s ease-in-out infinite;
+        animation-delay: 4.5s;
+        opacity: 0.6;
+    }
+
+    /* Additional sparkles that activate on hover */
+    .stars i:nth-child(n+5) {
         opacity: 0;
-        box-shadow: 0 0 10px rgba(168, 85, 247, 0.8);
         animation: starFloat 3s ease-out infinite paused;
     }
 
-    /* Distribute stars around the button in the environment */
-    .stars i:nth-child(1)  { left: 20%; top: 10%; animation-delay: 0s; }
-    .stars i:nth-child(2)  { left: 80%; top: 15%; animation-delay: 0.3s; }
-    .stars i:nth-child(3)  { left: 90%; top: 80%; animation-delay: 0.6s; }
-    .stars i:nth-child(4)  { left: 10%; top: 75%; animation-delay: 0.9s; }
-    .stars i:nth-child(5)  { left: 50%; top: 5%;  animation-delay: 1.2s; }
-    .stars i:nth-child(6)  { left: 95%; top: 50%; animation-delay: 1.5s; }
-    .stars i:nth-child(7)  { left: 5%;  top: 40%; animation-delay: 1.8s; }
-    .stars i:nth-child(8)  { left: 70%; top: 90%; animation-delay: 2.1s; }
-    .stars i:nth-child(9)  { left: 30%; top: 95%; animation-delay: 2.4s; }
-    .stars i:nth-child(10) { left: 15%; top: 30%; animation-delay: 2.7s; }
-    .stars i:nth-child(11) { left: 85%; top: 35%; animation-delay: 3s; }
-    .stars i:nth-child(12) { left: 40%; top: 15%; animation-delay: 3.3s; }
+    .stars i:nth-child(5)  { left: 50%; top: 5%;  animation-delay: 0.2s; }
+    .stars i:nth-child(6)  { left: 95%; top: 50%; animation-delay: 0.4s; }
+    .stars i:nth-child(7)  { left: 5%;  top: 40%; animation-delay: 0.6s; }
+    .stars i:nth-child(8)  { left: 70%; top: 90%; animation-delay: 0.8s; }
+    .stars i:nth-child(9)  { left: 30%; top: 95%; animation-delay: 1s; }
+    .stars i:nth-child(10) { left: 15%; top: 30%; animation-delay: 1.2s; }
+    .stars i:nth-child(11) { left: 85%; top: 35%; animation-delay: 1.4s; }
+    .stars i:nth-child(12) { left: 40%; top: 15%; animation-delay: 1.6s; }
 
-    /* Activate stars on hover */
-    &:hover .stars i,
-    &:focus-visible .stars i {
+    /* Activate more stars on hover */
+    &:hover .stars i:nth-child(n+5),
+    &:focus-visible .stars i:nth-child(n+5) {
+        opacity: 1;
         animation-play-state: running;
+    }
+
+    /* All stars active when chat is open */
+    &.chat-bubble-open .stars i {
+        opacity: 1 !important;
+        animation-play-state: running !important;
     }
 }
 
-/* Environment pulse animation */
+/* Animated gradient sweep INSIDE button (from Version 1) */
+@keyframes bubbleGradient {
+    0%   { background-position: 0% 50%; }
+    50%  { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+}
+
+/* Environment pulse OUTSIDE button (from Version 2) */
 @keyframes environmentPulse {
     0%, 100% {
         transform: translate(-50%, -50%) scale(1);
@@ -374,13 +434,25 @@
     }
 }
 
-/* Environment rotation animation */
+/* Environment rotation */
 @keyframes environmentRotate {
     0% { transform: translate(-50%, -50%) rotate(0deg); }
     100% { transform: translate(-50%, -50%) rotate(360deg); }
 }
 
-/* Stars floating outward from button */
+/* Gentle floating for ambient particles */
+@keyframes gentleFloat {
+    0%, 100% {
+        transform: translate(0, 0) scale(0.8);
+        opacity: 0.4;
+    }
+    50% {
+        transform: translate(10px, -20px) scale(1);
+        opacity: 0.8;
+    }
+}
+
+/* Stars floating outward */
 @keyframes starFloat {
     0% {
         opacity: 0;
@@ -392,7 +464,6 @@
     }
     100% {
         opacity: 0;
-        /* Float away from center */
         transform:
             translate(
                     calc(var(--star-x, 0) * 50px),
@@ -402,7 +473,7 @@
     }
 }
 
-/* Add CSS variables for star directions */
+/* Star movement directions */
 .stars i:nth-child(1)  { --star-x: -1; --star-y: -1; }
 .stars i:nth-child(2)  { --star-x: 1;  --star-y: -1; }
 .stars i:nth-child(3)  { --star-x: 1;  --star-y: 1; }
@@ -419,6 +490,7 @@
 /* Respect reduced motion */
 @media (prefers-reduced-motion: reduce) {
     .chat-bubble.neon {
+        animation: none;
         &::before,
         &::after {
             animation: none;
