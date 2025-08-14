@@ -124,6 +124,7 @@
 
 /* ===== Neon Gradient Chat Bubble with AMBIENT ENVIRONMENT ===== */
 .chat-bubble.neon {
+    overflow: visible;
     position: relative;
     width: 64px;
     height: 64px;
