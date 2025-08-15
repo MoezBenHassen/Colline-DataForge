@@ -1094,3 +1094,172 @@
         }
     }
 }
+
+
+/* ============ GLASSMORPHISM ============ */
+
+/* panel */
+.chat-window {
+    /* keep your positioning/sizing */
+    border-radius: 16px;
+    overflow: clip; /* avoid blur bleed at edges */
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    background: linear-gradient(
+            180deg,
+            rgba(17, 25, 40, 0.55) 0%,
+            rgba(17, 25, 40, 0.38) 100%
+    );
+    box-shadow:
+        0 10px 30px rgba(2, 8, 23, 0.45),
+        inset 0 1px 0 rgba(255, 255, 255, 0.08);
+    backdrop-filter: blur(16px) saturate(140%);
+    -webkit-backdrop-filter: blur(16px) saturate(140%);
+    position: absolute;
+}
+
+/* subtle animated border glow (like the toast) */
+.chat-window::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: 16px;
+    padding: 1px; /* border thickness */
+    background: linear-gradient(135deg, rgba(99,102,241,.35), rgba(56,189,248,.25), rgba(34,197,94,.25));
+    -webkit-mask:
+        linear-gradient(#000 0 0) content-box,
+        linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    pointer-events: none;
+    opacity: .65;
+    animation: glassBorder 12s linear infinite;
+}
+@keyframes glassBorder {
+    0% { filter: hue-rotate(0deg); }
+    100% { filter: hue-rotate(360deg); }
+}
+
+/* header */
+.chat-header {
+    background: linear-gradient(
+            180deg,
+            rgba(255, 255, 255, 0.06) 0%,
+            rgba(255, 255, 255, 0.02) 100%
+    );
+    border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    color: var(--text-color);
+}
+
+/* messages area */
+.chat-messages {
+    background: radial-gradient(1200px 400px at 20% -10%,
+        rgba(99,102,241,.08) 0%,
+        transparent 40%),
+    radial-gradient(1000px 400px at 110% 0%,
+            rgba(56,189,248,.08) 0%,
+            transparent 45%);
+    scrollbar-width: thin;
+    scrollbar-color: rgba(255,255,255,.25) transparent;
+}
+.chat-messages::-webkit-scrollbar { height: 8px; width: 8px; }
+.chat-messages::-webkit-scrollbar-thumb {
+    background: rgba(255,255,255,.25);
+    border-radius: 8px;
+}
+
+/* bubbles */
+.message-ai .message-content {
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    box-shadow:
+        0 8px 20px rgba(2, 8, 23, 0.25),
+        inset 0 1px 0 rgba(255, 255, 255, 0.06);
+    backdrop-filter: blur(8px) saturate(120%);
+    -webkit-backdrop-filter: blur(8px) saturate(120%);
+    color: var(--text-color);
+}
+
+.message-user .message-content {
+    /* glassy but tinted toward your primary */
+    background: linear-gradient(180deg,
+        color-mix(in oklab, var(--primary-color) 18%, transparent) 0%,
+        color-mix(in oklab, var(--primary-color) 8%, transparent) 100%);
+    border: 1px solid color-mix(in oklab, var(--primary-color) 35%, transparent);
+    color: var(--primary-color-text);
+    box-shadow:
+        0 8px 18px color-mix(in oklab, var(--primary-color) 20%, rgba(2,8,23,.0)),
+        inset 0 1px 0 rgba(255,255,255,.10);
+    backdrop-filter: blur(6px) saturate(120%);
+    -webkit-backdrop-filter: blur(6px) saturate(120%);
+}
+
+/* typing indicator matches glass */
+.typing-indicator span {
+    background-color: rgba(255,255,255,.85);
+    box-shadow: 0 0 10px rgba(255,255,255,.35);
+}
+
+/* input row */
+.chat-input {
+    background: linear-gradient(
+            180deg,
+            rgba(255, 255, 255, 0.05) 0%,
+            rgba(255, 255, 255, 0.02) 100%
+    );
+    border-top: 1px solid rgba(255, 255, 255, 0.12);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+}
+
+.chat-input input[pInputText] {
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.14);
+    color: var(--text-color);
+    border-radius: 12px;
+    padding: .65rem .9rem;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.06);
+    transition: border-color .2s ease, background .2s ease;
+}
+.chat-input input[pInputText]::placeholder {
+    color: rgba(255,255,255,.6);
+}
+.chat-input input[pInputText]:focus {
+    outline: none;
+    border-color: rgba(99,102,241,.6);
+    background: rgba(255,255,255,0.10);
+}
+
+/* prime button in the input row blends with glass */
+.chat-input .p-button {
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+    border-radius: 12px;
+    background: linear-gradient(135deg,
+        rgba(99,102,241,.35), rgba(56,189,248,.35));
+    border: 1px solid rgba(255,255,255,.18);
+    box-shadow:
+        0 6px 18px rgba(2,8,23,.35),
+        inset 0 1px 0 rgba(255,255,255,.10);
+}
+
+/* markdown readability inside glass */
+.message .message-content :where(p, ul, ol, pre, code) {
+    color: inherit;
+}
+.message .message-content pre, .message .message-content code {
+    background: rgba(0,0,0,.25);
+    border-radius: 8px;
+}
+
+/* graceful fallback for environments without backdrop-filter */
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+    .chat-window,
+    .chat-header,
+    .chat-input,
+    .message-ai .message-content,
+    .message-user .message-content {
+        background: rgba(17, 25, 40, 0.92);
+    }
+}
