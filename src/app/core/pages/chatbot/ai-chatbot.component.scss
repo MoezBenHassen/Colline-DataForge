@@ -5,6 +5,31 @@
     z-index: 1000;
 }
 
+/* ---------- Glass variables (more opaque) ---------- */
+:root {
+    /* bump opacity ~1.6–2x */
+    --glass-bg-1: color-mix(in srgb, var(--surface-0)   18%, transparent);
+    --glass-bg-2: color-mix(in srgb, var(--surface-100) 28%, transparent);
+    --glass-stroke: color-mix(in srgb, var(--surface-200) 55%, transparent);
+    --glass-shadow: color-mix(in srgb, var(--surface-900) 70%, transparent);
+
+    --ai-bubble:   color-mix(in srgb, var(--surface-100) 32%, transparent);
+    --user-bubble: color-mix(in srgb, var(--primary-color) 38%, transparent);
+    --divider-glass: color-mix(in srgb, var(--surface-300) 46%, transparent);
+}
+
+:root.dark, :root[data-p-theme="dark"] {
+    /* keep dark readable but crisper */
+    --glass-bg-1: color-mix(in srgb, var(--surface-800) 42%, transparent);
+    --glass-bg-2: color-mix(in srgb, var(--surface-700) 34%, transparent);
+    --glass-stroke: color-mix(in srgb, var(--surface-400) 40%, transparent);
+    --glass-shadow: color-mix(in srgb, var(--surface-950) 78%, transparent);
+
+    --ai-bubble:   color-mix(in srgb, var(--surface-700) 46%, transparent);
+    --user-bubble: color-mix(in srgb, var(--primary-color) 44%, transparent);
+}
+
+
 .chat-bubble {
     width: 60px;
     height: 60px;
@@ -1099,23 +1124,6 @@
 /* ============ GLASSMORPHISM ============ */
 
 /* panel */
-.chat-window {
-    /* keep your positioning/sizing */
-    border-radius: 16px;
-    overflow: clip; /* avoid blur bleed at edges */
-    border: 1px solid rgba(255, 255, 255, 0.14);
-    background: linear-gradient(
-            180deg,
-            rgba(17, 25, 40, 0.55) 0%,
-            rgba(17, 25, 40, 0.38) 100%
-    );
-    box-shadow:
-        0 10px 30px rgba(2, 8, 23, 0.45),
-        inset 0 1px 0 rgba(255, 255, 255, 0.08);
-    backdrop-filter: blur(16px) saturate(140%);
-    -webkit-backdrop-filter: blur(16px) saturate(140%);
-    position: absolute;
-}
 
 /* subtle animated border glow (like the toast) */
 .chat-window::before {
@@ -1262,4 +1270,183 @@
     .message-user .message-content {
         background: rgba(17, 25, 40, 0.92);
     }
+}
+
+
+/* ---------- Glassmorphism chat window ---------- */
+.chat-window {
+    position: absolute;
+    bottom: calc(100% + 1rem);
+    right: 0;
+    width: 370px;
+    max-width: 90vw;
+    height: 500px;
+    max-height: 70vh;
+
+    /* GLASS: gradient + translucency pulled from Surface palette */
+    background:
+        linear-gradient(180deg, var(--glass-bg-1), var(--glass-bg-2));
+    backdrop-filter: blur(14px) saturate(120%);
+    -webkit-backdrop-filter: blur(14px) saturate(120%);
+
+    border-radius: 16px;
+    overflow: hidden;
+
+    /* faint frosted border & inner stroke */
+    border: 1px solid var(--glass-stroke);
+    box-shadow:
+        0 20px 40px -20px var(--glass-shadow),
+        inset 0 1px 0 color-mix(in srgb, #fff 6%, transparent);
+
+    /* optional subtle highlight ring that also follows surface */
+    outline: 1px solid color-mix(in srgb, var(--surface-400) 12%, transparent);
+    outline-offset: -1px;
+}
+
+/* Header & footer keep glass look, slightly stronger backdrop */
+.chat-header {
+    padding: 1rem 1.25rem;
+    background: color-mix(in srgb, var(--glass-bg-2) 70%, transparent);
+    border-bottom: 1px solid var(--divider-glass);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+}
+
+.chat-input {
+    padding: 0.75rem;
+    background: color-mix(in srgb, var(--glass-bg-2) 70%, transparent);
+    border-top: 1px solid var(--divider-glass);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+}
+
+/* Messages area remains transparent over the glass body */
+.chat-messages {
+    flex: 1 1 auto;
+    overflow-y: auto;
+    padding: 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+/* ---------- Bubbles that follow theme ---------- */
+.message {
+    display: flex;
+    max-width: 85%;
+
+    .message-content {
+        padding: 0.75rem 1rem;
+        border-radius: 18px;
+        line-height: 1.5;
+        border: 1px solid var(--divider-glass);
+        backdrop-filter: blur(6px);
+        -webkit-backdrop-filter: blur(6px);
+    }
+}
+
+/* AI bubble = glass from Surface, readable text color token */
+.message-ai {
+    align-self: flex-start;
+
+    .message-content {
+        background: var(--ai-bubble);
+        color: var(--text-color);
+        border-bottom-left-radius: 6px;
+        box-shadow: 0 10px 24px -12px var(--glass-shadow);
+    }
+}
+
+/* User bubble = glass tinted with Primary (still translucent) */
+.message-user {
+    align-self: flex-end;
+
+    .message-content {
+        background: var(--user-bubble);
+        color: var(--primary-color-text);
+        border-bottom-right-radius: 6px;
+        box-shadow: 0 10px 24px -12px color-mix(in srgb, var(--primary-color) 40%, transparent);
+    }
+}
+
+/* Inputs and typing dots still inherit current theme text color */
+.typing-indicator span {
+    background-color: color-mix(in srgb, var(--text-color) 85%, transparent);
+}
+
+
+
+/* ---------- Chat window (denser frost) ---------- */
+.chat-window {
+    background: linear-gradient(180deg, var(--glass-bg-1), var(--glass-bg-2));
+    backdrop-filter: blur(18px) saturate(125%); /* +blur */
+    -webkit-backdrop-filter: blur(18px) saturate(125%);
+    border: 1px solid var(--glass-stroke);
+    box-shadow:
+        0 22px 48px -18px var(--glass-shadow),
+        inset 0 1px 0 color-mix(in srgb, #fff 8%, transparent);
+    border-radius: 16px;
+    overflow: hidden;
+    outline: 1px solid color-mix(in srgb, var(--surface-400) 16%, transparent);
+    outline-offset: -1px;
+}
+
+/* optional: a subtle inner vignette for legibility */
+.chat-window::after {
+    content: '';
+    position: absolute; inset: 0;
+    background:
+        radial-gradient(120% 120% at 50% -10%, transparent 30%, color-mix(in srgb, #000 12%, transparent) 70%),
+        linear-gradient(180deg, transparent 0%, color-mix(in srgb, #000 10%, transparent) 100%);
+    pointer-events: none;
+}
+
+/* Header/Footer glass a bit denser too */
+.chat-header,
+.chat-input {
+    background: color-mix(in srgb, var(--glass-bg-2) 85%, transparent);
+    border-color: var(--divider-glass);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+}
+
+
+/* AI bubble: clearer glass + stronger border for contrast */
+.message-ai .message-content {
+    background: color-mix(in srgb, var(--ai-bubble) 90%, transparent);
+    border: 1px solid color-mix(in srgb, var(--surface-300) 55%, transparent);
+    box-shadow:
+        0 10px 24px -12px var(--glass-shadow),
+        inset 0 1px 0 color-mix(in srgb, #fff 10%, transparent);
+    color: var(--text-color);
+}
+
+/* User bubble: keep glassmorphism but actually TINT with primary */
+.message-user .message-content {
+    background:
+        linear-gradient(180deg,
+            color-mix(in oklab, var(--primary-color) 55%, transparent) 0%,
+            color-mix(in oklab, var(--primary-color) 35%, transparent) 100%);
+    border: 1px solid color-mix(in oklab, var(--primary-color) 60%, transparent);
+    color: var(--primary-color-text);
+    box-shadow:
+        0 10px 26px -10px color-mix(in srgb, var(--primary-color) 40%, transparent),
+        inset 0 1px 0 color-mix(in srgb, #fff 12%, transparent);
+    backdrop-filter: blur(7px) saturate(120%);
+    -webkit-backdrop-filter: blur(7px) saturate(120%);
+}
+
+
+.typing-indicator span {
+    background-color: color-mix(in srgb, var(--text-color) 92%, transparent);
+    box-shadow: 0 0 8px color-mix(in srgb, #fff 40%, transparent);
+}
+
+.chat-input input[pInputText] {
+    background: color-mix(in srgb, var(--glass-bg-2) 85%, transparent);
+    border: 1px solid color-mix(in srgb, var(--surface-300) 46%, transparent);
+}
+.chat-input input[pInputText]:focus {
+    border-color: color-mix(in srgb, var(--primary-color) 60%, transparent);
+    background: color-mix(in srgb, var(--glass-bg-2) 92%, transparent);
 }
