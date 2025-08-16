@@ -7,6 +7,7 @@ import { RippleModule } from 'primeng/ripple';
 import { MarkdownModule } from 'ngx-markdown';
 import { AiChatService } from '../../../services/ai-chat.service';
 import {Message} from "primeng/message";
+import { Tooltip } from 'primeng/tooltip';
 
 interface ChatMessage {
     id: string;
@@ -17,7 +18,7 @@ interface ChatMessage {
 @Component({
     selector: 'app-ai-chatbot',
     standalone: true,
-    imports: [CommonModule, FormsModule, ButtonModule, InputTextModule, RippleModule, MarkdownModule, Message],
+    imports: [CommonModule, FormsModule, ButtonModule, InputTextModule, RippleModule, MarkdownModule, Message, Tooltip],
     templateUrl: './ai-chatbot.component.html',
     styleUrls: ['./ai-chatbot.component.scss']
 })
@@ -25,6 +26,7 @@ export class AiChatbotComponent implements AfterViewChecked {
     @ViewChild('scrollContainer') private scrollContainer!: ElementRef;
 
     isOpen = false;
+    isMaximized = false; // New property for maximize state
     isLoading = false;
     userInput = '';
     messages: ChatMessage[] = [{ id: crypto.randomUUID(), author: 'ai', text: 'Hello! I am the Colline DataForge assistant. How can I help you today?' }];
@@ -37,7 +39,20 @@ export class AiChatbotComponent implements AfterViewChecked {
 
     toggleChat(): void {
         this.isOpen = !this.isOpen;
+        if (!this.isOpen) {
+            this.isMaximized = false; // Reset maximize state when closing
+        }
         setTimeout(() => this.scrollToBottom(), 0);
+    }
+
+    closeChat(): void {
+        this.isOpen = false;
+        this.isMaximized = false;
+    }
+
+    toggleMaximize(): void {
+        this.isMaximized = !this.isMaximized;
+        setTimeout(() => this.scrollToBottom(), 50);
     }
 
     trackById = (_: number, m: ChatMessage) => m.id;

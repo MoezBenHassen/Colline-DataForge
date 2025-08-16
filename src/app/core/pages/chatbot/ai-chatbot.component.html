@@ -1,5 +1,4 @@
 <!-- The Floating Chat Bubble -->
-<!-- Floating Chat Bubble -->
 <button
     pButton
     type="button"
@@ -14,18 +13,42 @@
 
     <!-- star particles -->
     <span class="stars">
-    <i></i><i></i><i></i><i></i><i></i>
-    <i></i><i></i><i></i><i></i><i></i>
-    <i></i><i></i>
-  </span>
+        <i></i><i></i><i></i><i></i><i></i>
+        <i></i><i></i><i></i><i></i><i></i>
+        <i></i><i></i>
+    </span>
 </button>
 
 @if (isOpen) {
-    <div class="chat-window shadow-2xl">
+    <div class="chat-window shadow-2xl" [ngClass]="{'maximized': isMaximized}">
         <!-- Header -->
         <div class="chat-header">
-            <div class="font-bold text-lg">DataForge Assistant</div>
-            <div class="text-sm text-color-secondary">Your AI-powered guide</div>
+            <div class="chat-header-content">
+                <div class="chat-header-text">
+                    <div class="font-bold text-lg">DataForge Assistant</div>
+                    <div class="text-sm text-color-secondary">Your AI-powered guide</div>
+                </div>
+                <div class="chat-header-actions">
+                    <button
+                        pButton
+                        type="button"
+                        [icon]="isMaximized ? 'pi pi-window-minimize' : 'pi pi-window-maximize'"
+                        class="p-button-text p-button-rounded header-btn maximize-btn"
+                        (click)="toggleMaximize()"
+                        [pTooltip]="isMaximized ? 'Restore' : 'Maximize'"
+                        tooltipPosition="bottom">
+                    </button>
+                    <button
+                        pButton
+                        type="button"
+                        icon="pi pi-times"
+                        class="p-button-text p-button-rounded header-btn close-btn"
+                        (click)="closeChat()"
+                        pTooltip="Close"
+                        tooltipPosition="bottom">
+                    </button>
+                </div>
+            </div>
         </div>
 
         <!-- Messages -->
@@ -33,9 +56,7 @@
             @for (message of messages; track trackById) {
                 <div class="message" [ngClass]="'message-' + message.author">
                     <div class="message-content">
-
                         <markdown [data]="message.text"></markdown>
-
                     </div>
                 </div>
             }
