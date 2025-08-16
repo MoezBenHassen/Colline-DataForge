@@ -41,6 +41,12 @@ export class AppMenu {
                 ]
             },
             {
+                label: 'XML Forge',
+                items: [
+                    { label: 'N Elig Rules', icon: 'pi pi-fw pi-file-excel', routerLink: ['/generate-normal-eligibility-rules'] },
+                ]
+            },
+            {
                 label: 'UI Components Test',
                 items: [
                     { label: 'Form Layout', icon: 'pi pi-fw pi-id-card', routerLink: ['/uikit/formlayout'] },

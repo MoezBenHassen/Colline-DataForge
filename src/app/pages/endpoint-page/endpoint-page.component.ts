@@ -25,6 +25,8 @@ import { HighlightPipe } from '../../core/pipes/highlight.pipe';
 import * as XLSX from 'xlsx';
 import { TableModule } from 'primeng/table';
 import {ExecutionTrackingService} from "../../services/execution-tracking.service";
+import { ENDPOINTS_XML_METADATA } from '../../core/constants/endpoints-xml-metadata'; //
+import { XmlService } from '../../services/xml.service';
 
 type ExecutionResult = {
     severity: 'success' | 'warn' | 'error';
@@ -57,7 +59,11 @@ export class EndpointPageComponent implements OnInit {
     sqlQueryLoading = false;
     faqSearchTerm: string = '';
     filteredFaq: { q: any; a: any }[] = [];
+
     public searchTerm: string = '';
+
+    isXmlEndpoint: boolean = false; // Add this flag
+
     constructor(
         private route: ActivatedRoute,
         private excelService: ExcelService,
@@ -65,7 +71,8 @@ export class EndpointPageComponent implements OnInit {
         private globalStateService: GlobalStateService,
         private highlightPipe: HighlightPipe,
         private messageService: MessageService,
-        private trackingService: ExecutionTrackingService
+        private trackingService: ExecutionTrackingService,
+        private xmlService: XmlService,
     ) {
         effect(() => {
             // It will run automatically whenever the global default DB changes.
@@ -77,12 +84,23 @@ export class EndpointPageComponent implements OnInit {
 
     ngOnInit() {
         const endpointKey = this.route.snapshot.data['endpointKey'] || this.route.snapshot.paramMap.get('id');
-        if (!endpointKey || !ENDPOINTS_METADATA[endpointKey]) {
+        if (!endpointKey) {
             this.error = 'Unknown endpoint';
             return;
         }
-        this.metadata = ENDPOINTS_METADATA[endpointKey];
-        // Initialize the filtered list with all FAQs
+
+        // Check if the key exists in XML metadata first, then Excel
+        if (ENDPOINTS_XML_METADATA[endpointKey]) {
+            this.metadata = ENDPOINTS_XML_METADATA[endpointKey];
+            this.isXmlEndpoint = true;
+        } else if (ENDPOINTS_METADATA[endpointKey]) {
+            this.metadata = ENDPOINTS_METADATA[endpointKey];
+            this.isXmlEndpoint = false;
+        } else {
+            this.error = 'Unknown endpoint configuration';
+            return;
+        }
+
         this.filterFaq();
     }
 
@@ -161,19 +179,29 @@ export class EndpointPageComponent implements OnInit {
         this.result = null;
         this.loading = true;
         this.executionResult = null;
-        this.loading = true;
+
+
         const { file, numRows, databaseType, clearWarnings } = formData;
         let previewData: string[][] | undefined;
-        this.excelService.generate(this.metadata.key, formData).subscribe({
+
+        const serviceCall$ = this.isXmlEndpoint
+            ? this.xmlService.generate(this.metadata.key, formData)
+            : this.excelService.generate(this.metadata.key, formData);
+
+        serviceCall$.subscribe({
             next: async (response: HttpResponse<Blob>) => {
                 const warnings = response.headers.get('X-Warnings');
                 const body = response.body;
+                const fileExtension = this.isXmlEndpoint ? 'xml' : 'xlsx';
+                const fileName = `${this.metadata.key}.${fileExtension}`;
 
                 let previewData: string[][] | undefined;
+                if (body && !this.isXmlEndpoint) { // Only preview Excel files for now
+                    previewData = await this.processFilePreview(body);
+                }
 
                 if (body) {
-                    saveAs(body, `${this.metadata.key}.xlsx`);
-                    previewData = await this.processFilePreview(body);
+                    saveAs(body, fileName);
                 }
 
                 if (warnings) {

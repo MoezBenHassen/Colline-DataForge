@@ -20,6 +20,7 @@ export const appRoutes: Routes = [
             { path: `${RoutePaths.UIKIT}`, loadChildren: () => import('./app/pages/uikit/uikit.routes'), canActivate: [AuthGuard] },
             { path: `${RoutePaths.DOCUMENTATION}`, component: Documentation, canActivate: [AuthGuard] },
             { path: `${RoutePaths.PAGES}`, loadChildren: () => import('./app/pages/pages.routes'), canActivate: [AuthGuard] },
+            // EXCEL ENDPOINTS
             { path: 'interest-rate', component: EndpointPageComponent, data: { endpointKey: 'interest-rate' } },
             { path: 'interest-amount', component: EndpointPageComponent, data: { endpointKey: 'interest-amount' } },
             { path: 'counterparty-amount', component: EndpointPageComponent, data: { endpointKey: 'counterparty-amount' } },
@@ -31,7 +32,8 @@ export const appRoutes: Routes = [
             { path: 'org-contacts', component: EndpointPageComponent, data: { endpointKey: 'org-contacts' } },
             { path: 'tradeData', component: EndpointPageComponent, data: { endpointKey: 'tradeData' } },
             { path: 'mtm-feed', component: EndpointPageComponent, data: { endpointKey: 'mtm-feed' } },
-
+            // XML endpoints
+            { path: 'generate-normal-eligibility-rules', component: EndpointPageComponent, data: { endpointKey: 'generate-normal-eligibility-rules' } },
         ]
     },
 

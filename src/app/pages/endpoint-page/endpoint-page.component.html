@@ -29,6 +29,7 @@
                             <app-execution-form
                                 [metadata]="metadata"
                                 [loading]="loading"
+                                [isXmlEndpoint]="isXmlEndpoint"
                                 (execute)="handleExecute($event)"
                                 (formReset)="handleReset()">
                             </app-execution-form>
