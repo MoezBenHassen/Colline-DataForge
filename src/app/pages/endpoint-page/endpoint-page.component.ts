@@ -11,7 +11,7 @@ import { ExcelService } from '../../services/excel.service';
 import { DbManagementService } from '../../services/db-management.service';
 import { DatabaseType, GlobalStateService } from '../../services/gloable-state.service';
 import {Panel} from "primeng/panel";
-import {HttpResponse} from "@angular/common/http";
+import {HttpErrorResponse, HttpResponse} from "@angular/common/http";
 import {Message} from "primeng/message";
 import {TabView} from "primeng/tabview";
 import {FaqSectionComponent} from "./doc-section/faq-section.component";
@@ -240,9 +240,10 @@ export class EndpointPageComponent implements OnInit {
                 this.activeTabValue = '1';
             },
             // ✅ THE 'error' HANDLER RECEIVES AN HttpErrorResponse
-            error: (err) => {
+            error: (err: HttpErrorResponse) => {
                 this.loading = false;
-                const errorHeader = err.headers.get('X-Error');
+                this.processErrorResponse(err);
+               /* const errorHeader = err.headers.get('X-Error');
                 const warningHeader = err.headers.get('X-Warnings');
 
                 // Construct the object with the correct properties: severity, summary, and detail.
@@ -252,9 +253,46 @@ export class EndpointPageComponent implements OnInit {
                     detail: errorHeader || warningHeader || 'An unknown error occurred.'
                 };
                 this.trackingService.addRecord({ name: this.metadata.title, status: 'error', details: ''});
-                this.activeTabValue = '1';
+                this.activeTabValue = '1';*/
             }
         });
+    }
+// Add this new method inside the EndpointPageComponent class
+
+    /**
+     * Processes an HttpErrorResponse to extract a meaningful error message.
+     * It prioritizes the JSON body, then custom headers, then a default message.
+     */
+    private async processErrorResponse(err: HttpErrorResponse): Promise<void> {
+        const errorHeader = err.headers.get('X-Error');
+        const warningHeader = err.headers.get('X-Warnings');
+        let detailMessage = errorHeader || warningHeader || 'An unknown error occurred.';
+
+        // The error body might be a Blob that we need to parse as text
+        if (err.error instanceof Blob && err.error.type === 'application/json') {
+            try {
+                // Read the Blob's content as a string, then parse it as JSON
+                const errorJson = JSON.parse(await err.error.text());
+
+                // If we find the specific 'suggestion' structure, format it
+                if (errorJson.message && errorJson.suggestion) {
+                    detailMessage = `${errorJson.message}. ${errorJson.suggestion}`;
+                } else if (errorJson.message) {
+                    detailMessage = errorJson.message; // Handle other potential JSON errors
+                }
+            } catch (e) {
+                console.error("Failed to parse error response blob.", e);
+            }
+        }
+
+        this.executionResult = {
+            severity: 'error',
+            summary: 'Execution Failed',
+            detail: detailMessage
+        };
+
+        this.trackingService.addRecord({ name: this.metadata.title, status: 'error', details: detailMessage });
+        this.activeTabValue = '1';
     }
 
     /**
