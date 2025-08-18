@@ -62,7 +62,8 @@ export class EndpointPageComponent implements OnInit {
 
     public searchTerm: string = '';
 
-    isXmlEndpoint: boolean = false; // Add this flag
+    isXmlEndpoint: boolean = false;
+    usesDatabase: boolean = false;
 
     constructor(
         private route: ActivatedRoute,
@@ -100,6 +101,10 @@ export class EndpointPageComponent implements OnInit {
             this.error = 'Unknown endpoint configuration';
             return;
         }
+
+        this.usesDatabase = this.metadata.params.some(
+            p => p.name === 'database' || p.name === 'databaseType'
+        );
 
         this.filterFaq();
     }

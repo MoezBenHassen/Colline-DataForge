@@ -23,6 +23,7 @@ export class DocSectionComponent implements OnInit {
     @Input() metadata!: EndpointMetadata;
     @Input() sqlQuery?: string | string[];
     @Input() sqlQueryLoading: boolean = false;
+    @Input() usesDatabase: boolean = false;
 
     // This property will hold the generated URL for the template
     public swaggerUrl: string = '';
