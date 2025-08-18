@@ -38,6 +38,7 @@
                         <p-tabpanel value="1">
                             <div class="card px-8 py-6 shadow-xl rounded-2xl">
 
+
                                 @if (executionResult) {
                                     @switch (executionResult.severity) {
                                         @case ('success') {
@@ -45,8 +46,8 @@
                                         }
                                         @case ('warn') {
                                             <p-message size="large" severity="warn" icon="pi pi-exclamation-triangle">
-                                                        <span class="font-bold">{{ executionResult.summary }} : &nbsp;</span>
-                                                        <span class="mt-1 break-words">{{ executionResult.detail }}</span>
+                                                <span class="font-bold">{{ executionResult.summary }} : &nbsp;</span>
+                                                <span class="mt-1 break-words">{{ executionResult.detail }}</span>
                                             </p-message>
                                         }
                                         @case ('error') {
@@ -83,6 +84,15 @@
                                             </p-table>
                                         </div>
                                     }
+                                    @if (executionResult.xmlPreview) {
+                                        <div class="mt-4 border-t pt-4">
+                                            <h5 class="font-semibold mb-2 text-color-secondary">XML File Preview (First 50 Lines)</h5>
+                                            <div class="xml-preview-container">
+                                                <pre class="xml-pre m-0"><code [highlight]="executionResult.xmlPreview" language="xml"></code></pre>
+                                            </div>
+                                        </div>
+                                    }
+
                                 } @else {
                                     <div class="text-center text-color-secondary p-4">
                                         <i class="pi pi-info-circle text-2xl"></i>

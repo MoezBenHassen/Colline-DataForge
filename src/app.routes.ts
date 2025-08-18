@@ -33,7 +33,10 @@ export const appRoutes: Routes = [
             { path: 'tradeData', component: EndpointPageComponent, data: { endpointKey: 'tradeData' } },
             { path: 'mtm-feed', component: EndpointPageComponent, data: { endpointKey: 'mtm-feed' } },
             // XML endpoints
+            { path: 'generate-agreements', component: EndpointPageComponent, data: { endpointKey: 'generate-agreements' } },
             { path: 'generate-normal-eligibility-rules', component: EndpointPageComponent, data: { endpointKey: 'generate-normal-eligibility-rules' } },
+            { path: 'generate-complex-eligibility-rules', component: EndpointPageComponent, data: { endpointKey: 'generate-complex-eligibility-rules' } },
+            { path: 'generate-etd-balances', component: EndpointPageComponent, data: { endpointKey: 'generate-etd-balances' } },
         ]
     },
 

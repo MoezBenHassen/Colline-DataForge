@@ -27,12 +27,14 @@ import { TableModule } from 'primeng/table';
 import {ExecutionTrackingService} from "../../services/execution-tracking.service";
 import { ENDPOINTS_XML_METADATA } from '../../core/constants/endpoints-xml-metadata'; //
 import { XmlService } from '../../services/xml.service';
+import { Highlight } from 'ngx-highlightjs';
 
 type ExecutionResult = {
     severity: 'success' | 'warn' | 'error';
     summary: string;
     detail: string;
     filePreview?: string[][]
+    xmlPreview?: string;
 }
 type FaqItem = { q: string; a: string }; // Helper type
 
@@ -43,7 +45,7 @@ type FaqItem = { q: string; a: string }; // Helper type
     templateUrl: './endpoint-page.component.html',
     imports: [CommonModule, DocSectionComponent, ExecutionFormComponent, Panel, Message, TabPanel,
         FaqSectionComponent, PrimeTemplate, Tabs, Tab,
-        TabList, TabPanel, TabPanels, Badge, FormsModule, InputText, IconField, InputIcon, TableModule],
+        TabList, TabPanel, TabPanels, Badge, FormsModule, InputText, IconField, InputIcon, TableModule, Highlight],
     styleUrls: ['./endpoint-page.component.scss'],
     providers: [MessageService, HighlightPipe]
 })
@@ -187,7 +189,6 @@ export class EndpointPageComponent implements OnInit {
 
 
         const { file, numRows, databaseType, clearWarnings } = formData;
-        let previewData: string[][] | undefined;
 
         const serviceCall$ = this.isXmlEndpoint
             ? this.xmlService.generate(this.metadata.key, formData)
@@ -201,12 +202,19 @@ export class EndpointPageComponent implements OnInit {
                 const fileName = `${this.metadata.key}.${fileExtension}`;
 
                 let previewData: string[][] | undefined;
-                if (body && !this.isXmlEndpoint) { // Only preview Excel files for now
-                    previewData = await this.processFilePreview(body);
-                }
+                let excelPreviewData: string[][] | undefined;
+                let xmlPreviewData: string | undefined;
 
                 if (body) {
-                    saveAs(body, fileName);
+                    const fileExtension = this.isXmlEndpoint ? 'xml' : 'xlsx';
+                    saveAs(body, `${this.metadata.key}.${fileExtension}`);
+
+                    // 4. Call the correct preview processor based on endpoint type
+                    if (this.isXmlEndpoint) {
+                        xmlPreviewData = await this.processXmlPreview(body);
+                    } else {
+                        excelPreviewData = await this.processFilePreview(body);
+                    }
                 }
 
                 if (warnings) {
@@ -214,7 +222,8 @@ export class EndpointPageComponent implements OnInit {
                         severity: 'warn',
                         summary: 'File Downloaded with Warnings',
                         detail: warnings,
-                        filePreview: previewData
+                        filePreview: excelPreviewData,
+                        xmlPreview: xmlPreviewData // Pass the preview data
                     };
                     this.messageService.add({
                         severity: 'warning',
@@ -228,7 +237,8 @@ export class EndpointPageComponent implements OnInit {
                         severity: 'success',
                         summary: 'Success',
                         detail: 'File downloaded successfully!',
-                        filePreview: previewData
+                        filePreview: excelPreviewData,
+                        xmlPreview: xmlPreviewData
                     };
                     this.trackingService.addRecord({ name: this.metadata.title, status: 'success', details: 'File downloaded successfully!' });
                 } else {
@@ -257,7 +267,16 @@ export class EndpointPageComponent implements OnInit {
             }
         });
     }
-// Add this new method inside the EndpointPageComponent class
+    private async processXmlPreview(blob: Blob): Promise<string> {
+        try {
+            const text = await blob.text();
+            const lines = text.split('\n');
+            return lines.slice(0, 50).join('\n'); // Return first 50 lines
+        } catch (e) {
+            console.error('Error reading XML preview:', e);
+            return 'Could not generate XML preview.';
+        }
+    }
 
     /**
      * Processes an HttpErrorResponse to extract a meaningful error message.

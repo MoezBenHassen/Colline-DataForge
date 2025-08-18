@@ -79,7 +79,7 @@ export const ENDPOINTS_XML_METADATA: Record<string, EndpointMetadata> = {
                 required: true
             }
         ],
-        sqlQueryKey: 'agreement_legal_ids',
+        sqlQueryKey: 'agreements_legal-ids',
         faq: [
             { q: 'How are legal IDs selected?', a: 'They are fetched from the selected database to ensure uniqueness per cloned node.' },
             ...GENERAL_FAQ_XML
@@ -105,7 +105,7 @@ export const ENDPOINTS_XML_METADATA: Record<string, EndpointMetadata> = {
         notes:
             'Choose this endpoint if the simple (NORMAL) one returns an error indicating a complex template.',
         params: GENERAL_XML_TEMPLATE_PARAMS,
-        sqlQueryKey: 'complex_eligibility_names',
+        sqlQueryKey: 'eligibility_template',
         faq: [
             { q: 'How are template names generated?', a: 'They are queried from the selected database to avoid duplicates.' },
             ...GENERAL_FAQ_XML
@@ -181,7 +181,7 @@ export const ENDPOINTS_XML_METADATA: Record<string, EndpointMetadata> = {
                 placeholder: 'e.g., 500'
             }
         ],
-        sqlQueryKey: 'etd_balances',
+        sqlQueryKey: 'etd_balance_udf_data2',
         faq: [
             { q: 'Why is there no template upload?', a: 'The XML is generated entirely by the backend from database queries.' },
             ...GENERAL_FAQ_XML

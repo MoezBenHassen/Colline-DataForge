@@ -5,3 +5,27 @@
     border: solid red 2px !important;
     border-radius: 20px !important;
 }
+
+// Add these styles to your component's SCSS file
+.xml-preview-container {
+    max-height: 300px;
+    overflow-y: auto;
+    border-radius: var(--border-radius);
+    border: 1px solid var(--surface-border);
+    background-color: var(--surface-card);
+    border-top-left-radius: 10px;
+    border-bottom-left-radius: 10px;
+}
+
+xml-pre {
+    border-top-left-radius: 10px;
+    border-bottom-left-radius: 10px;
+}
+xml-pre code {
+    border-top-left-radius: 10px;
+    border-bottom-left-radius: 10px;
+}
+
+element.style {
+
+}

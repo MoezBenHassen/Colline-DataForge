@@ -25,6 +25,15 @@ export class AppMenu {
                 items: [{ label: 'Dashboard', icon: 'pi pi-fw pi-home', routerLink: ['/'] }]
             },
             {
+                label: 'XML Forge',
+                items: [
+                    { label: 'Agreements', icon: 'pi pi-fw pi-code', routerLink: ['/generate-agreements'] },
+                    { label: 'N Elig Rules', icon: 'pi pi-fw pi-code', routerLink: ['/generate-normal-eligibility-rules'] },
+                    { label: 'C Elig Rules', icon: 'pi pi-fw pi-code', routerLink: ['/generate-complex-eligibility-rules'] },
+                    { label: 'ETD Balances', icon: 'pi pi-fw pi-code', routerLink: ['/generate-etd-balances'] },
+                ]
+            },
+            {
                 label: 'Excel Forge',
                 items: [
                     { label: 'Interest Rate', icon: 'pi pi-fw pi-file-excel', routerLink: ['/interest-rate'] },
@@ -38,12 +47,6 @@ export class AppMenu {
                     { label: 'Security', icon: 'pi pi-fw pi-file-excel', routerLink: ['/security'] },
                     { label: 'Trade Data', icon: 'pi pi-fw pi-file-excel', routerLink: ['/tradeData'] },
                     { label: 'MTM', icon: 'pi pi-fw pi-file-excel', routerLink: ['/mtm-feed'] },
-                ]
-            },
-            {
-                label: 'XML Forge',
-                items: [
-                    { label: 'N Elig Rules', icon: 'pi pi-fw pi-file-excel', routerLink: ['/generate-normal-eligibility-rules'] },
                 ]
             },
             {

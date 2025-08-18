@@ -30,7 +30,8 @@ appConfig = {
         provideHighlightOptions({
             coreLibraryLoader: () => import('highlight.js/lib/core'),
             languages: {
-                sql: () => import('highlight.js/lib/languages/sql')
+                sql: () => import('highlight.js/lib/languages/sql'),
+                xml: () => import('highlight.js/lib/languages/xml')
             },
             themePath: 'assets/styles/github.css'
         }),
