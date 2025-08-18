@@ -56,14 +56,15 @@
             <div class="col-span-12 flex items-center justify-between mb-4">
                 <div class="flex items-center gap-2">
                     <ng-container *ngIf="getParam('file') as fileParam">
-                        <p-fileupload *ngIf="!form.get(fileParam.name)?.value"
-                                      mode="basic"
-                                      [name]="fileParam.name"
-                                      (onSelect)="onFileSelect($event, fileParam.name)"
-                                      [customUpload]="true" [auto]="true" [multiple]="false"
-                                      chooseLabel="Excel template file"
-                                      accept=".xls,.xlsx"
-                                      maxFileSize="5000000">
+                        <p-fileupload
+                            *ngIf="!form.get(fileParam.name)?.value"
+                            mode="basic"
+                            [name]="fileParam.name"
+                            (onSelect)="onFileSelect($event, fileParam.name)"
+                            [customUpload]="true" [auto]="true" [multiple]="false"
+                            [chooseLabel]="isXmlEndpoint ? 'XML template file' : 'Excel template file'"
+                            [accept]="isXmlEndpoint ? '.xml' : '.xls,.xlsx'"
+                            maxFileSize="5000000">
                         </p-fileupload>
                         <p-chip *ngIf="form.get(fileParam.name)?.value"
                                 [label]="form.get(fileParam.name)?.value.name"

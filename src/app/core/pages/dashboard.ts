@@ -5,30 +5,30 @@ import { RecentActivityWidget } from '../../../app/pages/dashboard/components/re
 import { EndpointStatsWidget } from '../../../app/pages/dashboard/components/endpoint-stats.widget';
 import {QueryExplorerWidget} from "../../pages/dashboard/components/query-explorer.widget";
 import {QuickActionsWidget} from "../../pages/dashboard/components/quick-actions.widget";
+import {SystemMetricsWidget} from "../../pages/dashboard/components/system-metrics.widget";
+import {UptimeWidget} from "../../pages/dashboard/components/uptime.widget";
+import {TopEndpointsWidget} from "../../pages/dashboard/components/top-endpoints.widget";
+import {GenerationPerformanceWidget} from "../../pages/dashboard/components/generation-performance.widget";
 
 @Component({
     selector: 'app-dashboard',
     standalone: true,
     // Import your new, dynamic widgets
-    imports: [CommonModule, DatabaseStatusWidget, RecentActivityWidget, EndpointStatsWidget, QueryExplorerWidget, QuickActionsWidget],
+    imports: [CommonModule, DatabaseStatusWidget, RecentActivityWidget, EndpointStatsWidget, QueryExplorerWidget, QuickActionsWidget, SystemMetricsWidget, UptimeWidget, TopEndpointsWidget, GenerationPerformanceWidget],
     template: `
         <div class="grid grid-cols-12 gap-6">
-            <div class="col-span-12 lg:col-span-5">
-                <app-endpoint-stats-widget />
-            </div>
-            <div class="col-span-12 lg:col-span-7">
-                <app-database-status-widget />
-            </div>
-            <div class="col-span-12 lg:col-span-5">
-                <app-quick-actions-widget />
-            </div>
+            <div class="col-span-12 lg:col-span-4"><app-endpoint-stats-widget /></div>
+            <div class="col-span-12 lg:col-span-4"><app-uptime-widget /></div>
+            <div class="col-span-12 lg:col-span-4"><app-quick-actions-widget /></div>
 
-            <div class="col-span-12 xl:col-span-6">
-                <app-recent-activity-widget />
-            </div>
-            <div class="col-span-12 xl:col-span-6">
-                <app-query-explorer-widget />
-            </div>
+            <div class="col-span-12"><app-system-metrics-widget /></div>
+            <div class="col-span-12"><app-database-status-widget /></div>
+
+            <div class="col-span-12 xl:col-span-6"><app-recent-activity-widget /></div>
+            <div class="col-span-12 xl:col-span-6"><app-top-endpoints-widget /></div>
+            <div class="col-span-12"><app-generation-performance-widget /></div>
+
+            <div class="col-span-12"><app-query-explorer-widget /></div>
         </div>
     `
 })

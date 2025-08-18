@@ -39,7 +39,7 @@ export class ExecutionFormComponent implements OnInit, OnDestroy {
     @Output() execute = new EventEmitter<any>();
     @Output() formReset = new EventEmitter<void>();
     @Output() dbTypeChange = new EventEmitter<DatabaseType>();
-
+    @Input() isXmlEndpoint: boolean = false;
     form!: FormGroup;
     private formSub?: Subscription;
     public readonly dbOptions: Signal<DatabaseOption[]>;
