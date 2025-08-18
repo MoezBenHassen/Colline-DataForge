@@ -6,13 +6,14 @@ import { Observable, tap } from 'rxjs';
 import {API} from '../../core/constants/api-endpoints';
 import { environment } from '../../../environments/environment';
 import { TokenService } from '../token.service';
+import {ChatStateService} from "../ai/chat-state.service";
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
     private readonly TOKEN_KEY = 'jwt_token';
     private readonly LOGIN_URL = '/api/auth/login'; // adjust if needed
 
-    constructor(private http: HttpClient, private router: Router) {}
+    constructor(private http: HttpClient, private router: Router, private chatStateService: ChatStateService) {}
 
     login(username: string, password: string, rememberMe = false): Observable<any> {
         // The URL endpoint from your Spring Boot app
@@ -39,6 +40,7 @@ export class AuthService {
         // Clear token from both locations
         sessionStorage.removeItem(this.TOKEN_KEY);
         localStorage.removeItem(this.TOKEN_KEY);
+        this.chatStateService.clearMessages();
         this.router.navigate(['/auth/login']); // Or your designated login route
     }
 

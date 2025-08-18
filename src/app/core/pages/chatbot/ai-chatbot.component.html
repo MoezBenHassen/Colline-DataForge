@@ -53,7 +53,7 @@
 
         <!-- Messages -->
         <div class="chat-messages" #scrollContainer>
-            @for (message of messages; track trackById) {
+            @for (message of messages(); track trackById) {
                 <div class="message" [ngClass]="'message-' + message.author">
                     <div class="message-content">
                         <markdown [data]="message.text"></markdown>

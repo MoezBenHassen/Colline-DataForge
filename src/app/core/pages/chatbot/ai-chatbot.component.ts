@@ -1,13 +1,14 @@
-import { Component, ElementRef, ViewChild, AfterViewChecked } from '@angular/core';
+import {Component, ElementRef, ViewChild, AfterViewChecked, Signal} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ButtonModule } from 'primeng/button';
 import { InputTextModule } from 'primeng/inputtext';
 import { RippleModule } from 'primeng/ripple';
 import { MarkdownModule } from 'ngx-markdown';
-import { AiChatService } from '../../../services/ai-chat.service';
+import { AiChatService } from '../../../services/ai/ai-chat.service';
 import {Message} from "primeng/message";
 import { Tooltip } from 'primeng/tooltip';
+import {ChatStateService} from "../../../services/ai/chat-state.service";
 
 interface ChatMessage {
     id: string;
@@ -29,9 +30,13 @@ export class AiChatbotComponent implements AfterViewChecked {
     isMaximized = false; // New property for maximize state
     isLoading = false;
     userInput = '';
-    messages: ChatMessage[] = [{ id: crypto.randomUUID(), author: 'ai', text: 'Hello! I am the Colline DataForge assistant. How can I help you today?' }];
+    // messages: ChatMessage[] = [{ id: crypto.randomUUID(), author: 'ai', text: 'Hello! I am the Colline DataForge assistant. How can I help you today?' }];
+    messages: Signal<ChatMessage[]>;
 
-    constructor(private aiChatService: AiChatService) {}
+
+    constructor(private aiChatService: AiChatService,  private chatStateService: ChatStateService) {
+        this.messages = this.chatStateService.messages;
+    }
 
     ngAfterViewChecked() {
         this.scrollToBottom();
@@ -62,7 +67,8 @@ export class AiChatbotComponent implements AfterViewChecked {
         if (!userQuery || this.isLoading) return;
 
         // push user message
-        this.messages.push({ id: crypto.randomUUID(), author: 'user', text: userQuery });
+        // this.messages.push({ id: crypto.randomUUID(), author: 'user', text: userQuery });
+        this.chatStateService.addMessage({ id: crypto.randomUUID(), author: 'user', text: userQuery });
         this.userInput = '';
         this.isLoading = true;
 
@@ -72,11 +78,11 @@ export class AiChatbotComponent implements AfterViewChecked {
                 next: (response) => {
                     // Backend returns { answer: string, status?: string } — handle either
                     const answer = (response as any)?.answer ?? '';
-                    this.messages.push({ id: crypto.randomUUID(), author: 'ai', text: answer });
+                    this.chatStateService.addMessage({ id: crypto.randomUUID(), author: 'ai', text: answer });
                     this.isLoading = false;
                 },
                 error: () => {
-                    this.messages.push({
+                    this.chatStateService.addMessage({
                         id: crypto.randomUUID(),
                         author: 'ai',
                         text: 'Sorry, I encountered an error. Please try again.'
