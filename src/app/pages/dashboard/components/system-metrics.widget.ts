@@ -3,65 +3,197 @@ import { CommonModule } from '@angular/common';
 import { ChartModule } from 'primeng/chart';
 import { SkeletonModule } from 'primeng/skeleton';
 import { DashboardService, ResourceMetrics } from '../../../services/dashboard.service';
-import {forkJoin, Subscription} from 'rxjs';
+import { forkJoin, Subscription, interval } from 'rxjs';
 import { LayoutService } from '../../../layout/service/layout.service';
+import { TooltipModule } from 'primeng/tooltip';
+import { ProgressBarModule } from 'primeng/progressbar';
+import {Checkbox} from "primeng/checkbox";
+import {FormsModule} from "@angular/forms";
 
 @Component({
     selector: 'app-system-metrics-widget',
     standalone: true,
-    imports: [CommonModule, ChartModule, SkeletonModule],
+    imports: [CommonModule, ChartModule, SkeletonModule, TooltipModule, ProgressBarModule, Checkbox, FormsModule],
     template: `
         <div class="card">
-            <h5 class="font-semibold text-xl mb-4">Backend System Resources</h5>
-            @if(loading) {
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 text-center">
-                    <p-skeleton shape="circle" size="120px" styleClass="mx-auto"></p-skeleton>
-                    <p-skeleton shape="circle" size="120px" styleClass="mx-auto"></p-skeleton>
-                    <p-skeleton shape="circle" size="120px" styleClass="mx-auto"></p-skeleton>
-                    <p-skeleton shape="circle" size="120px" styleClass="mx-auto"></p-skeleton>
+            <div class="flex justify-between items-center mb-4">
+                <h5 class="font-semibold text-xl">Backend System Resources</h5>
+                <div class="flex items-center gap-2">
+                    <span class="text-sm text-gray-500">Auto-refresh</span>
+                    <p-checkbox [(ngModel)]="autoRefresh" (onChange)="toggleAutoRefresh()"></p-checkbox>
+                </div>
+            </div>
+
+            @if (loading) {
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 text-center">
+                    @for (i of [1, 2, 3, 4]; track i) {
+                        <div class="metric-card">
+                            <p-skeleton shape="circle" size="120px" styleClass="mx-auto mb-2"></p-skeleton>
+                            <p-skeleton width="60%" height="1rem" styleClass="mx-auto"></p-skeleton>
+                        </div>
+                    }
                 </div>
             } @else {
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 text-center">
-                    <div>
-                        <p-chart type="doughnut" [data]="cpuData" [options]="cpuChartOptions" [plugins]="[centerTextPlugin]" height="120px"></p-chart>
-                        <div class="font-medium mt-2">CPU Usage</div>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 text-center">
+                    <!-- CPU Usage -->
+                    <div class="metric-card" [class.alert]="cpuPercent > 80">
+                        <div class="relative">
+                            <p-chart type="doughnut" [data]="cpuData" [options]="cpuChartOptions" [plugins]="[centerTextPlugin]" height="120px"> </p-chart>
+                            @if (cpuPercent > 80) {
+                                <i class="pi pi-exclamation-triangle absolute top-0 right-0 text-orange-500" pTooltip="High CPU usage detected"></i>
+                            }
+                        </div>
+                        <div class="metric-label">
+                            <i class="pi pi-microchip mr-2 text-cyan-500"></i>
+                            CPU Usage
+                        </div>
+                        <div class="metric-detail">
+                            <p-progressBar [value]="cpuPercent" [showValue]="false" styleClass="h-1 mt-2"> </p-progressBar>
+                        </div>
                     </div>
-                    <div>
-                        <p-chart type="doughnut" [data]="memoryData" [options]="memoryChartOptions" [plugins]="[centerTextPlugin]" height="120px"></p-chart>
-                        <div class="font-medium mt-2">Memory</div>
+
+                    <!-- Memory -->
+                    <div class="metric-card" [class.alert]="memPercent > 85">
+                        <div class="relative">
+                            <p-chart type="doughnut" [data]="memoryData" [options]="memoryChartOptions" [plugins]="[centerTextPlugin]" height="120px"> </p-chart>
+                            @if (memPercent > 85) {
+                                <i class="pi pi-exclamation-triangle absolute top-0 right-0 text-orange-500" pTooltip="High memory usage"></i>
+                            }
+                        </div>
+                        <div class="metric-label">
+                            <i class="pi pi-database mr-2 text-orange-500"></i>
+                            Memory
+                        </div>
+                        <div class="metric-detail text-xs text-gray-600">{{ formatBytes(memUsed) }} / {{ formatBytes(memMax) }}</div>
                     </div>
-                    <div>
-                        <p-chart type="doughnut" [data]="diskData" [options]="diskChartOptions" [plugins]="[centerTextPlugin]" height="120px"></p-chart>
-                        <div class="font-medium mt-2">Disk Space</div>
+
+                    <!-- Disk Space -->
+                    <div class="metric-card" [class.alert]="diskPercent > 90">
+                        <div class="relative">
+                            <p-chart type="doughnut" [data]="diskData" [options]="diskChartOptions" [plugins]="[centerTextPlugin]" height="120px"> </p-chart>
+                            @if (diskPercent > 90) {
+                                <i class="pi pi-exclamation-triangle absolute top-0 right-0 text-red-500" pTooltip="Low disk space!"></i>
+                            }
+                        </div>
+                        <div class="metric-label">
+                            <i class="pi pi-server mr-2 text-purple-500"></i>
+                            Disk Space
+                        </div>
+                        <div class="metric-detail text-xs text-gray-600">{{ formatBytes(diskFree) }} free</div>
                     </div>
-                    <div>
-                        <p-chart type="doughnut" [data]="directoryData" [options]="directoryChartOptions" [plugins]="[centerTextPlugin]" height="120px"></p-chart>
-                        <div class="font-medium mt-2">Data Directory</div>
+
+                    <!-- Data Directory -->
+                    <div class="metric-card">
+                        <div class="relative">
+                            <p-chart type="doughnut" [data]="directoryData" [options]="directoryChartOptions" [plugins]="[centerTextPlugin]" height="120px"> </p-chart>
+                        </div>
+                        <div class="metric-label">
+                            <i class="pi pi-folder mr-2 text-green-500"></i>
+                            Data Directory
+                        </div>
+                        <div class="metric-detail text-xs text-gray-600">{{ dirSizePercentOfDisk }}% of total disk</div>
+                    </div>
+                </div>
+
+                <!-- System Health Summary -->
+                <div class="mt-6 p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center gap-2">
+                            <i class="pi pi-info-circle text-blue-500"></i>
+                            <span class="font-medium">System Health:</span>
+                            <span [class]="getHealthStatusClass()">{{ getHealthStatus() }}</span>
+                        </div>
+                        <span class="text-sm text-gray-500"> Last updated: {{ lastUpdated | date: 'short' }} </span>
                     </div>
                 </div>
             }
         </div>
-    `
+    `,
+    styles: [
+        `
+            .metric-card {
+                padding: 1rem;
+                border-radius: 8px;
+                background: var(--surface-50);
+                transition: all 0.3s ease;
+                position: relative;
+            }
+
+            .metric-card:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            }
+
+            .metric-card.alert {
+                animation: pulse 2s infinite;
+            }
+
+            @keyframes pulse {
+                0%,
+                100% {
+                    background: var(--surface-50);
+                }
+                50% {
+                    background: rgba(251, 191, 36, 0.1);
+                }
+            }
+
+            .metric-label {
+                font-weight: 600;
+                margin-top: 0.75rem;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+
+            .metric-detail {
+                margin-top: 0.25rem;
+                color: var(--text-color-secondary);
+            }
+
+            :host ::ng-deep .p-chart {
+                transition: transform 0.3s ease;
+            }
+
+            :host ::ng-deep .p-chart:hover {
+                transform: scale(1.05);
+            }
+        `
+    ]
 })
 export class SystemMetricsWidget implements OnInit, OnDestroy {
     loading = true;
+    autoRefresh = false;
+    lastUpdated = new Date();
+
     cpuData: any;
     memoryData: any;
     diskData: any;
     directoryData: any;
 
-    // Use separate options for each chart to allow for custom tooltips
+    cpuPercent = 0;
+    memPercent = 0;
+    diskPercent = 0;
+    dirSizePercentOfDisk = 0;
+
+    memUsed = 0;
+    memMax = 0;
+    diskFree = 0;
+
     cpuChartOptions: any;
     memoryChartOptions: any;
     diskChartOptions: any;
     directoryChartOptions: any;
 
     subscription: Subscription;
+    refreshSubscription?: Subscription;
     centerTextPlugin: any;
-    private lastMetrics: ResourceMetrics | null = null; // Store last metrics for theme updates
+    private lastMetrics: ResourceMetrics | null = null;
 
-    constructor(private dashboardService: DashboardService, public layoutService: LayoutService) {
-        // Fix: Use last known metrics to regenerate charts on theme change
+    constructor(
+        private dashboardService: DashboardService,
+        public layoutService: LayoutService
+    ) {
         this.subscription = this.layoutService.configUpdate$.subscribe(() => {
             if (this.lastMetrics) {
                 this.createCharts(this.lastMetrics);
@@ -71,12 +203,34 @@ export class SystemMetricsWidget implements OnInit, OnDestroy {
     }
 
     ngOnInit(): void {
+        this.loadMetrics();
+    }
+
+    ngOnDestroy(): void {
+        if (this.subscription) {
+            this.subscription.unsubscribe();
+        }
+        if (this.refreshSubscription) {
+            this.refreshSubscription.unsubscribe();
+        }
+    }
+
+    toggleAutoRefresh(): void {
+        if (this.autoRefresh) {
+            this.refreshSubscription = interval(30000).subscribe(() => {
+                this.loadMetrics();
+            });
+        } else {
+            this.refreshSubscription?.unsubscribe();
+        }
+    }
+
+    private loadMetrics(): void {
         this.loading = true;
         forkJoin({
             metrics: this.dashboardService.getResourceMetrics(),
             dirSize: this.dashboardService.getDirectorySize()
         }).subscribe(({ metrics, dirSize }) => {
-            // Combine the data into a single object
             const combinedMetrics: ResourceMetrics = {
                 ...metrics,
                 directorySizeBytes: dirSize.directorySizeBytes
@@ -84,14 +238,25 @@ export class SystemMetricsWidget implements OnInit, OnDestroy {
 
             this.lastMetrics = combinedMetrics;
             this.createCharts(combinedMetrics);
+            this.lastUpdated = new Date();
             this.loading = false;
         });
     }
 
-    ngOnDestroy(): void {
-        if (this.subscription) {
-            this.subscription.unsubscribe();
+    getHealthStatus(): string {
+        if (this.cpuPercent > 90 || this.memPercent > 90 || this.diskPercent > 95) {
+            return 'Critical';
+        } else if (this.cpuPercent > 75 || this.memPercent > 80 || this.diskPercent > 85) {
+            return 'Warning';
         }
+        return 'Healthy';
+    }
+
+    getHealthStatusClass(): string {
+        const status = this.getHealthStatus();
+        if (status === 'Critical') return 'text-red-600 font-bold';
+        if (status === 'Warning') return 'text-orange-500 font-medium';
+        return 'text-green-600 font-medium';
     }
 
     private initializeChartPlugin() {
@@ -121,10 +286,7 @@ export class SystemMetricsWidget implements OnInit, OnDestroy {
         };
     }
 
-    /**
-     * Formats bytes into a human-readable string (KB, MB, GB, etc.).
-     */
-    private formatBytes(bytes: number, decimals = 1): string {
+    protected formatBytes(bytes: number, decimals = 1): string {
         if (bytes === 0) return '0 Bytes';
         const k = 1024;
         const dm = decimals < 0 ? 0 : decimals;
@@ -143,14 +305,18 @@ export class SystemMetricsWidget implements OnInit, OnDestroy {
                 legend: { display: false },
                 tooltip: {
                     enabled: true,
-                    callbacks: {} // To be customized for each chart
+                    callbacks: {}
                 }
+            },
+            animation: {
+                animateRotate: true,
+                animateScale: true
             }
         });
 
         // CPU Chart
-        const cpuUsed = Math.round(metrics.cpuUsage);
-        this.cpuData = this.buildChartData(`${cpuUsed}%`, [cpuUsed, 100 - cpuUsed], [documentStyle.getPropertyValue('--p-cyan-500'), surfaceBorder]);
+        this.cpuPercent = Math.round(metrics.cpuUsage);
+        this.cpuData = this.buildChartData(`${this.cpuPercent}%`, [this.cpuPercent, 100 - this.cpuPercent], this.getGradientColors('cyan', this.cpuPercent));
         this.cpuChartOptions = getBaseOptions();
         this.cpuChartOptions.plugins.tooltip.callbacks.label = (context: any) => {
             const label = context.dataIndex === 0 ? 'Used' : 'Free';
@@ -158,15 +324,15 @@ export class SystemMetricsWidget implements OnInit, OnDestroy {
         };
 
         // Memory Chart
-        const memUsed = metrics.memoryUsedBytes;
-        const memMax = metrics.memoryMaxBytes;
-        const memPercent = Math.round((memUsed / memMax) * 100);
-        this.memoryData = this.buildChartData(`${memPercent}%`, [memUsed, memMax - memUsed], [documentStyle.getPropertyValue('--p-orange-500'), surfaceBorder]);
+        this.memUsed = metrics.memoryUsedBytes;
+        this.memMax = metrics.memoryMaxBytes;
+        this.memPercent = Math.round((this.memUsed / this.memMax) * 100);
+        this.memoryData = this.buildChartData(`${this.memPercent}%`, [this.memUsed, this.memMax - this.memUsed], this.getGradientColors('orange', this.memPercent));
         this.memoryChartOptions = getBaseOptions();
         this.memoryChartOptions.plugins.tooltip.callbacks.label = (context: any) => {
             const value = this.formatBytes(context.raw);
             if (context.dataIndex === 0) {
-                return `Used: ${value} of ${this.formatBytes(memMax)}`;
+                return `Used: ${value} of ${this.formatBytes(this.memMax)}`;
             }
             return `Free: ${value}`;
         };
@@ -174,8 +340,9 @@ export class SystemMetricsWidget implements OnInit, OnDestroy {
         // Disk Chart
         const diskUsed = metrics.diskTotalBytes - metrics.diskFreeBytes;
         const diskTotal = metrics.diskTotalBytes;
-        const diskPercent = Math.round((diskUsed / diskTotal) * 100);
-        this.diskData = this.buildChartData(`${diskPercent}%`, [diskUsed, metrics.diskFreeBytes], [documentStyle.getPropertyValue('--p-purple-500'), surfaceBorder]);
+        this.diskFree = metrics.diskFreeBytes;
+        this.diskPercent = Math.round((diskUsed / diskTotal) * 100);
+        this.diskData = this.buildChartData(`${this.diskPercent}%`, [diskUsed, metrics.diskFreeBytes], this.getGradientColors('purple', this.diskPercent));
         this.diskChartOptions = getBaseOptions();
         this.diskChartOptions.plugins.tooltip.callbacks.label = (context: any) => {
             const value = this.formatBytes(context.raw);
@@ -185,27 +352,41 @@ export class SystemMetricsWidget implements OnInit, OnDestroy {
             return `Free: ${value}`;
         };
 
-        // DIR  CHART
+        // Directory Chart
         const dirSizeBytes = metrics.directorySizeBytes ?? 0;
-        const dirSizePercentOfDisk = diskTotal > 0 ? Math.round((dirSizeBytes / diskTotal) * 100) : 0;
+        this.dirSizePercentOfDisk = diskTotal > 0 ? Math.round((dirSizeBytes / diskTotal) * 100) : 0;
 
-        this.directoryData = this.buildChartData(
-            this.formatBytes(dirSizeBytes), // Center text shows the absolute size
-            [dirSizeBytes, diskTotal - dirSizeBytes], // Data is directory size vs. the rest of the disk
-            [documentStyle.getPropertyValue('--p-green-500'), surfaceBorder]
-        );
+        this.directoryData = this.buildChartData(this.formatBytes(dirSizeBytes), [dirSizeBytes, diskTotal - dirSizeBytes], this.getGradientColors('green', this.dirSizePercentOfDisk));
         this.directoryChartOptions = getBaseOptions();
         this.directoryChartOptions.plugins.tooltip.callbacks.label = (context: any) => {
             if (context.dataIndex === 0) {
-                return `Directory: ${this.formatBytes(context.raw)} (${dirSizePercentOfDisk}% of disk)`;
+                return `Directory: ${this.formatBytes(context.raw)} (${this.dirSizePercentOfDisk}% of disk)`;
             }
             return `Other Disk Space: ${this.formatBytes(context.raw)}`;
         };
     }
 
+    private getGradientColors(baseColor: string, percentage: number): string[] {
+        const documentStyle = getComputedStyle(document.documentElement);
+        const surfaceBorder = documentStyle.getPropertyValue('--surface-border');
+
+        let intensity = '500';
+        if (percentage > 90) intensity = '700';
+        else if (percentage > 75) intensity = '600';
+
+        return [documentStyle.getPropertyValue(`--p-${baseColor}-${intensity}`), surfaceBorder];
+    }
+
     private buildChartData(text: string, data: number[], colors: string[]): any {
         return {
-            datasets: [{ data, backgroundColor: colors, hoverBackgroundColor: colors }],
+            datasets: [
+                {
+                    data,
+                    backgroundColor: colors,
+                    hoverBackgroundColor: colors,
+                    borderWidth: 0
+                }
+            ],
             centerText: text
         };
     }
