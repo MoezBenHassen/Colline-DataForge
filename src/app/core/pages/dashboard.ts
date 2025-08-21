@@ -9,13 +9,27 @@ import { QuickActionsWidget } from "../../pages/dashboard/components/quick-actio
 import { TopEndpointsWidget } from "../../pages/dashboard/components/top-endpoints.widget";
 import { GenerationPerformanceWidget } from "../../pages/dashboard/components/generation-performance.widget";
 import { SystemMetricsCardsWidget } from '../../pages/dashboard/components/system-metrics.widget';
-import { BackendServiceStatusWidget } from '../../pages/dashboard/components/uptime.widget';
+
+import { ServiceStatusCardComponent } from '../../pages/dashboard/components/service-status-card.component';
+import { ServiceDetailsWidgetComponent } from '../../pages/dashboard/components/service-details-widget.component';
 
 
 @Component({
     selector: 'app-dashboard',
     standalone: true,
-    imports: [CommonModule, DatabaseStatusWidget, RecentActivityWidget, EndpointStatsWidget, QueryExplorerWidget, QuickActionsWidget, SystemMetricsCardsWidget, TopEndpointsWidget, GenerationPerformanceWidget, BackendServiceStatusWidget],
+    imports: [
+        CommonModule,
+        DatabaseStatusWidget,
+        RecentActivityWidget,
+        EndpointStatsWidget,
+        QueryExplorerWidget,
+        QuickActionsWidget,
+        SystemMetricsCardsWidget,
+        TopEndpointsWidget,
+        GenerationPerformanceWidget,
+        ServiceStatusCardComponent,
+        ServiceDetailsWidgetComponent
+    ],
     template: `
         <!-- Dashboard Header -->
         <div class="mb-6">
@@ -47,7 +61,9 @@ import { BackendServiceStatusWidget } from '../../pages/dashboard/components/upt
         <div class="grid grid-cols-12 gap-4 mb-8">
             <!-- Left Column: Backend Service Status -->
             <div class="col-span-12 lg:col-span-6">
-                <app-backend-service-status-widget/>
+                <app-service-status-card></app-service-status-card>
+
+                <app-service-details-widget></app-service-details-widget>
             </div>
             <!-- Right Column: Database and Endpoints -->
             <div class="col-span-12 lg:col-span-6">

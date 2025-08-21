@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import {HttpClient, HttpParams} from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { catchError, Observable, of } from 'rxjs';
 import { environment } from '../../environments/environment';
 import { DatabaseType } from './gloable-state.service';
 
@@ -19,7 +19,8 @@ export interface DirectorySizeInfo {
 
 export interface UptimeInfo {
     uptimeSeconds: number;
-    lastRestart: string; // ISO date string
+    lastRestart: string;
+    status?: 'ONLINE' | 'OFFLINE';
 }
 export interface EndpointMetric {
     path: string;
@@ -89,8 +90,17 @@ export class DashboardService {
         return this.http.get<EndpointMetric[]>(`${environment.apiUrl}/api/system-metrics/top-endpoints`);
     }
 
+
     getResponseTimeHistory(): Observable<TimeDataPoint[]> {
-        return this.http.get<TimeDataPoint[]>(`${environment.apiUrl}/api/system-metrics/response-time-history`);
+        return this.http.get<TimeDataPoint[]>(`${environment.apiUrl}/response-time-history`)
+            .pipe(
+                // 5. Also make this call resilient
+                catchError(error => {
+                    console.error('getResponseTimeHistory failed:', error);
+                    // On error, return an Observable of an empty array
+                    return of([]);
+                })
+            );
     }
 
     /**
@@ -119,8 +129,20 @@ export class DashboardService {
      * Fetches the backend service uptime and last restart time.
      */
     getUptimeInfo(): Observable<UptimeInfo> {
-        return this.http.get<UptimeInfo>(`${environment.apiUrl}/api/system-metrics/uptime`);
+        return this.http.get<UptimeInfo>(`${environment.apiUrl}/api/system-metrics/uptime`)
+            .pipe(
+                catchError(error => {
+                    console.error('getUptimeInfo failed:', error);
+                    // On error, return an Observable of a fallback "OFFLINE" object
+                    return of({
+                        uptimeSeconds: 0,
+                        lastRestart: new Date().toISOString(),
+                        status: 'OFFLINE'
+                    } as UptimeInfo); // ✅ Add 'as UptimeInfo' here
+                })
+            );
     }
+
 
     /**
      * Fetches system resource metrics (CPU, Memory, Disk).
