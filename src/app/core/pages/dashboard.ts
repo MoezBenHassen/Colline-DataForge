@@ -61,14 +61,15 @@ import { ServiceDetailsWidgetComponent } from '../../pages/dashboard/components/
         <div class="grid grid-cols-12 gap-4 mb-8">
             <!-- Left Column: Backend Service Status -->
             <div class="col-span-12 lg:col-span-6">
-                <app-service-status-card></app-service-status-card>
 
+                <app-database-status-widget />
                 <app-service-details-widget></app-service-details-widget>
             </div>
             <!-- Right Column: Database and Endpoints -->
             <div class="col-span-12 lg:col-span-6">
                 <div class="flex flex-col gap-4">
-                    <app-database-status-widget />
+
+                    <app-service-status-card></app-service-status-card>
                     <app-endpoint-stats-widget />
                 </div>
             </div>

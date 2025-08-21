@@ -11,6 +11,29 @@ import { TooltipModule } from 'primeng/tooltip';
     selector: 'app-database-status-widget',
     standalone: true,
     imports: [CommonModule, ChipModule, SkeletonModule, TooltipModule],
+    styles: [`
+        /* Light Mode Styles */
+        :host ::ng-deep .status-online {
+            background-color: var(--p-green-100);
+            color: var(--p-green-800);
+        }
+
+        :host ::ng-deep .status-offline {
+            background-color: var(--p-red-100);
+            color: var(--p-red-800);
+        }
+
+        /* Dark Mode Overrides */
+        .app-dark :host ::ng-deep .status-online {
+            background-color: var(--p-green-900);
+            color: var(--p-green-300);
+        }
+
+        .app-dark :host ::ng-deep .status-offline {
+            background-color: var(--p-red-900);
+            color: var(--p-red-300);
+        }
+    `],
     template: `
         <div class="card">
             <div class="font-semibold text-xl mb-4">Database Status</div>
@@ -28,8 +51,11 @@ import { TooltipModule } from 'primeng/tooltip';
                             styleClass="px-3 py-2"
                             [label]="db.db || ''"
                             [icon]="db.online ? 'pi pi-check-circle' : 'pi pi-times-circle'"
-                            [style.background-color]="db.online ? 'var(--p-green-100)' : 'var(--p-red-100)'"
-                            [style.color]="db.online ? 'var(--p-green-800)' : 'var(--p-red-800)'">
+                            [ngClass]="{
+                            'status-online': db.online,
+                            'status-offline': !db.online
+                            }"
+                            >
                         </p-chip>
                     }
                     @if (dbStatus.length === 0) {
