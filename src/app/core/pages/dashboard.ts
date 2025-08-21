@@ -5,32 +5,28 @@ import { RecentActivityWidget } from '../../../app/pages/dashboard/components/re
 import { EndpointStatsWidget } from '../../../app/pages/dashboard/components/endpoint-stats.widget';
 import { QueryExplorerWidget } from "../../pages/dashboard/components/query-explorer.widget";
 import { QuickActionsWidget } from "../../pages/dashboard/components/quick-actions.widget";
-import { SystemMetricsWidget } from "../../pages/dashboard/components/system-metrics.widget";
-import { UptimeWidget } from "../../pages/dashboard/components/uptime.widget";
+
 import { TopEndpointsWidget } from "../../pages/dashboard/components/top-endpoints.widget";
 import { GenerationPerformanceWidget } from "../../pages/dashboard/components/generation-performance.widget";
+import { SystemMetricsCardsWidget } from '../../pages/dashboard/components/system-metrics.widget';
+import { BackendServiceStatusWidget } from '../../pages/dashboard/components/uptime.widget';
+
 
 @Component({
     selector: 'app-dashboard',
     standalone: true,
-    imports: [CommonModule, DatabaseStatusWidget, RecentActivityWidget, EndpointStatsWidget, QueryExplorerWidget, QuickActionsWidget, SystemMetricsWidget, UptimeWidget, TopEndpointsWidget, GenerationPerformanceWidget],
+    imports: [CommonModule, DatabaseStatusWidget, RecentActivityWidget, EndpointStatsWidget, QueryExplorerWidget, QuickActionsWidget, SystemMetricsCardsWidget, TopEndpointsWidget, GenerationPerformanceWidget, BackendServiceStatusWidget],
     template: `
         <!-- Dashboard Header -->
         <div class="mb-6">
             <div class="flex justify-between items-center">
                 <div>
-                    <h1 class="text-3xl font-bold text-gray-900 dark:text-white mb-2">
-                        Dashboard Overview
-                    </h1>
-                    <p class="text-gray-600 dark:text-gray-400">
-                        Monitor your Spring Boot application performance and health
-                    </p>
+                    <h1 class="text-3xl font-bold text-gray-900 dark:text-white mb-2">Dashboard Overview</h1>
+                    <p class="text-gray-600 dark:text-gray-400">Monitor your Spring Boot application performance and health</p>
                 </div>
                 <div class="flex gap-2">
                     <!-- Add refresh button -->
-                    <button class="p-button p-button-outlined p-button-rounded"
-                            (click)="refreshDashboard()"
-                            [disabled]="isRefreshing">
+                    <button class="p-button p-button-outlined p-button-rounded" (click)="refreshDashboard()" [disabled]="isRefreshing">
                         <i class="pi pi-refresh" [class.pi-spin]="isRefreshing"></i>
                     </button>
                     <!-- Add time range selector -->
@@ -42,43 +38,33 @@ import { GenerationPerformanceWidget } from "../../pages/dashboard/components/ge
             </div>
         </div>
 
-        <!-- Key Metrics Row - Visual hierarchy with larger cards -->
-        <div class="grid grid-cols-12 gap-4 mb-6">
-            <div class="col-span-12 lg:col-span-4">
-                <div class="transform transition-all duration-200 hover:scale-105">
+        <!-- System Metrics Cards - 4 separate cards -->
+        <div class="mb-8">
+            <app-system-metrics-cards-widget />
+        </div>
+
+        <!-- Service Status and Database Row -->
+        <div class="grid grid-cols-12 gap-4 mb-8">
+            <!-- Left Column: Backend Service Status -->
+            <div class="col-span-12 lg:col-span-6">
+                <app-backend-service-status-widget/>
+            </div>
+            <!-- Right Column: Database and Endpoints -->
+            <div class="col-span-12 lg:col-span-6">
+                <div class="flex flex-col gap-4">
+                    <app-database-status-widget />
                     <app-endpoint-stats-widget />
                 </div>
             </div>
-            <div class="col-span-12 lg:col-span-4">
-                <div class="transform transition-all duration-200 hover:scale-105">
-                    <app-uptime-widget />
-                </div>
-            </div>
-            <div class="col-span-12 lg:col-span-4">
-                <div class="transform transition-all duration-200 hover:scale-105">
-                    <app-quick-actions-widget />
-                </div>
-            </div>
         </div>
 
-        <!-- System Health Section -->
-        <div class="mb-6">
-            <h2 class="text-xl font-semibold text-gray-700 dark:text-gray-300 mb-4 flex items-center">
-                <i class="pi pi-heart text-red-500 mr-2"></i>
-                System Health
-            </h2>
-            <div class="grid grid-cols-12 gap-4">
-                <div class="col-span-12">
-                    <app-system-metrics-widget />
-                </div>
-                <div class="col-span-12">
-                    <app-database-status-widget />
-                </div>
-            </div>
+        <!-- Quick Actions -->
+        <div class="mb-8">
+            <app-quick-actions-widget />
         </div>
 
         <!-- Activity & Performance Section -->
-        <div class="mb-6">
+        <div class="mb-8">
             <h2 class="text-xl font-semibold text-gray-700 dark:text-gray-300 mb-4 flex items-center">
                 <i class="pi pi-chart-line text-blue-500 mr-2"></i>
                 Activity & Performance
@@ -90,10 +76,6 @@ import { GenerationPerformanceWidget } from "../../pages/dashboard/components/ge
                 <div class="col-span-12 xl:col-span-6">
                     <app-top-endpoints-widget />
                 </div>
-                <!-- Uncomment when ready -->
-                <!-- <div class="col-span-12">
-                    <app-generation-performance-widget />
-                </div> -->
             </div>
         </div>
 
@@ -110,33 +92,50 @@ import { GenerationPerformanceWidget } from "../../pages/dashboard/components/ge
             </div>
         </div>
     `,
-    styles: [`
-        :host ::ng-deep .card {
-            border-radius: 12px;
-            box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
-            transition: box-shadow 0.3s ease;
-        }
-
-        :host ::ng-deep .card:hover {
-            box-shadow: 0 10px 25px 0 rgba(0, 0, 0, 0.1), 0 6px 10px 0 rgba(0, 0, 0, 0.06);
-        }
-
-        /* Add smooth loading animations */
-        @keyframes shimmer {
-            0% {
-                background-position: -1000px 0;
+    styles: [
+        `
+            :host ::ng-deep .card {
+                border-radius: 12px;
+                box-shadow:
+                    0 1px 3px 0 rgba(0, 0, 0, 0.1),
+                    0 1px 2px 0 rgba(0, 0, 0, 0.06);
+                transition: all 0.3s ease;
             }
-            100% {
-                background-position: 1000px 0;
-            }
-        }
 
-        :host ::ng-deep p-skeleton {
-            background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
-            background-size: 1000px 100%;
-            animation: shimmer 2s infinite;
-        }
-    `]
+            :host ::ng-deep .card:hover {
+                box-shadow:
+                    0 10px 25px 0 rgba(0, 0, 0, 0.1),
+                    0 6px 10px 0 rgba(0, 0, 0, 0.06);
+                transform: translateY(-2px);
+            }
+
+            /* Add smooth loading animations */
+            @keyframes shimmer {
+                0% {
+                    background-position: -1000px 0;
+                }
+                100% {
+                    background-position: 1000px 0;
+                }
+            }
+
+            :host ::ng-deep p-skeleton {
+                background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+                background-size: 1000px 100%;
+                animation: shimmer 2s infinite;
+            }
+
+            /* Ensure consistent card heights in grid */
+            .grid > div {
+                display: flex;
+                flex-direction: column;
+            }
+
+            .grid > div > * {
+                flex: 1;
+            }
+        `
+    ]
 })
 export class Dashboard {
     isRefreshing = false;

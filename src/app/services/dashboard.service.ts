@@ -4,6 +4,11 @@ import { Observable } from 'rxjs';
 import { environment } from '../../environments/environment';
 import { DatabaseType } from './gloable-state.service';
 
+export interface TimeDataPoint {
+    timestamp: number;
+    value: number;
+}
+
 export type DbStatus = {
     db: DatabaseType;
     online: boolean;
@@ -82,6 +87,10 @@ export class DashboardService {
      */
     getTopEndpoints(): Observable<EndpointMetric[]> {
         return this.http.get<EndpointMetric[]>(`${environment.apiUrl}/api/system-metrics/top-endpoints`);
+    }
+
+    getResponseTimeHistory(): Observable<TimeDataPoint[]> {
+        return this.http.get<TimeDataPoint[]>(`${environment.apiUrl}/api/system-metrics/response-time-history`);
     }
 
     /**
