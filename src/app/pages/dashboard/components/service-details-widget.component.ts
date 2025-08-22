@@ -10,6 +10,7 @@ import { TooltipItem } from 'chart.js';
 import { LayoutService } from '../../../layout/service/layout.service';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { environment } from '../../../../environments/environment';
+import { forkJoin } from 'rxjs';
 // Helper interface, same as before
 interface ServiceMetric {
     label: string;
@@ -112,6 +113,7 @@ export class ServiceDetailsWidgetComponent implements OnInit {
     healthIndicators: any[] = [];
     private lastResponseTimeData: TimeDataPoint[] = [];
     themeConfig!: Signal<any>;
+    activeSessions = 0;
 
     constructor(private dashboardService: DashboardService, private layoutService: LayoutService ) {
         effect(() => {
@@ -131,9 +133,16 @@ export class ServiceDetailsWidgetComponent implements OnInit {
 
     loadDetails(): void {
         this.loading = true;
-        this.dashboardService.getResponseTimeHistory().subscribe((responseTimes) => {
+        // 3. Use forkJoin to fetch both metrics at the same time
+        forkJoin({
+            responseTimes: this.dashboardService.getResponseTimeHistory(),
+            sessions: this.dashboardService.getActiveSessions()
+        }).subscribe(({ responseTimes, sessions }) => {
+            this.lastResponseTimeData = responseTimes;
+            this.activeSessions = sessions; // 4. Store the dynamic value
+
             this.updateChartData(responseTimes);
-            this.updateServiceMetrics();
+            this.updateServiceMetrics(); // This will now use the new value
             this.updateHealthIndicators(false);
             this.loading = false;
         });
@@ -143,7 +152,7 @@ export class ServiceDetailsWidgetComponent implements OnInit {
         this.serviceMetrics = [
             { label: 'Response Time', value: `${this.avgResponseTime}ms`, icon: 'pi-bolt', color: 'yellow', trend: 'down', trendValue: '12%' },
             { label: 'Throughput', value: '2.4k/s', icon: 'pi-arrow-right-arrow-left', color: 'blue', trend: 'up', trendValue: '8%' },
-            { label: 'Active Sessions', value: 847, icon: 'pi-users', color: 'green', trend: 'stable', trendValue: '0%' },
+            { label: 'Active Sessions', value: this.activeSessions, icon: 'pi-users', color: 'green', trend: 'stable', trendValue: '0%' },
             { label: 'Error Rate', value: '0.02%', icon: 'pi-exclamation-triangle', color: 'red', trend: 'down', trendValue: '5%' }
         ];
     }

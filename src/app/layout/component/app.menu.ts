@@ -48,7 +48,7 @@ export class AppMenu {
                     { label: 'Trade Data', icon: 'pi pi-fw pi-file-excel', routerLink: ['/tradeData'] },
                     { label: 'MTM', icon: 'pi pi-fw pi-file-excel', routerLink: ['/mtm-feed'] },
                 ]
-            },
+            }/*,
             {
                 label: 'UI Components Test',
                 items: [
@@ -161,7 +161,7 @@ export class AppMenu {
                         ]
                     }
                 ]
-            },
+            }*/,
             {
                 label: 'Ressources',
                 items: [

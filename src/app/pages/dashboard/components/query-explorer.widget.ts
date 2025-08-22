@@ -13,7 +13,7 @@ import { DatabaseType } from '../../../services/gloable-state.service';
     standalone: true,
     imports: [CommonModule, DropdownModule, FormsModule, TableModule, InputTextModule, SkeletonModule],
     template: `
-        <div class="card">
+        <div class="card h-full">
             <div class="flex flex-wrap items-center justify-between gap-4 mb-4">
                 <h5 class="font-semibold text-xl m-0">Query Explorer</h5>
                 <p-dropdown
@@ -31,9 +31,12 @@ import { DatabaseType } from '../../../services/gloable-state.service';
                     #dt
                     [value]="queryKeys"
                     [paginator]="true"
-                    [rows]="5"
-                    [rowsPerPageOptions]="[5, 10, 20]"
-                    [globalFilterFields]="['query']">
+                    [rows]="6"
+                    [rowsPerPageOptions]="[6, 10, 20]"
+                    [globalFilterFields]="['query']"
+                    [scrollable]="true"
+                    scrollHeight="400px"
+                >
                     <ng-template pTemplate="caption">
                         <div class="flex justify-end">
                             <input pInputText type="text" (input)="onGlobalFilter($event, dt)" placeholder="Search queries..." />

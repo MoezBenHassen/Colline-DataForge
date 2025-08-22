@@ -4,6 +4,7 @@ import { ChartModule } from 'primeng/chart';
 import { Subscription } from 'rxjs';
 import { ENDPOINTS_METADATA } from '../../../core/constants/endpoints-metadata';
 import { LayoutService } from '../../../layout/service/layout.service';
+import { ENDPOINTS_XML_METADATA } from '../../../core/constants/endpoints-xml-metadata';
 
 @Component({
     selector: 'app-endpoint-stats-widget',
@@ -42,8 +43,14 @@ export class EndpointStatsWidget implements OnInit, OnDestroy {
     initChart(): void {
         const documentStyle = getComputedStyle(document.documentElement);
         const textColor = documentStyle.getPropertyValue('--text-color');
+        const allEndpoints = [
+            ...Object.values(ENDPOINTS_METADATA),
+            ...Object.values(ENDPOINTS_XML_METADATA)
+        ];
+        this.totalEndpoints = allEndpoints.length;
 
-        const tags = Object.values(ENDPOINTS_METADATA).reduce((acc, meta) => {
+        // 4. Use the combined array to calculate the tags
+        const tags = allEndpoints.reduce((acc, meta) => {
             const tag = meta.swaggerTag || 'Uncategorized';
             acc[tag] = (acc[tag] || 0) + 1;
             return acc;

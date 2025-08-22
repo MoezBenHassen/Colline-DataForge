@@ -3,6 +3,23 @@ import {HttpClient, HttpParams} from '@angular/common/http';
 import { catchError, Observable, of } from 'rxjs';
 import { environment } from '../../environments/environment';
 import { DatabaseType } from './gloable-state.service';
+import { map } from 'rxjs/operators';
+
+export interface LoggerInfo {
+    configuredLevel: string | null;
+    effectiveLevel: string;
+}
+export interface ActuatorMetricResponse {
+    name: string;
+    measurements: {
+        statistic: string;
+        value: number;
+    }[];
+}
+export interface LoggersResponse {
+    levels: string[];
+    loggers: { [key: string]: LoggerInfo };
+}
 
 export interface TimeDataPoint {
     timestamp: number;
@@ -68,7 +85,18 @@ export class DashboardService {
         const params = new HttpParams().set('query', promql);
         return this.http.get<PrometheusResponse>(`${environment.apiUrl}/api/prometheus-proxy/query`, { params });
     }
-
+    getActiveSessions(): Observable<number> {
+        return this.http.get<ActuatorMetricResponse>(`${environment.apiUrl}/actuator/metrics/tomcat.sessions.active.current`)
+            .pipe(
+                // Extract the actual number from the response object
+                map(response => response.measurements[0].value),
+                // If the endpoint fails, return 0 as a fallback
+                catchError(error => {
+                    console.error('getActiveSessions failed:', error);
+                    return of(0);
+                })
+            );
+    }
     /**
      * Executes a PromQL range query via the backend proxy.
      * @param promql The PromQL query string.
@@ -154,5 +182,22 @@ export class DashboardService {
 
     getDirectorySize(): Observable<DirectorySizeInfo> {
         return this.http.get<DirectorySizeInfo>(`${environment.apiUrl}/api/system-metrics/directory-size`);
+    }
+
+    /**
+     * Fetches all loggers and their levels from the backend.
+     */
+    getLoggers(): Observable<LoggersResponse> {
+        return this.http.get<LoggersResponse>(`${environment.apiUrl}/actuator/loggers`);
+    }
+
+    /**
+     * Sets the log level for a specific logger on the backend.
+     * @param name The name of the logger (e.g., 'org.example.filegen.services').
+     * @param level The desired log level (e.g., 'DEBUG', 'INFO', or null to reset).
+     */
+    setLoggerLevel(name: string, level: string | null): Observable<any> {
+        const body = { configuredLevel: level };
+        return this.http.post(`${environment.apiUrl}/actuator/loggers/${name}`, body);
     }
 }

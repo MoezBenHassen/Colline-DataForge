@@ -12,6 +12,7 @@ import { SystemMetricsCardsWidget } from '../../pages/dashboard/components/syste
 
 import { ServiceStatusCardComponent } from '../../pages/dashboard/components/service-status-card.component';
 import { ServiceDetailsWidgetComponent } from '../../pages/dashboard/components/service-details-widget.component';
+import { LogLevelManagerWidget } from '../../pages/dashboard/components/log-level-manager-widget.component';
 
 
 @Component({
@@ -28,7 +29,8 @@ import { ServiceDetailsWidgetComponent } from '../../pages/dashboard/components/
         TopEndpointsWidget,
         GenerationPerformanceWidget,
         ServiceStatusCardComponent,
-        ServiceDetailsWidgetComponent
+        ServiceDetailsWidgetComponent,
+        LogLevelManagerWidget
     ],
     template: `
         <!-- Dashboard Header -->
@@ -60,15 +62,13 @@ import { ServiceDetailsWidgetComponent } from '../../pages/dashboard/components/
         <!-- Service Status and Database Row -->
         <div class="grid grid-cols-12 gap-4 mb-8">
             <!-- Left Column: Backend Service Status -->
-            <div class="col-span-12 lg:col-span-6">
-
+            <div class="col-span-12 lg:col-span-6 gap-11">
+                <app-service-details-widget />
                 <app-database-status-widget />
-                <app-service-details-widget></app-service-details-widget>
             </div>
             <!-- Right Column: Database and Endpoints -->
             <div class="col-span-12 lg:col-span-6">
                 <div class="flex flex-col gap-4">
-
                     <app-service-status-card></app-service-status-card>
                     <app-endpoint-stats-widget />
                 </div>
@@ -88,13 +88,14 @@ import { ServiceDetailsWidgetComponent } from '../../pages/dashboard/components/
             </h2>
             <div class="grid grid-cols-12 gap-4">
                 <div class="col-span-12 xl:col-span-6 gap-4">
-                    <app-recent-activity-widget />
                     <app-query-explorer-widget />
                 </div>
 
                 <div class="col-span-12 xl:col-span-6">
                     <app-top-endpoints-widget />
-
+                </div>
+                <div class="col-span-12">
+                    <app-recent-activity-widget />
                 </div>
             </div>
         </div>
@@ -107,7 +108,7 @@ import { ServiceDetailsWidgetComponent } from '../../pages/dashboard/components/
             </h2>
             <div class="grid grid-cols-12 gap-4">
                 <div class="col-span-12">
-                    <app-query-explorer-widget />
+                    <app-log-level-manager-widget />
                 </div>
             </div>
         </div>

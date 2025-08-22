@@ -10,9 +10,9 @@ import { DashboardService, EndpointMetric } from '../../../services/dashboard.se
     standalone: true,
     imports: [CommonModule, TableModule, SkeletonModule, TagModule],
     template: `
-        <div class="card">
+        <div class="card h-full">
             <h5 class="font-semibold text-xl mb-4">Top Endpoints (Session)</h5>
-            <p-table [value]="metrics" [tableStyle]="{ 'min-width': '25rem' }" [loading]="loading">
+            <p-table [value]="metrics" [tableStyle]="{ 'min-width': '25rem' }" [loading]="loading" [scrollable]="true" scrollHeight="400px">
                 <ng-template pTemplate="header">
                     <tr>
                         <th>Path</th>
@@ -60,7 +60,7 @@ export class TopEndpointsWidget implements OnInit {
         this.dashboardService.getTopEndpoints().subscribe(data => {
             this.metrics = data;
             // only keep the first 5
-            this.metrics = this.metrics.slice(0, 5);
+
             this.loading = false;
         });
     }
