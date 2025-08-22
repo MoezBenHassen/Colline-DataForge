@@ -97,7 +97,7 @@ import { TagModule } from 'primeng/tag';
                         <span class="text-gray-600 dark:text-gray-400 font-medium">Memory</span>
                         <div class="w-10 h-10 rounded-full flex items-center justify-center"
                              [ngClass]="memPercent > 85 ? 'bg-orange-100 dark:bg-orange-400/10' : 'bg-purple-100 dark:bg-purple-400/10'">
-                            <i class="pi pi-database text-xl"
+                            <i class="pi pi-th-large text-xl"
                                [ngClass]="memPercent > 85 ? 'text-orange-500' : 'text-purple-500'"></i>
                         </div>
                     </div>

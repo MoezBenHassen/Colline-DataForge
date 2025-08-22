@@ -93,7 +93,7 @@ export class DashboardService {
 
 
     getResponseTimeHistory(): Observable<TimeDataPoint[]> {
-        return this.http.get<TimeDataPoint[]>(`${environment.apiUrl}/response-time-history`)
+        return this.http.get<TimeDataPoint[]>(`${environment.apiUrl}/api/system-metrics/response-time-history`)
             .pipe(
                 // 5. Also make this call resilient
                 catchError(error => {

@@ -6,7 +6,7 @@ import { ChartModule } from 'primeng/chart';
 import { TagModule } from 'primeng/tag';
 import { TooltipModule } from 'primeng/tooltip';
 import { ButtonModule } from 'primeng/button';
-
+import { TooltipItem } from 'chart.js';
 // Helper interface, same as before
 interface ServiceMetric {
     label: string;
@@ -155,23 +155,68 @@ export class ServiceDetailsWidgetComponent implements OnInit {
 
     private initializeChart(): void {
         const documentStyle = getComputedStyle(document.documentElement);
+        // Get theme colors for a consistent look
+        const textColorSecondary = documentStyle.getPropertyValue('--p-text-color-secondary');
+        const surfaceBorder = documentStyle.getPropertyValue('--p-surface-border');
+
         this.responseTimeChartOptions = {
             maintainAspectRatio: false,
             aspectRatio: 0.3,
             plugins: {
-                legend: { display: false },
+                legend: {
+                    display: false // No need for a legend on a single-series chart
+                },
+                // --- Modern Tooltip Configuration ---
                 tooltip: {
-                    backgroundColor: 'rgba(0,0,0,0.8)',
-                    titleColor: '#fff',
-                    bodyColor: '#fff',
+                    enabled: true,
+                    mode: 'index', // Show tooltip for the nearest X-axis point
+                    intersect: false, // Tooltip appears even if not directly hovering on the point
+                    backgroundColor: 'var(--p-surface-overlay)',
+                    titleColor: 'var(--p-text-color)',
+                    bodyColor: 'var(--p-text-color)',
+                    borderColor: 'var(--p-surface-border)',
+                    borderWidth: 1,
+                    displayColors: false, // Hide the little color box
                     callbacks: {
-                        label: (context: any) => context.parsed.y + 'ms'
+                        // Custom title to show the full timestamp
+                        title: (context: TooltipItem<'line'>[]) => 'At ' + context[0].label,
+
+                        // Apply the type TooltipItem<'line'> to the context here
+                        label: (context: TooltipItem<'line'>) => `Response Time: ${context.parsed.y}ms`
                     }
                 }
             },
-            scales: { x: { display: false }, y: { display: false } },
-            elements: { point: { radius: 0 }, line: { borderWidth: 2, tension: 0.4 } }
+            scales: {
+                x: {
+                    display: false // Keep the x-axis hidden for a clean look
+                },
+                // --- Subtle Y-Axis for Context ---
+                y: {
+                    display: true,
+                    ticks: {
+                        color: textColorSecondary // Use theme color for labels
+                    },
+                    grid: {
+                        color: surfaceBorder // Use theme color for grid lines
+                    }
+                }
+            },
+            elements: {
+                // --- Hover Effect for Data Points ---
+                point: {
+                    radius: 0, // Hide points by default
+                    hoverRadius: 7, // Show a larger point on hover
+                    hoverBackgroundColor: 'var(--p-primary-color)',
+                    hoverBorderColor: '#ffffff',
+                    hoverBorderWidth: 2
+                },
+                line: {
+                    borderWidth: 2,
+                    tension: 0.4 // Smooth, curved line
+                }
+            }
         };
+
         this.updateChartData([]);
     }
 
@@ -187,11 +232,19 @@ export class ServiceDetailsWidgetComponent implements OnInit {
             labels: data.map(point => new Date(point.timestamp).toLocaleTimeString()),
             datasets: [{
                 data: values,
-                borderColor: documentStyle.getPropertyValue('--blue-500'),
-                backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                // --- Use Theme Colors for the Line and Fill ---
+                borderColor: documentStyle.getPropertyValue('--p-primary-color'),
+                backgroundColor: this.hexToRgba(documentStyle.getPropertyValue('--p-primary-color'), 0.1),
                 fill: true
             }]
         };
+    }
+
+    private hexToRgba(hex: string, alpha: number) {
+        const r = parseInt(hex.slice(1, 3), 16);
+        const g = parseInt(hex.slice(3, 5), 16);
+        const b = parseInt(hex.slice(5, 7), 16);
+        return `rgba(${r}, ${g}, ${b}, ${alpha})`;
     }
 
     // ✅ Added all missing helper methods
