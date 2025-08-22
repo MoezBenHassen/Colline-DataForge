@@ -42,7 +42,8 @@ import { LogLevelManagerWidget } from '../../pages/dashboard/components/log-leve
                 </div>
                 <div class="flex gap-2">
                     <!-- Add refresh button -->
-                    <button class="p-button p-button-outlined p-button-rounded" (click)="refreshDashboard()" [disabled]="isRefreshing">
+                    <button class="p-button p-button-outlined p-button-rounded"
+(click)="refreshDashboard()" [disabled]="isRefreshing">
                         <i class="pi pi-refresh" [class.pi-spin]="isRefreshing"></i>
                     </button>
                     <!-- Add time range selector -->

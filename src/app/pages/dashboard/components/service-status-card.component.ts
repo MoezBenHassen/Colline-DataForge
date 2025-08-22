@@ -14,10 +14,11 @@ import { TooltipModule } from 'primeng/tooltip';
       <div class="flex items-center justify-between mb-4">
         <h5 class="font-semibold text-xl">Backend Service Status</h5>
         <div class="flex items-center gap-2">
-          <button pButton type="button" icon="pi pi-refresh"
-            class="p-button-text p-button-rounded p-button-sm"
-            (click)="loadData()" [disabled]="serviceStatus === 'CHECKING'" pTooltip="Refresh status">
-          </button>
+            <button class="p-button p-button-outlined p-button-rounded"
+                    (click)="loadData()" [disabled]="serviceStatus === 'CHECKING'"
+                    pTooltip="Refresh status">
+                <i class="pi pi-refresh" [class.pi-spin]="isRefreshing"></i>
+            </button>
           <p-tag [value]="serviceStatus" [severity]="getStatusSeverity()" [icon]="getStatusIcon()" styleClass="px-3 py-1"></p-tag>
         </div>
       </div>
@@ -65,20 +66,24 @@ export class ServiceStatusCardComponent implements OnInit {
     serviceStatus: 'ONLINE' | 'DEGRADED' | 'OFFLINE' | 'CHECKING' = 'CHECKING';
     avgResponseTime = 124;
     constructor(private dashboardService: DashboardService) {}
+    isRefreshing = false;
 
     ngOnInit(): void { this.loadData(); }
 
     loadData(): void {
         this.serviceStatus = 'CHECKING';
+        this.isRefreshing = true;
         this.dashboardService.getUptimeInfo().subscribe({
             next: (uptime) => {
                 if (uptime.status === 'OFFLINE') {
                     this.handleOfflineState();
+                    this.isRefreshing = false;
                 } else {
                     this.uptimeInfo = uptime;
                     this.serviceStatus = 'ONLINE';
                     this.formattedUptime = this.formatUptime(uptime.uptimeSeconds);
                     this.uptimePercentage = 99.9;
+                    this.isRefreshing = false;
                 }
             },
             error: () => this.handleOfflineState()
