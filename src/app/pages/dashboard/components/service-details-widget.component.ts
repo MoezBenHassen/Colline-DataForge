@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, effect, OnInit, Signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { SkeletonModule } from 'primeng/skeleton';
 import { DashboardService, TimeDataPoint } from '../../../services/dashboard.service';
@@ -7,6 +7,9 @@ import { TagModule } from 'primeng/tag';
 import { TooltipModule } from 'primeng/tooltip';
 import { ButtonModule } from 'primeng/button';
 import { TooltipItem } from 'chart.js';
+import { LayoutService } from '../../../layout/service/layout.service';
+import { toSignal } from '@angular/core/rxjs-interop';
+import { environment } from '../../../../environments/environment';
 // Helper interface, same as before
 interface ServiceMetric {
     label: string;
@@ -92,7 +95,7 @@ interface ServiceMetric {
                 </div>
 
                 <div class="grid grid-cols-3 gap-2">
-                    <button pButton type="button" label="View Logs" icon="pi pi-file-text" class="p-button-sm p-button-outlined" pTooltip="View application logs"></button>
+                    <button pButton type="button" label="View Logs" icon="pi pi-file-text" class="p-button-sm p-button-outlined" pTooltip="View application logs"  (click)="viewLogs()"></button>
                     <button pButton type="button" label="Metrics" icon="pi pi-chart-bar" class="p-button-sm p-button-outlined" pTooltip="Detailed metrics"></button>
                     <button pButton type="button" label="Restart" icon="pi pi-replay" class="p-button-sm p-button-danger p-button-outlined" pTooltip="Restart service" [disabled]="true"></button>
                 </div>
@@ -107,8 +110,19 @@ export class ServiceDetailsWidgetComponent implements OnInit {
     responseTimeChartOptions: any;
     serviceMetrics: ServiceMetric[] = [];
     healthIndicators: any[] = [];
+    private lastResponseTimeData: TimeDataPoint[] = [];
+    themeConfig!: Signal<any>;
 
-    constructor(private dashboardService: DashboardService) {}
+    constructor(private dashboardService: DashboardService, private layoutService: LayoutService ) {
+        effect(() => {
+            // This will run when the component loads AND every time the theme changes
+            this.themeConfig = toSignal(this.layoutService.configUpdate$);
+
+            // Now, re-initialize the chart with the latest theme colors
+            this.initializeChart();
+            this.updateChartData(this.lastResponseTimeData);
+        });
+    }
 
     ngOnInit(): void {
         this.loadDetails();
@@ -156,6 +170,7 @@ export class ServiceDetailsWidgetComponent implements OnInit {
     private initializeChart(): void {
         const documentStyle = getComputedStyle(document.documentElement);
         // Get theme colors for a consistent look
+        const textColor = documentStyle.getPropertyValue('--p-text-color');
         const textColorSecondary = documentStyle.getPropertyValue('--p-text-color-secondary');
         const surfaceBorder = documentStyle.getPropertyValue('--p-surface-border');
 
@@ -163,42 +178,32 @@ export class ServiceDetailsWidgetComponent implements OnInit {
             maintainAspectRatio: false,
             aspectRatio: 0.3,
             plugins: {
-                legend: {
-                    display: false // No need for a legend on a single-series chart
-                },
-                // --- Modern Tooltip Configuration ---
+                legend: { display: false },
                 tooltip: {
                     enabled: true,
-                    mode: 'index', // Show tooltip for the nearest X-axis point
-                    intersect: false, // Tooltip appears even if not directly hovering on the point
+                    mode: 'index',
+                    intersect: false,
                     backgroundColor: 'var(--p-surface-overlay)',
-                    titleColor: 'var(--p-text-color)',
-                    bodyColor: 'var(--p-text-color)',
                     borderColor: 'var(--p-surface-border)',
                     borderWidth: 1,
-                    displayColors: false, // Hide the little color box
+                    displayColors: false,
+                    // ✅ Explicitly set font colors to prevent flicker
+                    titleFont: { size: 12, weight: 'bold' },
+                    bodyFont: { size: 12 },
+                    titleColor: textColor,
+                    bodyColor: textColor,
                     callbacks: {
-                        // Custom title to show the full timestamp
                         title: (context: TooltipItem<'line'>[]) => 'At ' + context[0].label,
-
-                        // Apply the type TooltipItem<'line'> to the context here
                         label: (context: TooltipItem<'line'>) => `Response Time: ${context.parsed.y}ms`
                     }
                 }
             },
             scales: {
-                x: {
-                    display: false // Keep the x-axis hidden for a clean look
-                },
-                // --- Subtle Y-Axis for Context ---
+                x: { display: false },
                 y: {
                     display: true,
-                    ticks: {
-                        color: textColorSecondary // Use theme color for labels
-                    },
-                    grid: {
-                        color: surfaceBorder // Use theme color for grid lines
-                    }
+                    ticks: { color: textColorSecondary }, // This will now update on theme change
+                    grid: { color: surfaceBorder } // This will also update
                 }
             },
             elements: {
@@ -294,5 +299,10 @@ export class ServiceDetailsWidgetComponent implements OnInit {
         if (this.avgResponseTime < 200) return 'info';
         if (this.avgResponseTime < 500) return 'warning';
         return 'danger';
+    }
+
+    viewLogs(): void {
+        const logUrl = `${environment.apiUrl}/actuator/logfile`;
+        window.open(logUrl, '_blank');
     }
 }

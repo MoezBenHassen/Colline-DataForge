@@ -87,11 +87,14 @@ import { ServiceDetailsWidgetComponent } from '../../pages/dashboard/components/
                 Activity & Performance
             </h2>
             <div class="grid grid-cols-12 gap-4">
-                <div class="col-span-12 xl:col-span-6">
+                <div class="col-span-12 xl:col-span-6 gap-4">
                     <app-recent-activity-widget />
+                    <app-query-explorer-widget />
                 </div>
+
                 <div class="col-span-12 xl:col-span-6">
                     <app-top-endpoints-widget />
+
                 </div>
             </div>
         </div>

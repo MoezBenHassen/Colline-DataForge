@@ -59,6 +59,8 @@ export class TopEndpointsWidget implements OnInit {
     ngOnInit(): void {
         this.dashboardService.getTopEndpoints().subscribe(data => {
             this.metrics = data;
+            // only keep the first 5
+            this.metrics = this.metrics.slice(0, 5);
             this.loading = false;
         });
     }
