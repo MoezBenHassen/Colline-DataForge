@@ -12,6 +12,7 @@ export interface TimeDataPoint {
 export type DbStatus = {
     db: DatabaseType;
     online: boolean;
+    configured: boolean;
 };
 export interface DirectorySizeInfo {
     directorySizeBytes: number;
