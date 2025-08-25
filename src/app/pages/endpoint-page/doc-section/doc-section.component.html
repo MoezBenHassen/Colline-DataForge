@@ -16,7 +16,7 @@
                         <code id="lightCode" class="font-mono text-lg surface-ground p-2 border-round">{{ metadata.path }}</code>
                     }
                 </a>
-                <p-button icon="pi pi-copy" styleClass="p-button-text" pTooltip="Copy Path" [rounded]="true" tooltipPosition="bottom" (click)="navigator.clipboard.writeText(metadata.path)"></p-button>
+                <p-button icon="pi pi-copy" styleClass="p-button-text" pTooltip="Copy Path" [rounded]="true" tooltipPosition="bottom" (click)="copyPath($event)"></p-button>
             </div>
         </div>
 

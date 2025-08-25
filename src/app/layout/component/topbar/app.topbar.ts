@@ -18,7 +18,6 @@ import { Select } from 'primeng/select';
 import { FormsModule } from '@angular/forms';
 import { Button } from 'primeng/button';
 import {DbManagementService} from "../../../services/db-management.service";
-import {Divider} from "primeng/divider";
 import { IconField } from 'primeng/iconfield';
 import { InputIcon } from 'primeng/inputicon';
 import { InputText } from 'primeng/inputtext';

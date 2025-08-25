@@ -7,10 +7,10 @@ import { ButtonModule } from 'primeng/button';
 import { TooltipModule } from 'primeng/tooltip';
 import {Panel} from "primeng/panel";
 import {Highlight} from "ngx-highlightjs";
-import {HighlightLineNumbers} from "ngx-highlightjs/line-numbers";
 import { environment } from '../../../../environments/environment';
 import {MarkdownComponent} from "ngx-markdown";
 import {Fieldset} from "primeng/fieldset";
+import {MessageService} from "primeng/api";
 
 @Component({
     selector: 'app-doc-section',
@@ -31,7 +31,7 @@ export class DocSectionComponent implements OnInit {
     protected readonly navigator = navigator;
 
     // Inject LayoutService as it's used in the template for dark mode check
-    constructor(protected layoutService: LayoutService) {}
+    constructor(protected layoutService: LayoutService, private messageService: MessageService) {}
 
     ngOnInit(): void {
         this.buildSwaggerUrl();
@@ -61,8 +61,31 @@ export class DocSectionComponent implements OnInit {
         if (this.sqlQuery) {
             navigator.clipboard.writeText(this.sqlQuery.toString());
             // Optionally, add a success message with PrimeNG's MessageService
+            this.messageService.add({
+                severity:'success',
+                summary: 'SQL Copied',
+                detail: 'The SQL query has been copied to your clipboard.',
+                life: 3000});
         }
     }
+
+    copyPath(event: Event): void {
+        // Prevents the panel from toggling when the button is clicked
+        event.stopPropagation();
+
+        // Perform the copy action
+        if (this.metadata && this.metadata.path) {
+            navigator.clipboard.writeText(this.metadata.path);
+            // add a success message with PrimeNG's MessageService
+
+        }
+        this.messageService.add({
+            severity:'success',
+            summary: 'Path Copied',
+            detail: 'The endpoint path has been copied to your clipboard.',
+            life: 3000});
+    }
+
     isArray(value: any): value is any[] {
         return Array.isArray(value);
     }

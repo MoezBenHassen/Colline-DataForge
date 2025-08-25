@@ -47,7 +47,7 @@ type FaqItem = { q: string; a: string }; // Helper type
         FaqSectionComponent, PrimeTemplate, Tabs, Tab,
         TabList, TabPanel, TabPanels, Badge, FormsModule, InputText, IconField, InputIcon, TableModule, Highlight],
     styleUrls: ['./endpoint-page.component.scss'],
-    providers: [MessageService, HighlightPipe]
+    providers: [HighlightPipe]
 })
 export class EndpointPageComponent implements OnInit {
     executionResult: ExecutionResult | null = null;
