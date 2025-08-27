@@ -69,8 +69,17 @@
 
                     </p-select>
                 </div>
-                <p-button pRipple variant="outlined" [rounded]="true"  severity="secondary" class="layout-topbar-action" (click)="onRefreshDbStatus()" [loading]="isRefreshingDbStatus" pTooltip="Refresh Database Status" tooltipPosition="bottom">
-                    <i class="pi pi-sync"></i>
+                <p-button
+                    (click)="onRefreshDbStatus()"
+                    [loading]="isRefreshingDbStatus"
+                    [rounded]="true"
+                    class="layout-topbar-action"
+                    icon="pi pi-refresh"  pRipple
+                    pTooltip="Refresh Database Status"
+                    severity="secondary"
+                    styleClass="p-button"
+                    tooltipPosition="bottom"
+                    variant="outlined">
                     <span>Refresh Status</span>
                 </p-button>
                 <div class="w-px bg-surface-200 dark:bg-surface-700"></div>

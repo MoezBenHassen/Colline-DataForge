@@ -8,11 +8,13 @@ import { QuickActionsWidget } from "../../pages/dashboard/components/quick-actio
 
 import { TopEndpointsWidget } from "../../pages/dashboard/components/top-endpoints.widget";
 import { GenerationPerformanceWidget } from "../../pages/dashboard/components/generation-performance.widget";
-import { SystemMetricsCardsWidget } from '../../pages/dashboard/components/system-metrics.widget';
+import { SystemMetricsCardsWidget } from '../../pages/dashboard/components/system-health-widget/system-metrics.widget';
 
 import { ServiceStatusCardComponent } from '../../pages/dashboard/components/service-status-card.component';
-import { ServiceDetailsWidgetComponent } from '../../pages/dashboard/components/service-details-widget.component';
+import { ServiceDetailsWidgetComponent } from '../../pages/dashboard/components/service-details-widget/service-details-widget.component';
 import { LogLevelManagerWidget } from '../../pages/dashboard/components/log-level-manager-widget.component';
+import {DashboardRefreshService} from "../../services/dashboard-refersh.service";
+import {Button} from "primeng/button";
 
 
 @Component({
@@ -30,7 +32,8 @@ import { LogLevelManagerWidget } from '../../pages/dashboard/components/log-leve
         GenerationPerformanceWidget,
         ServiceStatusCardComponent,
         ServiceDetailsWidgetComponent,
-        LogLevelManagerWidget
+        LogLevelManagerWidget,
+        Button
     ],
     template: `
         <!-- Dashboard Header -->
@@ -42,10 +45,8 @@ import { LogLevelManagerWidget } from '../../pages/dashboard/components/log-leve
                 </div>
                 <div class="flex gap-2">
                     <!-- Add refresh button -->
-                    <button class="p-button p-button-outlined p-button-rounded"
-(click)="refreshDashboard()" [disabled]="isRefreshing">
-                        <i class="pi pi-refresh" [class.pi-spin]="isRefreshing"></i>
-                    </button>
+                    <p-button icon="pi pi-refresh" styleClass="p-button-outlined p-button-rounded"
+                              (click)="refreshDashboard()" [loading]="isRefreshing"></p-button>
                     <!-- Add time range selector -->
                     <button class="p-button p-button-text">
                         <i class="pi pi-clock mr-2"></i>
@@ -162,10 +163,12 @@ import { LogLevelManagerWidget } from '../../pages/dashboard/components/log-leve
 export class Dashboard {
     isRefreshing = false;
 
-    constructor() {}
+    constructor(private refreshService: DashboardRefreshService) {}
 
     refreshDashboard(): void {
         this.isRefreshing = true;
+
+        this.refreshService.triggerRefresh();
         // Trigger refresh logic here
         setTimeout(() => {
             this.isRefreshing = false;

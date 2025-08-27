@@ -1,16 +1,18 @@
-import { Component, effect, OnInit, Signal } from '@angular/core';
+import {Component, effect, OnDestroy, OnInit, Signal} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { SkeletonModule } from 'primeng/skeleton';
-import { DashboardService, TimeDataPoint } from '../../../services/dashboard.service';
+import { DashboardService, TimeDataPoint } from '../../../../services/dashboard.service';
 import { ChartModule } from 'primeng/chart';
 import { TagModule } from 'primeng/tag';
 import { TooltipModule } from 'primeng/tooltip';
 import { ButtonModule } from 'primeng/button';
 import { TooltipItem } from 'chart.js';
-import { LayoutService } from '../../../layout/service/layout.service';
+import { LayoutService } from '../../../../layout/service/layout.service';
 import { toSignal } from '@angular/core/rxjs-interop';
-import { environment } from '../../../../environments/environment';
-import { forkJoin } from 'rxjs';
+import { environment } from '../../../../../environments/environment';
+import {forkJoin, Subscription} from 'rxjs';
+import {SelectButton} from "primeng/selectbutton";
+import {DashboardRefreshService} from "../../../../services/dashboard-refersh.service";
 // Helper interface, same as before
 interface ServiceMetric {
     label: string;
@@ -25,86 +27,11 @@ interface ServiceMetric {
     selector: 'app-service-details-widget',
     standalone: true,
     // ✅ Fully populated imports array
-    imports: [
-        CommonModule,
-        SkeletonModule,
-        TagModule,
-        TooltipModule,
-        ChartModule,
-        ButtonModule
-    ],
-    // ✅ Complete HTML template
-    template: `
-        <div class="card h-full">
-            @if (loading) {
-                <div class="space-y-4">
-                    <div class="grid grid-cols-2 lg:grid-cols-4 gap-3">
-                        @for (i of [1, 2, 3, 4]; track i) {
-                            <div class="p-3 rounded-lg bg-gray-50 dark:bg-gray-800">
-                                <p-skeleton height="0.75rem" width="60%" styleClass="mb-2"></p-skeleton>
-                                <p-skeleton height="1.5rem" width="80%"></p-skeleton>
-                            </div>
-                        }
-                    </div>
-                    <p-skeleton height="150px" width="100%"></p-skeleton>
-                </div>
-            } @else {
-                <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-4">
-                    @for (metric of serviceMetrics; track metric.label) {
-                        <div class="p-3 rounded-lg bg-gray-50 dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
-                            <div class="flex items-center justify-between mb-1">
-                                <i [class]="'pi ' + metric.icon + ' text-' + metric.color + '-500'"></i>
-                                @if (metric.trend) {
-                                    <div class="flex items-center text-xs" [ngClass]="getTrendClass(metric.trend)">
-                                        <i [class]="getTrendIcon(metric.trend)"></i>
-                                        <span class="ml-1">{{ metric.trendValue }}</span>
-                                    </div>
-                                }
-                            </div>
-                            <div class="text-xs text-gray-600 dark:text-gray-400">{{ metric.label }}</div>
-                            <div class="font-semibold text-lg text-gray-900 dark:text-white">{{ metric.value }}</div>
-                        </div>
-                    }
-                </div>
-
-                <div class="mb-4">
-                    <div class="flex items-center justify-between mb-2">
-                        <span class="text-sm font-medium text-gray-700 dark:text-gray-300">Health Indicators</span>
-                        <span class="text-xs text-gray-500">All Systems</span>
-                    </div>
-                    <div class="grid grid-cols-3 gap-2">
-                        @for (indicator of healthIndicators; track indicator.name) {
-                            <div class="flex items-center justify-between p-2 rounded-lg"
-                                 [ngClass]="getIndicatorBgClass(indicator.status)"
-                                 [pTooltip]="indicator.tooltip" tooltipPosition="top">
-                                <span class="text-xs font-medium">{{ indicator.name }}</span>
-                                <i [class]="getIndicatorIcon(indicator.status)"></i>
-                            </div>
-                        }
-                    </div>
-                </div>
-
-                <div class="mb-4">
-                    <div class="flex items-center justify-between mb-2">
-                        <span class="text-sm font-medium text-gray-700 dark:text-gray-300">Response Time (last hour)</span>
-                        <div class="flex items-center gap-2">
-                            <span class="text-xs text-gray-500">Avg: {{ avgResponseTime }}ms</span>
-                            <p-tag [value]="getResponseTimeStatus()" [severity]="getResponseTimeSeverity()" styleClass="text-xs px-2 py-0"></p-tag>
-                        </div>
-                    </div>
-                    <p-chart type="line" [data]="responseTimeChartData" [options]="responseTimeChartOptions" height="120px"></p-chart>
-                </div>
-
-                <div class="grid grid-cols-3 gap-2">
-                    <button pButton type="button" label="View Logs" icon="pi pi-file-text" class="p-button-sm p-button-outlined" pTooltip="View application logs"  (click)="viewLogs()"></button>
-                    <button pButton type="button" label="Metrics" icon="pi pi-chart-bar" class="p-button-sm p-button-outlined" pTooltip="Detailed metrics"></button>
-                    <button pButton type="button" label="Restart" icon="pi pi-replay" class="p-button-sm p-button-danger p-button-outlined" pTooltip="Restart service" [disabled]="true"></button>
-                </div>
-            }
-        </div>
-    `
+    imports: [CommonModule, SkeletonModule, TagModule, TooltipModule, ChartModule, ButtonModule, SelectButton],
+    templateUrl:'./service-details-widget.component.html',
+    styleUrls: ['./service-details-widget-styles.scss']
 })
-export class ServiceDetailsWidgetComponent implements OnInit {
+export class ServiceDetailsWidgetComponent implements OnInit, OnDestroy {
     loading = true;
     avgResponseTime = 124;
     responseTimeChartData: any;
@@ -114,36 +41,54 @@ export class ServiceDetailsWidgetComponent implements OnInit {
     private lastResponseTimeData: TimeDataPoint[] = [];
     themeConfig!: Signal<any>;
     activeSessions = 0;
+    private themeSubscription?: Subscription;
+    private refreshSubscription?: Subscription;
+    constructor(
+        private dashboardService: DashboardService,
+        private layoutService: LayoutService,
+        private refreshService: DashboardRefreshService
+    ) {
 
-    constructor(private dashboardService: DashboardService, private layoutService: LayoutService ) {
-        effect(() => {
-            // This will run when the component loads AND every time the theme changes
-            this.themeConfig = toSignal(this.layoutService.configUpdate$);
-
-            // Now, re-initialize the chart with the latest theme colors
-            this.initializeChart();
-            this.updateChartData(this.lastResponseTimeData);
-        });
     }
 
     ngOnInit(): void {
-        this.loadDetails();
+        // 1. Set up the chart's appearance first.
         this.initializeChart();
+
+        // 2. Load the initial data, which will show the skeleton loader.
+        this.loadDetails();
+
+        // 3. Subscribe to theme changes to update chart colors.
+        this.themeSubscription = this.layoutService.configUpdate$.subscribe(() => {
+            this.initializeChart();
+            // Re-apply existing data to the newly themed chart
+            this.updateChartData(this.lastResponseTimeData);
+        });
+
+        // 4. Subscribe to the global refresh button.
+        this.refreshSubscription = this.refreshService.refresh$.subscribe(() => {
+            this.loadDetails();
+        });
+    }
+    ngOnDestroy(): void {
+        this.themeSubscription?.unsubscribe();
+        this.refreshSubscription?.unsubscribe();
     }
 
     loadDetails(): void {
         this.loading = true;
-        // 3. Use forkJoin to fetch both metrics at the same time
         forkJoin({
             responseTimes: this.dashboardService.getResponseTimeHistory(),
             sessions: this.dashboardService.getActiveSessions()
         }).subscribe(({ responseTimes, sessions }) => {
             this.lastResponseTimeData = responseTimes;
-            this.activeSessions = sessions; // 4. Store the dynamic value
+            this.activeSessions = sessions;
 
             this.updateChartData(responseTimes);
-            this.updateServiceMetrics(); // This will now use the new value
+            this.updateServiceMetrics();
             this.updateHealthIndicators(false);
+
+            // Set loading to false only after all data is processed.
             this.loading = false;
         });
     }
@@ -216,7 +161,6 @@ export class ServiceDetailsWidgetComponent implements OnInit {
                 }
             },
             elements: {
-                // --- Hover Effect for Data Points ---
                 point: {
                     radius: 0, // Hide points by default
                     hoverRadius: 7, // Show a larger point on hover
@@ -236,21 +180,23 @@ export class ServiceDetailsWidgetComponent implements OnInit {
 
     private updateChartData(data: TimeDataPoint[]): void {
         const documentStyle = getComputedStyle(document.documentElement);
-        const values = data.map(point => point.value);
+        const values = data.map((point) => point.value);
 
         if (values.length > 0) {
             this.avgResponseTime = Math.round(values.reduce((a, b) => a + b, 0) / values.length);
         }
 
         this.responseTimeChartData = {
-            labels: data.map(point => new Date(point.timestamp).toLocaleTimeString()),
-            datasets: [{
-                data: values,
-                // --- Use Theme Colors for the Line and Fill ---
-                borderColor: documentStyle.getPropertyValue('--p-primary-color'),
-                backgroundColor: this.hexToRgba(documentStyle.getPropertyValue('--p-primary-color'), 0.1),
-                fill: true
-            }]
+            labels: data.map((point) => new Date(point.timestamp).toLocaleTimeString()),
+            datasets: [
+                {
+                    data: values,
+                    // --- Use Theme Colors for the Line and Fill ---
+                    borderColor: documentStyle.getPropertyValue('--p-primary-color'),
+                    backgroundColor: this.hexToRgba(documentStyle.getPropertyValue('--p-primary-color'), 0.1),
+                    fill: true
+                }
+            ]
         };
     }
 
@@ -264,35 +210,49 @@ export class ServiceDetailsWidgetComponent implements OnInit {
     // ✅ Added all missing helper methods
     getTrendClass(trend: 'up' | 'down' | 'stable'): string {
         switch (trend) {
-            case 'up': return 'text-green-500';
-            case 'down': return 'text-red-500';
-            case 'stable': return 'text-gray-500';
+            case 'up':
+                return 'text-green-500';
+            case 'down':
+                return 'text-red-500';
+            case 'stable':
+                return 'text-gray-500';
         }
     }
 
     getTrendIcon(trend: 'up' | 'down' | 'stable'): string {
         switch (trend) {
-            case 'up': return 'pi pi-arrow-up text-xs';
-            case 'down': return 'pi pi-arrow-down text-xs';
-            case 'stable': return 'pi pi-minus text-xs';
+            case 'up':
+                return 'pi pi-arrow-up text-xs';
+            case 'down':
+                return 'pi pi-arrow-down text-xs';
+            case 'stable':
+                return 'pi pi-minus text-xs';
         }
     }
 
     getIndicatorBgClass(status: string): string {
         switch (status) {
-            case 'healthy': return 'bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800';
-            case 'warning': return 'bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800';
-            case 'error': return 'bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800';
-            default: return 'bg-gray-50 dark:bg-gray-900/20';
+            case 'healthy':
+                return 'bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800';
+            case 'warning':
+                return 'bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800';
+            case 'error':
+                return 'bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800';
+            default:
+                return 'bg-gray-50 dark:bg-gray-900/20';
         }
     }
 
     getIndicatorIcon(status: string): string {
         switch (status) {
-            case 'healthy': return 'pi pi-check-circle text-green-500 text-xs';
-            case 'warning': return 'pi pi-exclamation-triangle text-yellow-500 text-xs';
-            case 'error': return 'pi pi-times-circle text-red-500 text-xs';
-            default: return 'pi pi-circle text-gray-500 text-xs';
+            case 'healthy':
+                return 'pi pi-check-circle text-green-500 text-xs';
+            case 'warning':
+                return 'pi pi-exclamation-triangle text-yellow-500 text-xs';
+            case 'error':
+                return 'pi pi-times-circle text-red-500 text-xs';
+            default:
+                return 'pi pi-circle text-gray-500 text-xs';
         }
     }
 

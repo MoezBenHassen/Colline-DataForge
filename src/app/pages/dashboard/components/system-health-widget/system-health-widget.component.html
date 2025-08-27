@@ -1,0 +1,156 @@
+<!-- Auto-refresh control -->
+<div class="flex justify-between items-center mb-4">
+    <h2 class="text-xl font-semibold text-gray-700 dark:text-gray-300 flex items-center">
+        <i class="pi pi-heart text-red-500 mr-2"></i>
+        System Health
+    </h2>
+    <div class="flex items-center gap-3">
+        <p-tag
+            [value]="getHealthStatus()"
+            [severity]="getHealthSeverity()"
+            [icon]="getHealthIcon()">
+        </p-tag>
+        <div class="flex items-center gap-2">
+            <span class="text-sm text-gray-500">Auto-refresh</span>
+            <p-checkbox [(ngModel)]="autoRefresh" (onChange)="toggleAutoRefresh()"></p-checkbox>
+        </div>
+        <span class="text-sm text-gray-500">
+                    Last updated: {{ lastUpdated | date: 'short' }}
+                </span>
+    </div>
+</div>
+
+@if (loading) {
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+        @for (i of [1, 2, 3, 4]; track i) {
+            <div class="card">
+                <div class="flex items-center justify-between mb-3">
+                    <p-skeleton width="60%" height="1.5rem"></p-skeleton>
+                    <p-skeleton shape="circle" size="2rem"></p-skeleton>
+                </div>
+                <p-skeleton width="40%" height="2.5rem" styleClass="mb-2"></p-skeleton>
+                <p-skeleton width="100%" height="0.5rem" styleClass="mb-2"></p-skeleton>
+                <p-skeleton width="80%" height="0.8rem"></p-skeleton>
+            </div>
+        }
+    </div>
+} @else {
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+        <!-- CPU Usage Card -->
+        <div class="card metric-card" [class.alert-card]="cpuPercent > 80">
+            <div class="flex items-center justify-between mb-3">
+                <span class="text-gray-600 dark:text-gray-400 font-medium">CPU Usage</span>
+                <div class="w-10 h-10 rounded-full flex items-center justify-center"
+                     [ngClass]="cpuPercent > 80 ? 'bg-orange-100 dark:bg-orange-400/10' : 'bg-cyan-100 dark:bg-cyan-400/10'">
+                    <i class="pi pi-microchip text-xl"
+                       [ngClass]="cpuPercent > 80 ? 'text-orange-500' : 'text-cyan-500'"></i>
+                </div>
+            </div>
+            <div class="flex items-baseline mb-2">
+                        <span class="text-3xl font-bold text-gray-900 dark:text-white">
+                            {{ cpuPercent }}%
+                        </span>
+                @if (cpuPercent > 80) {
+                    <i class="pi pi-exclamation-triangle text-orange-500 ml-2"
+                       pTooltip="High CPU usage detected"
+                       tooltipPosition="top"></i>
+                }
+            </div>
+            <p-progressBar
+                [value]="cpuPercent"
+                [showValue]="false"
+                styleClass="h-2 mb-2"
+                [ngClass]="getProgressBarClass(cpuPercent)">
+            </p-progressBar>
+            <span class="text-sm text-gray-500 dark:text-gray-400">
+                        Processing Load
+                    </span>
+        </div>
+
+        <!-- Memory Card -->
+        <div class="card metric-card" [class.alert-card]="memPercent > 85">
+            <div class="flex items-center justify-between mb-3">
+                <span class="text-gray-600 dark:text-gray-400 font-medium">Memory</span>
+                <div class="w-10 h-10 rounded-full flex items-center justify-center"
+                     [ngClass]="memPercent > 85 ? 'bg-orange-100 dark:bg-orange-400/10' : 'bg-purple-100 dark:bg-purple-400/10'">
+                    <i class="pi pi-th-large text-xl"
+                       [ngClass]="memPercent > 85 ? 'text-orange-500' : 'text-purple-500'"></i>
+                </div>
+            </div>
+            <div class="flex items-baseline mb-2">
+                        <span class="text-3xl font-bold text-gray-900 dark:text-white">
+                            {{ memPercent }}%
+                        </span>
+                @if (memPercent > 85) {
+                    <i class="pi pi-exclamation-triangle text-orange-500 ml-2"
+                       pTooltip="High memory usage"
+                       tooltipPosition="top"></i>
+                }
+            </div>
+            <p-progressBar
+                [value]="memPercent"
+                [showValue]="false"
+                styleClass="h-2 mb-2"
+                [ngClass]="getProgressBarClass(memPercent)">
+            </p-progressBar>
+            <span class="text-sm text-gray-500 dark:text-gray-400">
+                        {{ formatBytes(memUsed) }} / {{ formatBytes(memMax) }}
+                    </span>
+        </div>
+
+        <!-- Disk Space Card -->
+        <div class="card metric-card" [class.critical-card]="diskPercent > 90">
+            <div class="flex items-center justify-between mb-3">
+                <span class="text-gray-600 dark:text-gray-400 font-medium">Disk Space</span>
+                <div class="w-10 h-10 rounded-full flex items-center justify-center"
+                     [ngClass]="diskPercent > 90 ? 'bg-red-100 dark:bg-red-400/10' : 'bg-indigo-100 dark:bg-indigo-400/10'">
+                    <i class="pi pi-server text-xl"
+                       [ngClass]="diskPercent > 90 ? 'text-red-500' : 'text-indigo-500'"></i>
+                </div>
+            </div>
+            <div class="flex items-baseline mb-2">
+                        <span class="text-3xl font-bold text-gray-900 dark:text-white">
+                            {{ diskPercent }}%
+                        </span>
+                @if (diskPercent > 90) {
+                    <i class="pi pi-exclamation-circle text-red-500 ml-2"
+                       pTooltip="Low disk space!"
+                       tooltipPosition="top"></i>
+                }
+            </div>
+            <p-progressBar
+                [value]="diskPercent"
+                [showValue]="false"
+                styleClass="h-2 mb-2"
+                [ngClass]="getDiskProgressBarClass(diskPercent)">
+            </p-progressBar>
+            <span class="text-sm text-gray-500 dark:text-gray-400">
+                        {{ formatBytes(diskFree) }} free
+                    </span>
+        </div>
+
+        <!-- Data Directory Card -->
+        <div class="card metric-card h-full flex flex-col">
+            <div class="flex items-center justify-between mb-3">
+                <span class="text-gray-600 dark:text-gray-400 font-medium">Data Directory</span>
+                <div class="w-10 h-10 rounded-full bg-green-100 dark:bg-green-400/10 flex items-center justify-center">
+                    <i class="pi pi-folder text-xl text-green-500"></i>
+                </div>
+            </div>
+            <div class="flex items-baseline mb-2">
+                        <span class="text-3xl font-bold text-gray-900 dark:text-white">
+                            {{ formatBytes(dirSizeBytes) }}
+                        </span>
+            </div>
+            <p-progressBar
+                [value]="dirSizePercentOfDisk"
+                [showValue]="false"
+                styleClass="h-2 mb-2"
+                [ngClass]="'progress-green'">
+            </p-progressBar>
+            <span class="text-sm text-gray-500 dark:text-gray-400">
+                        {{ dirSizePercentOfDisk }}% of total disk
+                    </span>
+        </div>
+    </div>
+}

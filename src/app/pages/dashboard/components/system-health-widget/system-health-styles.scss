@@ -1,0 +1,71 @@
+.metric-card {
+    display: flex; /* Add this */
+    flex-direction: column; /* Add this */
+    transition: all 0.3s ease;
+    border: 1px solid transparent;
+}
+.metric-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
+}
+
+.alert-card {
+    animation: pulse 3s infinite;
+    border-color: rgba(251, 191, 36, 0.3);
+    background: linear-gradient(135deg,
+        rgba(251, 191, 36, 0.02) 0%,
+        rgba(251, 191, 36, 0.05) 100%);
+}
+
+.critical-card {
+    animation: pulse 2s infinite;
+    border-color: rgba(239, 68, 68, 0.3);
+    background: linear-gradient(135deg,
+        rgba(239, 68, 68, 0.02) 0%,
+        rgba(239, 68, 68, 0.05) 100%);
+}
+
+@keyframes pulse {
+    0%, 100% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.9;
+    }
+}
+
+:host ::ng-deep .progress-green .p-progressbar-value {
+    background: #10b981;
+}
+
+:host ::ng-deep .progress-yellow .p-progressbar-value {
+    background: #f59e0b;
+}
+
+:host ::ng-deep .progress-orange .p-progressbar-value {
+    background: #fb923c;
+}
+
+:host ::ng-deep .progress-red .p-progressbar-value {
+    background: #ef4444;
+}
+
+:host ::ng-deep .p-progressbar {
+    background: rgba(0, 0, 0, 0.08);
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.card {
+    padding: 1.25rem;
+    background: var(--surface-card);
+    border-radius: 12px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+    :host ::ng-deep .p-progressbar {
+        background: rgba(255, 255, 255, 0.08);
+    }
+}
