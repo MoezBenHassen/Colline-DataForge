@@ -32,14 +32,17 @@
 
         <div class="layout-topbar-menu hidden lg:block">
             <div class="layout-topbar-menu-content">
-                <p-button type="button" pRipple class="layout-topbar-action" variant="outlined" [rounded]="true"  severity="help"
-                        (click)="onReloadQueries()"
-                        [loading]="isReloadingQueries"
-                        pTooltip="Reload SQL queries from files"
-                        tooltipPosition="bottom">
-                    <i class="pi pi-cloud-download"></i>
+                <button
+                    type="button"
+                    pRipple
+                    class="p-button p-component p-button-outlined p-button-rounded p-button-help layout-topbar-action"
+                    (click)="onReloadQueries()"
+                    [disabled]="isReloadingQueries"
+                    pTooltip="Reload SQL queries from files"
+                    tooltipPosition="bottom">
+                    <i [ngClass]="isReloadingQueries ? 'pi pi-spin pi-spinner' : 'pi pi-cloud-download'"></i>
                     <span>Reload Queries</span>
-                </p-button>
+                </button>
                 <!-- Inside the <div class="layout-topbar-menu-content"> -->
                 <div class="p-fluid " pTooltip="Set a default database for all pages" tooltipPosition="bottom">
                     <p-select
@@ -74,12 +77,12 @@
                     [loading]="isRefreshingDbStatus"
                     [rounded]="true"
                     class="layout-topbar-action"
-                    icon="pi pi-refresh"  pRipple
+                    pRipple
                     pTooltip="Refresh Database Status"
                     severity="secondary"
-                    styleClass="p-button"
                     tooltipPosition="bottom"
                     variant="outlined">
+                    <i class="pi pi-refresh" [class.pi-spin]="isRefreshingDbStatus"></i>
                     <span>Refresh Status</span>
                 </p-button>
                 <div class="w-px bg-surface-200 dark:bg-surface-700"></div>
