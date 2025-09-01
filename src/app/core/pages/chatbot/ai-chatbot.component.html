@@ -77,6 +77,18 @@
                    [(ngModel)]="userInput"
                    (keyup.enter)="sendMessage()"
                    [disabled]="isLoading" />
+
+            <!-- Voice Input Button -->
+            <p-button
+                [icon]="isListening ? 'pi pi-stop-circle' : 'pi pi-microphone'"
+                styleClass="p-button-primary p-button-text p-button-rounded voice-btn"
+                (click)="toggleVoiceInput()"
+                [disabled]="isLoading"
+                [class.pulse-animation]="isListening"
+                [pTooltip]="isListening ? 'Stop listening' : 'Start voice input'"
+                tooltipPosition="top">
+            </p-button>
+
             <p-button icon="pi pi-send" styleClass="p-button-primary p-button-text p-button-rounded"
                       (click)="sendMessage()"
                       [disabled]="isLoading || !userInput.trim()"></p-button>
