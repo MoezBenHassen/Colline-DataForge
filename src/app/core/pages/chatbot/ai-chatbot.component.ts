@@ -1,4 +1,4 @@
-import {Component, ElementRef, ViewChild, AfterViewChecked, Signal, OnDestroy} from '@angular/core';
+import {Component, ElementRef, ViewChild, AfterViewChecked, Signal, OnDestroy, NgZone, ChangeDetectorRef} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ButtonModule } from 'primeng/button';
@@ -38,7 +38,12 @@ export class AiChatbotComponent implements AfterViewChecked, OnDestroy {
     isVoiceSupported = false;
     private recognitionTimeout: any = null;
 
-    constructor(private aiChatService: AiChatService, private chatStateService: ChatStateService) {
+    constructor(
+        private aiChatService: AiChatService,
+        private chatStateService: ChatStateService,
+        private ngZone: NgZone,
+        private cdr: ChangeDetectorRef
+    ) {
         this.messages = this.chatStateService.messages;
         this.initializeVoiceRecognition();
     }
@@ -61,95 +66,106 @@ export class AiChatbotComponent implements AfterViewChecked, OnDestroy {
 
             // Set up event handlers
             this.recognition.onstart = () => {
-                console.log('Voice recognition started');
-                this.isListening = true;
-                // Clear any existing timeout
-                if (this.recognitionTimeout) {
-                    clearTimeout(this.recognitionTimeout);
-                    this.recognitionTimeout = null;
-                }
+                this.ngZone.run(() => {
+                    console.log('Voice recognition started');
+                    this.isListening = true;
+                    this.cdr.detectChanges();
+                    // Clear any existing timeout
+                    if (this.recognitionTimeout) {
+                        clearTimeout(this.recognitionTimeout);
+                        this.recognitionTimeout = null;
+                    }
+                });
             };
 
             this.recognition.onresult = (event: any) => {
-                let finalTranscript = '';
-                let interimTranscript = '';
+                this.ngZone.run(() => {
+                    let finalTranscript = '';
+                    let interimTranscript = '';
 
-                // Process all results
-                for (let i = event.resultIndex; i < event.results.length; i++) {
-                    const transcript = event.results[i][0].transcript;
-                    if (event.results[i].isFinal) {
-                        finalTranscript += transcript;
-                    } else {
-                        interimTranscript += transcript;
+                    // Process all results
+                    for (let i = event.resultIndex; i < event.results.length; i++) {
+                        const transcript = event.results[i][0].transcript;
+                        if (event.results[i].isFinal) {
+                            finalTranscript += transcript;
+                        } else {
+                            interimTranscript += transcript;
+                        }
                     }
-                }
 
-                // Update input with combined final and interim results
-                if (finalTranscript) {
-                    this.userInput = finalTranscript;
-                } else if (interimTranscript) {
-                    this.userInput = interimTranscript;
-                }
-
-                // Reset the silence timeout on any speech
-                if (this.recognitionTimeout) {
-                    clearTimeout(this.recognitionTimeout);
-                }
-
-                // Auto-stop after 3 seconds of silence
-                this.recognitionTimeout = setTimeout(() => {
-                    if (this.isListening) {
-                        console.log('Stopping due to silence');
-                        this.stopListening();
+                    // Update input with combined final and interim results
+                    if (finalTranscript) {
+                        this.userInput = finalTranscript;
+                    } else if (interimTranscript) {
+                        this.userInput = interimTranscript;
                     }
-                }, 3000);
+
+                    // Reset the silence timeout on any speech
+                    if (this.recognitionTimeout) {
+                        clearTimeout(this.recognitionTimeout);
+                    }
+
+                    // Auto-stop after 3 seconds of silence
+                    this.recognitionTimeout = setTimeout(() => {
+                        if (this.isListening) {
+                            console.log('Stopping due to silence');
+                            this.stopListening();
+                        }
+                    }, 3000);
+                });
             };
 
             this.recognition.onerror = (event: any) => {
-                console.error('Voice recognition error:', event.error);
+                this.ngZone.run(() => {
+                    console.error('Voice recognition error:', event.error);
 
-                // Always ensure isListening is false on error
-                this.isListening = false;
+                    // Always ensure isListening is false on error
+                    this.isListening = false;
+                    this.cdr.detectChanges();
 
-                // Clear timeout on error
-                if (this.recognitionTimeout) {
-                    clearTimeout(this.recognitionTimeout);
-                    this.recognitionTimeout = null;
-                }
+                    // Clear timeout on error
+                    if (this.recognitionTimeout) {
+                        clearTimeout(this.recognitionTimeout);
+                        this.recognitionTimeout = null;
+                    }
 
-                // Handle specific errors
-                switch(event.error) {
-                    case 'no-speech':
-                        // Don't show error for no-speech, just stop silently
-                        console.log('No speech detected');
-                        break;
-                    case 'audio-capture':
-                        this.showVoiceError('No microphone found. Please check your device.');
-                        break;
-                    case 'not-allowed':
-                        this.showVoiceError('Microphone access denied. Please enable permissions.');
-                        break;
-                    case 'aborted':
-                        // User manually stopped, no error needed
-                        console.log('Recognition aborted');
-                        break;
-                    default:
-                        if (event.error !== 'aborted') {
-                            this.showVoiceError('Voice recognition error. Please try again.');
-                        }
-                }
+                    // Handle specific errors
+                    switch(event.error) {
+                        case 'no-speech':
+                            // Don't show error for no-speech, just stop silently
+                            console.log('No speech detected');
+                            break;
+                        case 'audio-capture':
+                            this.showVoiceError('No microphone found. Please check your device.');
+                            break;
+                        case 'not-allowed':
+                            this.showVoiceError('Microphone access denied. Please enable permissions.');
+                            break;
+                        case 'aborted':
+                            // User manually stopped, no error needed
+                            console.log('Recognition aborted');
+                            break;
+                        default:
+                            if (event.error !== 'aborted') {
+                                this.showVoiceError('Voice recognition error. Please try again.');
+                            }
+                    }
+                });
             };
 
             this.recognition.onend = () => {
-                console.log('Voice recognition ended');
-                // Always ensure isListening is false when recognition ends
-                this.isListening = false;
+                this.ngZone.run(() => {
+                    console.log('Voice recognition ended');
+                    // Always ensure isListening is false when recognition ends
+                    this.isListening = false;
+                    this.cdr.detectChanges();
 
-                // Clear timeout when recognition ends
-                if (this.recognitionTimeout) {
-                    clearTimeout(this.recognitionTimeout);
-                    this.recognitionTimeout = null;
-                }
+                    // Clear timeout when recognition ends
+                    if (this.recognitionTimeout) {
+                        clearTimeout(this.recognitionTimeout);
+                        this.recognitionTimeout = null;
+                    }
+                });
             };
 
             // Handle speech end event
