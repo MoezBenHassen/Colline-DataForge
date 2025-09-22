@@ -191,7 +191,7 @@ export class AiChatbotComponent implements AfterViewChecked, OnDestroy {
             this.showVoiceError('Voice input is not supported in your browser. Please use Chrome, Edge, or Safari.');
             return;
         }
-
+    
         if (this.isListening) {
             this.stopListening();
         } else {
